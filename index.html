@@ -163,7 +163,25 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 .total-score{font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:700;color:var(--gold);white-space:nowrap;}
 .nav-row{display:flex;gap:12px;justify-content:center;margin-top:30px;flex-wrap:wrap;}
 
-/* PRECISION LEADERBOARD */
+/* VOTER MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;width:100%;max-width:460px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;transform:translateY(20px);transition:transform .2s;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-header{padding:20px 22px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;}
+.modal-header h3{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--gold);}
+.modal-header .modal-song{font-size:.8rem;color:var(--muted);margin-top:2px;}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1;padding:4px;border-radius:6px;transition:color .15s;}
+.modal-close:hover{color:var(--text);}
+.modal-body{overflow-y:auto;padding:16px 22px 22px;}
+.voter-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.voter-row:last-child{border-bottom:none;}
+.voter-row .v-name{font-size:.9rem;font-weight:500;}
+.voter-row .v-score{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--gold);}
+.voter-row .v-score.no-vote{color:var(--muted);font-size:.85rem;font-family:'DM Sans',sans-serif;font-weight:400;}
+.voters-btn{background:rgba(232,200,74,.1);border:1px solid rgba(232,200,74,.25);border-radius:8px;color:var(--gold);font-size:.75rem;font-family:'DM Sans',sans-serif;cursor:pointer;padding:5px 10px;display:flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap;}
+.voters-btn:hover{background:rgba(232,200,74,.2);border-color:var(--gold);}
+.voters-btn svg{width:13px;height:13px;flex-shrink:0;}
 .precision-header{text-align:center;margin-bottom:32px;}
 .precision-header h2{font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--gold);margin-bottom:5px;}
 .precision-header p{color:var(--muted);font-size:.88rem;}
@@ -402,6 +420,20 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
       <button class="btn btn-ghost btn-sm" onclick="showPrecision()">← Cancel</button>
     </div>
     <div class="pin-error" id="admin-save-msg" style="margin-top:12px;text-align:center"></div>
+  </div>
+</div>
+
+<!-- VOTER BREAKDOWN MODAL -->
+<div class="modal-overlay" id="voter-modal" onclick="closeVoterModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h3 id="modal-song-name"></h3>
+        <div class="modal-song" id="modal-song-country"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
   </div>
 </div>
 
@@ -896,22 +928,31 @@ async function showResults(){
   }).sort((a,b)=>b.total-a.total);
 
   const maxTotal=totals[0]?.total||1;
+  // Store breakdown data for modal access
+  window._resultBreakdowns = {};
+  totals.forEach(s=>{ window._resultBreakdowns[s.idx]={song:s, voters, sc}; });
+
   document.getElementById('results-list').innerHTML=totals.map((s,rank)=>{
     const rc=rank===0?'top1':rank===1?'top2':rank===2?'top3':'';
     const bc=rank===0?'r1':rank===1?'r2':rank===2?'r3':'';
     const m=rank===0?'🥇':rank===1?'🥈':rank===2?'🥉':rank+1;
     const pct=maxTotal>0?(s.total/maxTotal)*100:0;
     const display=s.song&&s.song!=='TBA'?s.song:s.country;
-    const bd=voters.map(v=>{const x=s.bd[v];return `<div class="vb-chip">${v}: <span>${x!==null?x:'—'}</span></div>`;}).join('');
+    const votedCount=voters.filter(v=>s.bd[v]!==null).length;
     return `<div class="result-card ${rc}">
       <div class="rank-badge ${bc}">${m}</div>
       <div class="result-info">
         <div class="result-title" style="display:flex;align-items:center;gap:6px">${flagImg(s.country,20)} ${display}</div>
         <div class="result-country">${s.country}${s.artist&&s.artist!=='TBA'?' · '+s.artist:''}</div>
         <div class="score-bar"><div class="score-bar-fill" style="width:${pct}%"></div></div>
-        <div class="voter-breakdown">${bd}</div>
       </div>
-      <div class="total-score">${s.total%1===0?s.total:s.total.toFixed(2)}</div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+        <div class="total-score">${s.total%1===0?s.total:s.total.toFixed(2)}</div>
+        <button class="voters-btn" onclick="openVoterModal(${s.idx})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>
+          ${votedCount}/${voters.length}
+        </button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -1118,6 +1159,53 @@ async function saveOfficialResults(){
     msg.style.color='var(--red)'; msg.textContent='Error: '+e.message;
   }
 }
+
+// ── VOTER MODAL ───────────────────────────────────────────────────────────────
+function openVoterModal(songIdx){
+  const data = window._resultBreakdowns?.[songIdx];
+  if(!data) return;
+  const {song:s, voters, sc} = data;
+  const display = s.song&&s.song!=='TBA' ? s.song : s.country;
+
+  document.getElementById('modal-song-name').textContent = display;
+  document.getElementById('modal-song-country').innerHTML =
+    `${flagImg(s.country,16)} ${s.country}${s.artist&&s.artist!=='TBA'?' · '+s.artist:''}`;
+
+  // Sort voters: voted first (highest score first), then no-vote
+  const sorted = [...voters].sort((a,b)=>{
+    const sa=sc[a][s.idx], sb=sc[b][s.idx];
+    if(sa!==null && sb!==null) return sb-sa;
+    if(sa!==null) return -1;
+    if(sb!==null) return 1;
+    return a.localeCompare(b);
+  });
+
+  document.getElementById('modal-body').innerHTML = sorted.map(v=>{
+    const score = sc[v][s.idx];
+    const isMe = v===currentUser;
+    return `<div class="voter-row">
+      <div class="v-name">${v}${isMe?' <small style="color:var(--gold);font-size:.72rem">(you)</small>':''}</div>
+      ${score!==null
+        ? `<div class="v-score">${score%1===0?score:score.toFixed(2)}</div>`
+        : `<div class="v-score no-vote">not voted</div>`}
+    </div>`;
+  }).join('');
+
+  document.getElementById('voter-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(){
+  document.getElementById('voter-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function closeVoterModal(e){
+  if(e.target===document.getElementById('voter-modal')) closeModal();
+}
+
+// Close on Escape key
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 
 boot();
 </script>
