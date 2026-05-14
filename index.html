@@ -37,8 +37,6 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 .auth-card{max-width:420px;margin:24px auto 0;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px 32px;text-align:center;}
 .auth-card h2{font-family:'Playfair Display',serif;font-size:1.45rem;color:var(--gold);margin-bottom:6px;}
 .auth-card .sub{color:var(--muted);font-size:.87rem;line-height:1.6;margin-bottom:28px;}
-
-/* FIELDS */
 .field{margin-bottom:16px;text-align:left;}
 .field label{display:block;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
 .field-wrap{position:relative;}
@@ -56,6 +54,20 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 .pw-strength-fill{height:100%;border-radius:99px;width:0%;transition:width .3s,background .3s;}
 .form-error{background:rgba(232,74,106,.1);border:1px solid rgba(232,74,106,.35);border-radius:10px;padding:10px 14px;font-size:.83rem;color:var(--red);margin-bottom:16px;display:none;text-align:left;}
 
+/* CONTEST PICKER */
+.contest-card{max-width:520px;margin:24px auto 0;text-align:center;}
+.contest-card h2{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--gold);margin-bottom:8px;}
+.contest-card .sub{color:var(--muted);font-size:.88rem;margin-bottom:28px;}
+.contest-grid{display:grid;gap:14px;}
+.contest-item{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px 24px;cursor:pointer;transition:all .2s;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.contest-item:hover{border-color:var(--gold);box-shadow:0 0 20px rgba(232,200,74,.1);transform:translateY(-2px);}
+.contest-item .c-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--text);}
+.contest-item .c-desc{font-size:.8rem;color:var(--muted);margin-top:4px;}
+.contest-item .c-badge{background:rgba(232,200,74,.12);border:1px solid rgba(232,200,74,.3);border-radius:20px;padding:4px 12px;font-size:.75rem;color:var(--gold);white-space:nowrap;font-weight:600;}
+.contest-item .c-badge.live{background:rgba(232,74,106,.12);border-color:rgba(232,74,106,.3);color:var(--red);animation:pulse .8s infinite alternate;}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:.83rem;cursor:pointer;margin-top:20px;text-decoration:none;}
+.back-link:hover{color:var(--gold);}
+
 /* BUTTONS */
 .btn{background:var(--gold);color:#0d0b18;border:none;border-radius:10px;padding:12px 24px;font-size:.95rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .2s,transform .1s;white-space:nowrap;width:100%;}
 .btn:hover{background:var(--gold2);transform:translateY(-1px);}
@@ -68,9 +80,14 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 .btn-sm{padding:8px 18px;font-size:.85rem;width:auto;}
 
 /* SESSION BAR */
-.session-bar{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 18px;margin-bottom:24px;gap:12px;flex-wrap:wrap;}
+.session-bar{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 18px;margin-bottom:16px;gap:12px;flex-wrap:wrap;}
 .session-bar .who{font-size:.88rem;color:var(--muted);}
 .session-bar .who strong{color:var(--gold);}
+
+/* CONTEST BAR */
+.contest-bar{display:flex;align-items:center;justify-content:space-between;background:rgba(232,200,74,.06);border:1px solid rgba(232,200,74,.2);border-radius:12px;padding:10px 18px;margin-bottom:24px;gap:12px;flex-wrap:wrap;}
+.contest-bar .c-name{font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold);}
+.contest-bar .c-info{font-size:.78rem;color:var(--muted);margin-top:2px;}
 
 /* VOTER TABS */
 .voter-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;justify-content:center;}
@@ -136,30 +153,28 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 
 @media(max-width:600px){
   .song-card{grid-template-columns:24px 1fr auto;gap:9px;padding:11px 12px;}
-  .song-title{font-size:.86rem;}
-  .score-input{width:48px;}
-  header h1{font-size:1.9rem;}
-  #db-badge{display:none;}
-  .auth-card{padding:28px 20px;}
+  .song-title{font-size:.86rem;}.score-input{width:48px;}
+  header h1{font-size:1.9rem;}#db-badge{display:none;}.auth-card{padding:28px 20px;}
+  .contest-item{flex-direction:column;align-items:flex-start;}
 }
 </style>
 </head>
 <body>
 
-<div id="loading"><div class="spinner"></div><p>Connecting to database…</p></div>
+<div id="loading"><div class="spinner"></div><p id="loading-msg">Connecting to database…</p></div>
 <div id="db-badge"><div class="dot"></div><span id="db-label">Connecting…</span></div>
 
 <header>
   <div class="flag-strip">🇦🇱🇦🇲🇦🇺🇦🇹🇦🇿🇧🇪🇧🇬🇭🇷🇨🇾🇨🇿🇩🇰🇪🇪🇫🇮🇫🇷🇩🇪🇬🇪🇬🇷🇮🇱🇮🇹🇱🇻🇱🇹🇱🇺🇲🇹🇲🇩🇲🇪🇳🇴🇵🇱🇵🇹🇷🇴🇸🇲🇷🇸🇸🇪🇨🇭🇺🇦🇬🇧</div>
   <h1>Eurovision 2026</h1>
-  <p>Vienna · Grand Final · 16 May 2026 · Friends Vote</p>
+  <p>Vienna · Friends Vote</p>
 </header>
 
 <!-- AUTH -->
 <div class="wrap" id="auth-screen" style="display:none">
   <div class="auth-card">
     <h2 id="auth-title">Welcome Back</h2>
-    <p class="sub" id="auth-subtitle">Sign in to cast your Eurovision scores. Your session is remembered for 3 days.</p>
+    <p class="sub" id="auth-subtitle">Sign in to cast your scores. Your session is remembered for 3 days.</p>
     <div class="form-error" id="auth-error"></div>
     <div class="field">
       <label for="inp-username">Username</label>
@@ -193,13 +208,30 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
   </div>
 </div>
 
+<!-- CONTEST PICKER -->
+<div class="wrap" id="contest-screen" style="display:none">
+  <div class="contest-card">
+    <h2>Choose a Contest</h2>
+    <p class="sub">Select which show you want to vote for tonight.</p>
+    <div class="contest-grid" id="contest-grid"></div>
+    <a class="back-link" onclick="signOut()">← Sign out</a>
+  </div>
+</div>
+
 <!-- VOTING -->
 <div class="wrap" id="voting-screen" style="display:none">
   <div class="session-bar">
     <div class="who">Voting as <strong id="session-name"></strong> <span id="session-expiry" style="font-size:.75rem;color:var(--muted);margin-left:4px"></span></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn btn-ghost btn-sm" onclick="showResults()">🏆 Results</button>
+      <button class="btn btn-ghost btn-sm" onclick="showContestPicker()">⬅ Contests</button>
       <button class="btn btn-ghost btn-sm" onclick="signOut()">Sign Out</button>
+    </div>
+  </div>
+  <div class="contest-bar">
+    <div>
+      <div class="c-name" id="contest-bar-name"></div>
+      <div class="c-info" id="contest-bar-info"></div>
     </div>
   </div>
   <div class="voter-tabs" id="voter-tabs"></div>
@@ -207,12 +239,13 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
     <h3>Scores Used by <span id="tab-name-label">—</span></h3>
     <div class="score-pills" id="score-pills"></div>
   </div>
-  <div class="progress-label" id="progress-label">0 of 35 songs rated</div>
+  <div class="progress-label" id="progress-label">0 songs rated</div>
   <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
   <div class="conflict-msg" id="conflict-msg"></div>
   <div id="songs-list"></div>
   <div class="nav-row">
     <button class="btn btn-sm" onclick="showResults()">🏆 View Scoreboard</button>
+    <button class="btn btn-ghost btn-sm" onclick="showContestPicker()">⬅ Contests</button>
     <button class="btn btn-del btn-sm" onclick="signOut()">Sign Out</button>
   </div>
 </div>
@@ -221,11 +254,12 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 <div class="wrap" id="results-screen" style="display:none">
   <div class="results-header">
     <h2>🏆 The Scoreboard</h2>
-    <p>Live scores from all voters.</p>
+    <p id="results-contest-name"></p>
   </div>
   <div id="results-list"></div>
   <div class="nav-row">
     <button class="btn btn-sm" onclick="goVoting()">← Back to Voting</button>
+    <button class="btn btn-ghost btn-sm" onclick="showContestPicker()">⬅ Contests</button>
     <button class="btn btn-del btn-sm" onclick="signOut()">Sign Out</button>
   </div>
 </div>
@@ -233,146 +267,124 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 <script>
 'use strict';
 
-// ── CONFIG ────────────────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://onpsmwempgoopamqodfb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_hHkVZYm10pCjyKwzWAJFeg_GvVpPINX';
 const SESSION_ID   = 'esc2026_session';
 const SESSION_DAYS = 3;
+const INT_SCORES   = [0,1,2,3,4,5,6,7,8,9,10,11,12];
 
-// ── SONGS ─────────────────────────────────────────────────────────────────────
-const SONGS = [
-  {country:"Albania",        flag:"🇦🇱",artist:"Alis",                           song:"Nân"},
-  {country:"Armenia",        flag:"🇦🇲",artist:"Simón",                          song:"Paloma Rumba"},
-  {country:"Australia",      flag:"🇦🇺",artist:"Delta Goodrem",                  song:"Eclipse"},
-  {country:"Austria",        flag:"🇦🇹",artist:"Cosmó",                          song:"Tanzschein"},
-  {country:"Azerbaijan",     flag:"🇦🇿",artist:"TBA",                            song:"Just Go"},
-  {country:"Belgium",        flag:"🇧🇪",artist:"TBA",                            song:"Dancing on the Ice"},
-  {country:"Bulgaria",       flag:"🇧🇬",artist:"TBA",                            song:"Bangaranga"},
-  {country:"Croatia",        flag:"🇭🇷",artist:"TBA",                            song:"Andromeda"},
-  {country:"Cyprus",         flag:"🇨🇾",artist:"TBA",                            song:"JALLA"},
-  {country:"Czechia",        flag:"🇨🇿",artist:"TBA",                            song:"CROSSROADS"},
-  {country:"Denmark",        flag:"🇩🇰",artist:"TBA",                            song:"Før Vi Går Hjem"},
-  {country:"Estonia",        flag:"🇪🇪",artist:"TBA",                            song:"Too Epic To Be True"},
-  {country:"Finland",        flag:"🇫🇮",artist:"Linda Lampenius & Pete Parkkonen",song:"Liekinheitin"},
-  {country:"France",         flag:"🇫🇷",artist:"TBA",                            song:"Regarde !"},
-  {country:"Germany",        flag:"🇩🇪",artist:"TBA",                            song:"Fire"},
-  {country:"Georgia",        flag:"🇬🇪",artist:"TBA",                            song:"On Replay"},
-  {country:"Greece",         flag:"🇬🇷",artist:"TBA",                            song:"Ferto"},
-  {country:"Israel",         flag:"🇮🇱",artist:"TBA",                            song:"Michelle"},
-  {country:"Italy",          flag:"🇮🇹",artist:"TBA",                            song:"TBA"},
-  {country:"Latvia",         flag:"🇱🇻",artist:"TBA",                            song:"TBA"},
-  {country:"Lithuania",      flag:"🇱🇹",artist:"TBA",                            song:"TBA"},
-  {country:"Luxembourg",     flag:"🇱🇺",artist:"TBA",                            song:"TBA"},
-  {country:"Malta",          flag:"🇲🇹",artist:"TBA",                            song:"TBA"},
-  {country:"Moldova",        flag:"🇲🇩",artist:"TBA",                            song:"TBA"},
-  {country:"Montenegro",     flag:"🇲🇪",artist:"Tamara Živković",                song:"TBA"},
-  {country:"Norway",         flag:"🇳🇴",artist:"TBA",                            song:"TBA"},
-  {country:"Poland",         flag:"🇵🇱",artist:"TBA",                            song:"TBA"},
-  {country:"Portugal",       flag:"🇵🇹",artist:"TBA",                            song:"TBA"},
-  {country:"Romania",        flag:"🇷🇴",artist:"TBA",                            song:"TBA"},
-  {country:"San Marino",     flag:"🇸🇲",artist:"TBA",                            song:"TBA"},
-  {country:"Serbia",         flag:"🇷🇸",artist:"TBA",                            song:"TBA"},
-  {country:"Sweden",         flag:"🇸🇪",artist:"TBA",                            song:"TBA"},
-  {country:"Switzerland",    flag:"🇨🇭",artist:"TBA",                            song:"TBA"},
-  {country:"Ukraine",        flag:"🇺🇦",artist:"TBA",                            song:"TBA"},
-  {country:"United Kingdom", flag:"🇬🇧",artist:"LOOK MUM NO COMPUTER",           song:"Eins, Zwei, Drei"},
-];
-const INT_SCORES = [0,1,2,3,4,5,6,7,8,9,10,11,12];
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let currentUser    = null;
+let currentContest = null;   // full contest row {id, name, description, ...}
+let contestSongs   = [];     // array of song rows for current contest
+let allVoters      = [];
+let allScores      = {};     // allScores[username][songIdx]
+let activeVoter    = 0;
+let saveTimer      = null;
 
-// ── SUPABASE API ──────────────────────────────────────────────────────────────
-const H = {'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=representation'};
+// ── SUPABASE ──────────────────────────────────────────────────────────────────
+const H = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation'
+};
 
 async function sbGet(table, params=''){
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`,{headers:H});
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {headers:H});
   if(!r.ok) throw new Error(await r.text());
   return r.json();
 }
 
 async function sbUpsert(table, body){
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{
-    method:'POST', headers:{...H,'Prefer':'resolution=merge-duplicates,return=representation'},
-    body:JSON.stringify(body)
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method:'POST',
+    headers:{...H, 'Prefer':'resolution=merge-duplicates,return=representation'},
+    body: JSON.stringify(body)
   });
   if(!r.ok) throw new Error(await r.text());
   return r.json();
 }
 
 async function sbDelete(table, params){
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`,{method:'DELETE',headers:H});
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {method:'DELETE', headers:H});
   if(!r.ok) throw new Error(await r.text());
 }
 
-// ── HASH PASSWORD ──────────────────────────────────────────────────────────────
+// ── HASH ──────────────────────────────────────────────────────────────────────
 async function hashPw(pw){
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
-let currentUser = null;
-let allVoters   = [];
-let allScores   = {};
-let activeVoter = 0;
-let saveTimer   = null;
+// ── UI HELPERS ────────────────────────────────────────────────────────────────
+function show(id){document.getElementById(id).style.display='block';}
+function hide(id){document.getElementById(id).style.display='none';}
+function hideAll(){ ['auth-screen','contest-screen','voting-screen','results-screen'].forEach(hide); }
+function setLoadingMsg(m){ document.getElementById('loading-msg').textContent=m; }
 
-// ── STATUS ────────────────────────────────────────────────────────────────────
 function setStatus(state, label){
-  const el=document.getElementById('db-badge');
-  el.className=state;
+  const el=document.getElementById('db-badge'); el.className=state;
   document.getElementById('db-label').textContent=label;
 }
 function flashSaving(){
-  setStatus('saving','Saving…');
-  clearTimeout(saveTimer);
+  setStatus('saving','Saving…'); clearTimeout(saveTimer);
   saveTimer=setTimeout(()=>setStatus('ready','Saved'),900);
 }
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
-function show(id){document.getElementById(id).style.display='block';}
-function hide(id){document.getElementById(id).style.display='none';}
 function hideLoading(){
   const el=document.getElementById('loading');
-  el.classList.add('gone');
-  setTimeout(()=>el.remove(),600);
+  el.classList.add('gone'); setTimeout(()=>el.remove(),600);
 }
 
-// ── SESSION (localStorage for remember-me token) ──────────────────────────────
-function saveLocalSession(username, expiresAt){
-  localStorage.setItem(SESSION_ID, JSON.stringify({username, expiresAt}));
+// ── SESSION ───────────────────────────────────────────────────────────────────
+function saveLocalSession(username, expiresAt, contestId){
+  localStorage.setItem(SESSION_ID, JSON.stringify({username, expiresAt, contestId}));
 }
 function loadLocalSession(){
   try{
-    const s = JSON.parse(localStorage.getItem(SESSION_ID)||'null');
+    const s=JSON.parse(localStorage.getItem(SESSION_ID)||'null');
     if(s && s.expiresAt > Date.now()) return s;
-    localStorage.removeItem(SESSION_ID);
-    return null;
+    localStorage.removeItem(SESSION_ID); return null;
   } catch(e){ return null; }
 }
-function clearLocalSession(){
-  localStorage.removeItem(SESSION_ID);
+function clearLocalSession(){ localStorage.removeItem(SESSION_ID); }
+function updateSessionContest(contestId){
+  const s=loadLocalSession();
+  if(s){ s.contestId=contestId; localStorage.setItem(SESSION_ID, JSON.stringify(s)); }
 }
 
 // ── BOOT ──────────────────────────────────────────────────────────────────────
 async function boot(){
-  // Test connection
   try{
     await sbGet('users','select=username&limit=1');
     setStatus('ready','Connected');
   } catch(e){
-    setStatus('error','DB error');
+    setStatus('error','Cannot connect');
     document.getElementById('loading').innerHTML=
       `<p style="color:var(--red);padding:30px;text-align:center">Cannot connect to database.<br><small>${e.message}</small></p>`;
     return;
   }
 
-  // Check remembered session
   const local = loadLocalSession();
   if(local){
     try{
       const rows = await sbGet('users',`username=eq.${encodeURIComponent(local.username)}&select=username`);
       if(rows.length){
+        setLoadingMsg('Restoring session…');
+        currentUser = local.username;
+        setSessionBar(local.expiresAt);
+        if(local.contestId){
+          // Try to restore directly into contest
+          const contests = await sbGet('contests',`id=eq.${encodeURIComponent(local.contestId)}&select=*`);
+          if(contests.length){
+            hideLoading();
+            await enterContest(contests[0]);
+            return;
+          }
+        }
         hideLoading();
-        await loginAs(local.username, false);
+        await showContestPicker();
         return;
       }
     } catch(e){}
@@ -383,28 +395,27 @@ async function boot(){
   showLoginScreen();
 }
 
-// ── AUTH SCREENS ──────────────────────────────────────────────────────────────
-let authMode = 'login';
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+let authMode='login';
 
 function showLoginScreen(){
   authMode='login';
   document.getElementById('auth-title').textContent='Welcome Back';
-  document.getElementById('auth-subtitle').textContent='Sign in to cast your Eurovision scores. Your session is remembered for 3 days.';
+  document.getElementById('auth-subtitle').textContent='Sign in to cast your scores. Your session is remembered for 3 days.';
   document.getElementById('field-confirm').style.display='none';
   document.getElementById('pw-strength-wrap').style.display='none';
   document.getElementById('auth-submit').textContent='Sign In';
   document.getElementById('inp-password').placeholder='Your password';
   document.getElementById('auth-switch-hint').innerHTML=
     `Don't have an account yet? <a href="#" style="color:var(--gold);text-decoration:none;font-weight:600" onclick="showRegisterScreen();return false">Create one here →</a>`;
-  clearErrors();
-  show('auth-screen');
+  clearErrors(); hideAll(); show('auth-screen');
   setTimeout(()=>document.getElementById('inp-username').focus(),100);
 }
 
 function showRegisterScreen(){
   authMode='register';
   document.getElementById('auth-title').textContent='Create Account';
-  document.getElementById('auth-subtitle').textContent='Pick a unique username and password. Your name will appear on the scoreboard.';
+  document.getElementById('auth-subtitle').textContent='Pick a unique username. Your name appears on the scoreboard.';
   document.getElementById('field-confirm').style.display='block';
   document.getElementById('pw-strength-wrap').style.display='block';
   document.getElementById('auth-submit').textContent='Create Account';
@@ -424,32 +435,23 @@ function clearErrors(){
 }
 
 function setField(f,state,msg){
-  const inp=document.getElementById('inp-'+f);
-  const m=document.getElementById('msg-'+f);
+  const inp=document.getElementById('inp-'+f), m=document.getElementById('msg-'+f);
   if(inp){inp.classList.remove('err','ok');if(state)inp.classList.add(state);}
   if(m){m.textContent=msg||'';m.className='field-msg'+(state?' '+state:'');}
-  if(f==='username'){
-    const ic=document.getElementById('icon-username');
-    if(ic) ic.textContent=state==='ok'?'✅':state==='err'?'❌':'👤';
-  }
+  if(f==='username'){ const ic=document.getElementById('icon-username'); if(ic) ic.textContent=state==='ok'?'✅':state==='err'?'❌':'👤'; }
 }
 
-function showFormError(msg){
-  const e=document.getElementById('auth-error');
-  e.textContent=msg; e.style.display='block';
-}
+function showFormError(msg){ const e=document.getElementById('auth-error'); e.textContent=msg; e.style.display='block'; }
 
-// Live validation
 async function liveValidateUsername(){
   const val=document.getElementById('inp-username').value.trim();
   if(!val){setField('username','','');return;}
   if(val.length<2){setField('username','err','At least 2 characters');return;}
-  if(!/^[a-zA-Z0-9 _\-.]+$/.test(val)){setField('username','err','Letters, numbers, spaces, _ - . only');return;}
+  if(!/^[a-zA-Z0-9 _.\-]+$/.test(val)){setField('username','err','Letters, numbers, spaces, _ - . only');return;}
   if(authMode==='register'){
     try{
       const rows=await sbGet('users',`username=eq.${encodeURIComponent(val)}&select=username`);
-      if(rows.length) setField('username','err','Username already taken');
-      else             setField('username','ok','Available!');
+      rows.length ? setField('username','err','Username already taken') : setField('username','ok','Available!');
     } catch(e){ setField('username','',''); }
   } else { setField('username','',''); }
 }
@@ -461,7 +463,7 @@ function liveValidatePassword(){
     document.getElementById('pw-strength-fill').style.width=s.pct+'%';
     document.getElementById('pw-strength-fill').style.background=s.color;
     if(!val){setField('password','','');return;}
-    val.length<6?setField('password','err','At least 6 characters'):setField('password','ok',s.label);
+    val.length<6 ? setField('password','err','At least 6 characters') : setField('password','ok',s.label);
   } else { setField('password','',''); }
   liveValidateConfirm();
 }
@@ -471,7 +473,7 @@ function liveValidateConfirm(){
   const pw=document.getElementById('inp-password').value;
   const cf=document.getElementById('inp-confirm').value;
   if(!cf){setField('confirm','','');return;}
-  pw===cf?setField('confirm','ok','Passwords match ✓'):setField('confirm','err','Passwords do not match');
+  pw===cf ? setField('confirm','ok','Passwords match ✓') : setField('confirm','err','Passwords do not match');
 }
 
 function pwStrength(pw){
@@ -479,16 +481,12 @@ function pwStrength(pw){
   if(pw.length>=6)s++;if(pw.length>=10)s++;
   if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^a-zA-Z0-9]/.test(pw))s++;
   return [{pct:20,color:'#e84a6a',label:'Very weak'},{pct:40,color:'#e87a4a',label:'Weak'},
-          {pct:60,color:'#e8c84a',label:'Fair'},{pct:80,color:'#a0e84a',label:'Good'},
-          {pct:100,color:'#4ae8a0',label:'Strong'}][Math.min(s,4)];
+    {pct:60,color:'#e8c84a',label:'Fair'},{pct:80,color:'#a0e84a',label:'Good'},
+    {pct:100,color:'#4ae8a0',label:'Strong'}][Math.min(s,4)];
 }
 
-function togglePw(){
-  const i=document.getElementById('inp-password');
-  i.type=i.type==='password'?'text':'password';
-}
+function togglePw(){ const i=document.getElementById('inp-password'); i.type=i.type==='password'?'text':'password'; }
 
-// ── SUBMIT AUTH ───────────────────────────────────────────────────────────────
 async function submitAuth(){
   clearErrors();
   const username=document.getElementById('inp-username').value.trim();
@@ -497,7 +495,6 @@ async function submitAuth(){
 
   if(!username){setField('username','err','Required');return;}
   if(username.length<2){setField('username','err','At least 2 characters');return;}
-  if(!/^[a-zA-Z0-9 _\-.]+$/.test(username)){setField('username','err','Letters, numbers, spaces, _ - . only');return;}
   if(!password){setField('password','err','Required');return;}
 
   const btn=document.getElementById('auth-submit');
@@ -505,21 +502,24 @@ async function submitAuth(){
 
   try{
     const hash=await hashPw(password);
-
     if(authMode==='register'){
       if(password.length<6){setField('password','err','At least 6 characters');btn.disabled=false;btn.textContent='Create Account';return;}
       if(password!==confirm){setField('confirm','err','Passwords do not match');btn.disabled=false;btn.textContent='Create Account';return;}
       const existing=await sbGet('users',`username=eq.${encodeURIComponent(username)}&select=username`);
       if(existing.length){setField('username','err','Username already taken');btn.disabled=false;btn.textContent='Create Account';return;}
       await sbUpsert('users',{username, password_hash:hash});
-      await loginAs(username, true);
-
     } else {
       const rows=await sbGet('users',`username=eq.${encodeURIComponent(username)}&select=username,password_hash`);
       if(!rows.length){setField('username','err','Username not found');btn.disabled=false;btn.textContent='Sign In';return;}
       if(rows[0].password_hash!==hash){setField('password','err','Incorrect password');btn.disabled=false;btn.textContent='Sign In';return;}
-      await loginAs(username, true);
     }
+
+    // Save session
+    const expiresAt = Date.now() + SESSION_DAYS*24*60*60*1000;
+    saveLocalSession(username, expiresAt, null);
+    currentUser = username;
+    setSessionBar(expiresAt);
+    await showContestPicker();
 
   } catch(e){
     showFormError('Error: '+e.message);
@@ -528,55 +528,85 @@ async function submitAuth(){
   }
 }
 
-// ── LOGIN ─────────────────────────────────────────────────────────────────────
-async function loginAs(username, writeSession=true){
-  currentUser=username;
+function setSessionBar(expiresAt){
+  document.getElementById('session-name').textContent=currentUser;
+  const exp=new Date(expiresAt);
+  document.getElementById('session-expiry').textContent=
+    `· until ${exp.toLocaleDateString(undefined,{day:'numeric',month:'short'})}`;
+}
 
-  if(writeSession){
-    const expiresAt=Date.now()+SESSION_DAYS*24*60*60*1000;
-    saveLocalSession(username, expiresAt);
-    const exp=new Date(expiresAt);
-    document.getElementById('session-expiry').textContent=
-      `· until ${exp.toLocaleDateString(undefined,{day:'numeric',month:'short'})}`;
-  } else {
-    const local=loadLocalSession();
-    if(local){
-      const exp=new Date(local.expiresAt);
-      document.getElementById('session-expiry').textContent=
-        `· until ${exp.toLocaleDateString(undefined,{day:'numeric',month:'short'})}`;
-    }
+async function signOut(){
+  clearLocalSession();
+  currentUser=null; currentContest=null; contestSongs=[];
+  allVoters=[]; allScores={}; activeVoter=0;
+  ['inp-username','inp-password','inp-confirm'].forEach(id=>document.getElementById(id).value='');
+  showLoginScreen();
+}
+
+// ── CONTEST PICKER ────────────────────────────────────────────────────────────
+async function showContestPicker(){
+  hideAll(); show('contest-screen');
+  const grid=document.getElementById('contest-grid');
+  grid.innerHTML='<div style="color:var(--muted);font-size:.85rem;padding:20px">Loading contests…</div>';
+
+  try{
+    const contests = await sbGet('contests','select=*&order=created_at.asc');
+    grid.innerHTML = contests.map(c=>{
+      const isTonight = c.id==='esc2026_sf2';
+      return `<div class="contest-item" onclick="selectContest('${c.id}')">
+        <div>
+          <div class="c-title">${c.name}</div>
+          <div class="c-desc">${c.description||''}</div>
+        </div>
+        <div class="c-badge${isTonight?' live':''}">${isTonight?'🔴 Tonight':'📅 Upcoming'}</div>
+      </div>`;
+    }).join('');
+  } catch(e){
+    grid.innerHTML=`<div style="color:var(--red);padding:20px">Error: ${e.message}</div>`;
   }
+}
 
-  // Load all users + votes from Supabase
+async function selectContest(contestId){
+  try{
+    const contests=await sbGet('contests',`id=eq.${encodeURIComponent(contestId)}&select=*`);
+    if(contests.length) await enterContest(contests[0]);
+  } catch(e){ alert('Error loading contest: '+e.message); }
+}
+
+async function enterContest(contest){
+  currentContest=contest;
+  updateSessionContest(contest.id);
+
+  // Load songs for this contest
+  const songs=await sbGet('contest_songs',
+    `contest_id=eq.${encodeURIComponent(contest.id)}&select=*&order=running_order.asc`);
+  contestSongs=songs;
+
+  // Load all voters + votes for this contest
   const userRows=await sbGet('users','select=username&order=username.asc');
   allVoters=userRows.map(r=>r.username);
   allScores={};
-  allVoters.forEach(v=>{allScores[v]=Array(SONGS.length).fill(null);});
-  const voteRows=await sbGet('votes','select=username,song_idx,score');
+  allVoters.forEach(v=>{ allScores[v]=Array(contestSongs.length).fill(null); });
+
+  const voteRows=await sbGet('votes',
+    `contest_id=eq.${encodeURIComponent(contest.id)}&select=username,song_idx,score`);
   voteRows.forEach(row=>{
-    if(allScores[row.username]!==undefined) allScores[row.username][row.song_idx]=parseFloat(row.score);
+    if(allScores[row.username]!==undefined && row.song_idx<contestSongs.length)
+      allScores[row.username][row.song_idx]=parseFloat(row.score);
   });
 
   activeVoter=allVoters.indexOf(currentUser);
   if(activeVoter<0) activeVoter=0;
 
-  document.getElementById('session-name').textContent=currentUser;
-  hide('auth-screen');
-  show('voting-screen');
-  setStatus('ready','Connected');
-  renderTabs();
-  renderSongs();
+  // Update contest bar
+  document.getElementById('contest-bar-name').textContent=contest.name;
+  document.getElementById('contest-bar-info').textContent=contest.description||'';
+
+  hideAll(); show('voting-screen');
+  renderTabs(); renderSongs();
 }
 
-async function signOut(){
-  clearLocalSession();
-  currentUser=null; allScores={}; allVoters=[]; activeVoter=0;
-  hide('voting-screen'); hide('results-screen');
-  ['inp-username','inp-password','inp-confirm'].forEach(id=>document.getElementById(id).value='');
-  showLoginScreen();
-}
-
-// ── VOTING TABS ───────────────────────────────────────────────────────────────
+// ── TABS ──────────────────────────────────────────────────────────────────────
 function renderTabs(){
   document.getElementById('voter-tabs').innerHTML=allVoters.map((v,i)=>`
     <button class="tab${i===activeVoter?' active':''}" onclick="switchVoter(${i})">
@@ -584,14 +614,13 @@ function renderTabs(){
     </button>`).join('');
   document.getElementById('tab-name-label').textContent=allVoters[activeVoter]||'—';
 }
-
-function switchVoter(i){activeVoter=i;renderTabs();renderSongs();}
+function switchVoter(i){ activeVoter=i; renderTabs(); renderSongs(); }
 
 // ── SCORE PILLS ───────────────────────────────────────────────────────────────
 function renderScorePills(){
   const voter=allVoters[activeVoter];
   const used=new Set();
-  (allScores[voter]||[]).forEach(v=>{if(v!==null&&Math.floor(v)===v)used.add(v);});
+  (allScores[voter]||[]).forEach(v=>{ if(v!==null && Math.floor(v)===v) used.add(v); });
   document.getElementById('score-pills').innerHTML=INT_SCORES.map(s=>
     `<div class="score-pill${used.has(s)?' used':''}">${s}</div>`).join('');
 }
@@ -599,19 +628,20 @@ function renderScorePills(){
 // ── SONGS ─────────────────────────────────────────────────────────────────────
 function renderSongs(){
   const voter=allVoters[activeVoter];
-  const vs=allScores[voter]||Array(SONGS.length).fill(null);
+  const vs=allScores[voter]||Array(contestSongs.length).fill(null);
   const isMe=voter===currentUser;
   renderScorePills(); updateProgress();
-  document.getElementById('songs-list').innerHTML=SONGS.map((s,i)=>{
+
+  document.getElementById('songs-list').innerHTML=contestSongs.map((s,i)=>{
     const val=vs[i]; const rated=val!==null;
-    const display=s.song!=='TBA'?s.song:s.country;
+    const display=s.song&&s.song!=='TBA'?s.song:s.country;
     const dis=isMe?'':' disabled';
     return `<div class="song-card${rated?' rated':''}" id="card-${i}">
-      <div class="song-num">${i+1}</div>
+      <div class="song-num">${s.running_order||i+1}</div>
       <div class="song-info">
-        <div class="song-title">${s.flag} ${display}</div>
+        <div class="song-title">${s.flag||''} ${display}</div>
         <div class="song-country">${s.country}</div>
-        <div class="song-artist">${s.artist!=='TBA'?s.artist:''}</div>
+        <div class="song-artist">${s.artist&&s.artist!=='TBA'?s.artist:''}</div>
       </div>
       <div class="score-control">
         <button class="score-btn" onclick="adjustScore(${i},-0.5)"${dis}>−</button>
@@ -634,24 +664,20 @@ async function setScore(idx, rawVal){
     allScores[currentUser][idx]=null;
     inp.classList.remove('ok','conflict');
     updateCard(idx,false); updateProgress(); renderScorePills();
-    await persistScore(idx, null); return;
+    await persistScore(idx,null); return;
   }
-  let val=parseFloat(rawVal);
-  if(isNaN(val)) return;
-  val=Math.round(val*100)/100;
-  if(val<0)val=0; if(val>12)val=12;
+  let val=parseFloat(rawVal); if(isNaN(val)) return;
+  val=Math.round(val*100)/100; if(val<0)val=0; if(val>12)val=12;
   allScores[currentUser][idx]=val; inp.value=val;
   validateAll(); updateProgress(); renderScorePills();
-  await persistScore(idx, val);
+  await persistScore(idx,val);
 }
 
 async function adjustScore(idx,delta){
   if(allVoters[activeVoter]!==currentUser) return;
   const cur=allScores[currentUser][idx]??0;
-  let nv=Math.round((cur+delta)*100)/100;
-  if(nv<0)nv=0; if(nv>12)nv=12;
-  const inp=document.getElementById(`score-inp-${idx}`);
-  if(inp) inp.value=nv;
+  let nv=Math.round((cur+delta)*100)/100; if(nv<0)nv=0; if(nv>12)nv=12;
+  const inp=document.getElementById(`score-inp-${idx}`); if(inp) inp.value=nv;
   await setScore(idx,nv);
 }
 
@@ -659,9 +685,13 @@ async function persistScore(songIdx, score){
   flashSaving();
   try{
     if(score===null){
-      await sbDelete('votes',`username=eq.${encodeURIComponent(currentUser)}&song_idx=eq.${songIdx}`);
+      await sbDelete('votes',
+        `username=eq.${encodeURIComponent(currentUser)}&contest_id=eq.${encodeURIComponent(currentContest.id)}&song_idx=eq.${songIdx}`);
     } else {
-      await sbUpsert('votes',{username:currentUser, song_idx:songIdx, score, updated_at:new Date().toISOString()});
+      await sbUpsert('votes',{
+        username:currentUser, contest_id:currentContest.id,
+        song_idx:songIdx, score, updated_at:new Date().toISOString()
+      });
     }
     setStatus('ready','Saved');
   } catch(e){ setStatus('error','Save failed'); }
@@ -669,13 +699,12 @@ async function persistScore(songIdx, score){
 
 // ── VALIDATION ────────────────────────────────────────────────────────────────
 function validateAll(){
-  const voter=allVoters[activeVoter];
-  const vs=allScores[voter]||[];
+  const voter=allVoters[activeVoter]; const vs=allScores[voter]||[];
   const intMap={};
-  vs.forEach((v,i)=>{if(v!==null&&Math.floor(v)===v){if(!intMap[v])intMap[v]=[];intMap[v].push(i);}});
+  vs.forEach((v,i)=>{ if(v!==null&&Math.floor(v)===v){ if(!intMap[v])intMap[v]=[]; intMap[v].push(i); } });
   const conflicts=new Set(); const nums=[];
-  Object.entries(intMap).forEach(([k,idxs])=>{if(idxs.length>1){idxs.forEach(i=>conflicts.add(i));nums.push(k);}});
-  SONGS.forEach((_,i)=>{
+  Object.entries(intMap).forEach(([k,idxs])=>{ if(idxs.length>1){ idxs.forEach(i=>conflicts.add(i)); nums.push(k); } });
+  contestSongs.forEach((_,i)=>{
     const inp=document.getElementById(`score-inp-${i}`); if(!inp) return;
     inp.classList.remove('ok','conflict');
     if(conflicts.has(i)) inp.classList.add('conflict');
@@ -683,35 +712,35 @@ function validateAll(){
     updateCard(i, vs[i]!==null && !conflicts.has(i));
   });
   const msg=document.getElementById('conflict-msg');
-  if(nums.length){msg.style.display='block';msg.textContent=`⚠ Score${nums.length>1?'s':''} ${nums.join(', ')} used more than once. Use decimals (e.g. 8 and 8.50) to differentiate.`;}
+  if(nums.length){ msg.style.display='block'; msg.textContent=`⚠ Score${nums.length>1?'s':''} ${nums.join(', ')} used more than once. Use decimals (e.g. 8 and 8.50) to differentiate.`; }
   else msg.style.display='none';
 }
 
-function updateCard(idx,ok){const c=document.getElementById(`card-${idx}`);if(c)c.classList.toggle('rated',ok);}
+function updateCard(idx,ok){ const c=document.getElementById(`card-${idx}`); if(c) c.classList.toggle('rated',ok); }
 function updateProgress(){
   const voter=allVoters[activeVoter];
   const rated=(allScores[voter]||[]).filter(v=>v!==null).length;
-  document.getElementById('progress-label').textContent=`${rated} of ${SONGS.length} songs rated by ${voter}`;
-  document.getElementById('progress-bar').style.width=`${(rated/SONGS.length)*100}%`;
+  document.getElementById('progress-label').textContent=`${rated} of ${contestSongs.length} songs rated by ${voter}`;
+  document.getElementById('progress-bar').style.width=`${(rated/contestSongs.length)*100}%`;
 }
 
 // ── RESULTS ───────────────────────────────────────────────────────────────────
 async function showResults(){
-  // Fresh data from Supabase
+  const voteRows=await sbGet('votes',
+    `contest_id=eq.${encodeURIComponent(currentContest.id)}&select=username,song_idx,score`);
   const userRows=await sbGet('users','select=username&order=username.asc');
   const voters=userRows.map(r=>r.username);
   const sc={};
-  voters.forEach(v=>{sc[v]=Array(SONGS.length).fill(null);});
-  const voteRows=await sbGet('votes','select=username,song_idx,score');
-  voteRows.forEach(row=>{if(sc[row.username]!==undefined) sc[row.username][row.song_idx]=parseFloat(row.score);});
+  voters.forEach(v=>{ sc[v]=Array(contestSongs.length).fill(null); });
+  voteRows.forEach(row=>{ if(sc[row.username]!==undefined) sc[row.username][row.song_idx]=parseFloat(row.score); });
 
-  hide('voting-screen');
-  show('results-screen');
+  hideAll(); show('results-screen');
+  document.getElementById('results-contest-name').textContent=currentContest.name;
 
-  const totals=SONGS.map((s,i)=>{
+  const totals=contestSongs.map((s,i)=>{
     let total=0; const bd={};
-    voters.forEach(v=>{const x=sc[v][i];bd[v]=x;if(x!==null)total+=x;});
-    return {...s,idx:i,total,bd};
+    voters.forEach(v=>{ const x=sc[v][i]; bd[v]=x; if(x!==null) total+=x; });
+    return {...s, idx:i, total, bd};
   }).sort((a,b)=>b.total-a.total);
 
   const maxTotal=totals[0]?.total||1;
@@ -720,13 +749,13 @@ async function showResults(){
     const bc=rank===0?'r1':rank===1?'r2':rank===2?'r3':'';
     const m=rank===0?'🥇':rank===1?'🥈':rank===2?'🥉':rank+1;
     const pct=maxTotal>0?(s.total/maxTotal)*100:0;
-    const display=s.song!=='TBA'?s.song:s.country;
-    const bd=voters.map(v=>{const x=s.bd[v];return `<div class="vb-chip">${v}: <span>${x!==null?x:'—'}</span></div>`;}).join('');
+    const display=s.song&&s.song!=='TBA'?s.song:s.country;
+    const bd=voters.map(v=>{ const x=s.bd[v]; return `<div class="vb-chip">${v}: <span>${x!==null?x:'—'}</span></div>`; }).join('');
     return `<div class="result-card ${rc}">
       <div class="rank-badge ${bc}">${m}</div>
       <div class="result-info">
-        <div class="result-title">${s.flag} ${display}</div>
-        <div class="result-country">${s.country}${s.artist!=='TBA'?' · '+s.artist:''}</div>
+        <div class="result-title">${s.flag||''} ${display}</div>
+        <div class="result-country">${s.country}${s.artist&&s.artist!=='TBA'?' · '+s.artist:''}</div>
         <div class="score-bar"><div class="score-bar-fill" style="width:${pct}%"></div></div>
         <div class="voter-breakdown">${bd}</div>
       </div>
@@ -735,11 +764,7 @@ async function showResults(){
   }).join('');
 }
 
-function goVoting(){
-  hide('results-screen');
-  show('voting-screen');
-  renderTabs(); renderSongs();
-}
+function goVoting(){ hideAll(); show('voting-screen'); renderTabs(); renderSongs(); }
 
 boot();
 </script>
