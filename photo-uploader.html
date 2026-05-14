@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Eurovision 2026 — Photo Uploader</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',sans-serif;background:#0d0b18;color:#e8e3ff;padding:24px;min-height:100vh;}
+h1{font-size:1.4rem;color:#e8c84a;margin-bottom:6px;}
+.sub{color:#7b72a8;font-size:.85rem;margin-bottom:20px;line-height:1.6;}
+.tabs{display:flex;gap:6px;margin-bottom:20px;}
+.tab-btn{background:transparent;border:1px solid #2e2852;color:#7b72a8;border-radius:8px;padding:8px 16px;font-size:.85rem;font-family:'Segoe UI',sans-serif;cursor:pointer;transition:all .2s;}
+.tab-btn.active{background:#e8c84a;border-color:#e8c84a;color:#0d0b18;font-weight:600;}
+.panel{display:none;} .panel.active{display:block;}
+
+/* Method A — URL paste */
+.url-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:16px;}
+.url-row{background:#16132a;border:1px solid #2e2852;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;}
+.url-row img{width:48px;height:32px;object-fit:cover;border-radius:4px;background:#2e2852;flex-shrink:0;}
+.url-row .info{flex:1;min-width:0;}
+.url-row .country{font-size:.82rem;font-weight:600;}
+.url-row .artist{font-size:.72rem;color:#7b72a8;}
+.url-row input{width:100%;background:#0d0b18;border:1px solid #2e2852;border-radius:6px;color:#e8e3ff;padding:5px 8px;font-size:.75rem;font-family:'Segoe UI',sans-serif;outline:none;margin-top:4px;}
+.url-row input:focus{border-color:#e8c84a;}
+.url-row input.has-url{border-color:#4ae8a0;}
+
+/* Method B — drag & drop */
+.drop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px;}
+.drop-card{background:#16132a;border:2px dashed #2e2852;border-radius:10px;padding:10px;cursor:pointer;transition:all .2s;text-align:center;position:relative;}
+.drop-card:hover,.drop-card.dragover{border-color:#e8c84a;background:rgba(232,200,74,.05);}
+.drop-card.has-photo{border-style:solid;border-color:#4ae8a0;}
+.drop-card img.preview{width:100%;height:60px;object-fit:cover;border-radius:6px;margin-bottom:6px;display:none;}
+.drop-card.has-photo img.preview{display:block;}
+.drop-card .placeholder{height:60px;display:flex;align-items:center;justify-content:center;color:#2e2852;font-size:1.8rem;margin-bottom:6px;}
+.drop-card.has-photo .placeholder{display:none;}
+.drop-card .country{font-size:.78rem;font-weight:600;}
+.drop-card .artist{font-size:.67rem;color:#7b72a8;margin-top:2px;}
+.drop-card input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.status{font-size:.68rem;padding:2px 6px;border-radius:4px;display:inline-block;margin-top:4px;}
+.pending{background:rgba(123,114,168,.15);color:#7b72a8;}
+.loading{background:rgba(232,200,74,.15);color:#e8c84a;}
+.done{background:rgba(74,232,160,.15);color:#4ae8a0;}
+.error{background:rgba(232,74,106,.15);color:#e84a6a;}
+
+/* Shared */
+.btn{background:#e8c84a;color:#0d0b18;border:none;border-radius:8px;padding:10px 22px;font-size:.88rem;font-weight:600;cursor:pointer;margin-right:8px;margin-bottom:8px;}
+.btn:hover{background:#f5d96e;}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+.btn-ghost{background:transparent;border:1px solid #2e2852;color:#7b72a8;}
+.btn-ghost:hover{border-color:#e8c84a;color:#e8c84a;background:transparent;}
+#summary{background:#16132a;border:1px solid #2e2852;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:.83rem;color:#7b72a8;line-height:1.5;}
+#summary span{color:#e8c84a;font-weight:600;}
+progress{width:100%;height:5px;border-radius:99px;margin-bottom:12px;display:none;}
+.tip{background:rgba(74,159,232,.08);border:1px solid rgba(74,159,232,.2);border-radius:8px;padding:10px 14px;font-size:.8rem;color:#4a9fe8;margin-bottom:16px;line-height:1.5;}
+</style>
+</head>
+<body>
+<h1>🖼 Eurovision 2026 — Photo Uploader</h1>
+<p class="sub">Upload artist photos to Supabase Storage. Make sure you already created a <strong style="color:#e8c84a">public bucket named "artists"</strong> in Supabase → Storage.</p>
+
+<div id="summary">Choose a method below, add photos, then click Upload.</div>
+<progress id="prog" max="35"></progress>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('drag')">📁 Drag & Drop Photos</button>
+  <button class="tab-btn" onclick="switchTab('url')">🔗 Paste Image URLs</button>
+</div>
+
+<!-- METHOD A: Drag & Drop -->
+<div class="panel active" id="panel-drag">
+  <div class="tip">
+    <strong>How to get artist photos:</strong> Go to <a href="https://www.eurovision.com/eurovision-song-contest/vienna-2026/all-participants/" target="_blank" style="color:#4a9fe8">eurovision.com/all-participants</a>, right-click each artist photo → Save image. Then drag it onto the matching card below, or click a card to browse.
+  </div>
+  <div class="drop-grid" id="drop-grid"></div>
+  <button class="btn" onclick="uploadAll('drag')">⬆ Upload All Photos</button>
+  <button class="btn btn-ghost" onclick="clearAll()">✕ Clear All</button>
+</div>
+
+<!-- METHOD B: URL paste -->
+<div class="panel" id="panel-url">
+  <div class="tip">
+    <strong>Paste a direct image URL</strong> for each artist. Works with any public image URL that doesn't block hotlinking (e.g. Wikipedia, Eurovision press photos, etc.).<br>
+    After pasting, click "Upload All".
+  </div>
+  <div class="url-grid" id="url-grid"></div>
+  <button class="btn" onclick="uploadAll('url')">⬆ Upload All URLs</button>
+</div>
+
+<script>
+const SB_URL = 'https://onpsmwempgoopamqodfb.supabase.co';
+const SB_KEY = 'sb_publishable_hHkVZYm10pCjyKwzWAJFeg_GvVpPINX';
+const BUCKET = 'artists';
+const H = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+
+const ARTISTS = [
+  {country:'Albania',       artist:'Alis'},
+  {country:'Armenia',       artist:'SIMÓN'},
+  {country:'Australia',     artist:'Delta Goodrem'},
+  {country:'Austria',       artist:'COSMÓ'},
+  {country:'Azerbaijan',    artist:'JIVA'},
+  {country:'Belgium',       artist:'ESSYLA'},
+  {country:'Bulgaria',      artist:'DARA'},
+  {country:'Croatia',       artist:'LELEK'},
+  {country:'Cyprus',        artist:'Antigoni'},
+  {country:'Czechia',       artist:'Daniel Zizka'},
+  {country:'Denmark',       artist:'Søren Torpegaard Lund'},
+  {country:'Estonia',       artist:'Vanilla Ninja'},
+  {country:'Finland',       artist:'Linda Lampenius & Pete Parkkonen'},
+  {country:'France',        artist:'Monroe'},
+  {country:'Georgia',       artist:'Bzikebi'},
+  {country:'Germany',       artist:'Sarah Engels'},
+  {country:'Greece',        artist:'Akylas'},
+  {country:'Israel',        artist:'Noam Bettan'},
+  {country:'Italy',         artist:'Sal Da Vinci'},
+  {country:'Latvia',        artist:'Atvara'},
+  {country:'Lithuania',     artist:'Lion Ceccah'},
+  {country:'Luxembourg',    artist:'Eva Marija'},
+  {country:'Malta',         artist:'AIDAN'},
+  {country:'Moldova',       artist:'Satoshi'},
+  {country:'Montenegro',    artist:'Tamara Živković'},
+  {country:'Norway',        artist:'JONAS LOVV'},
+  {country:'Poland',        artist:'ALICJA'},
+  {country:'Portugal',      artist:'Bandidos do Cante'},
+  {country:'Romania',       artist:'Alexandra Căpitănescu'},
+  {country:'San Marino',    artist:'SENHIT'},
+  {country:'Serbia',        artist:'LAVINA'},
+  {country:'Sweden',        artist:'FELICIA'},
+  {country:'Switzerland',   artist:'Veronica Fusaro'},
+  {country:'Ukraine',       artist:'LELÉKA'},
+  {country:'United Kingdom',artist:'LOOK MUM NO COMPUTER'},
+];
+
+// file blobs stored here
+const fileBlobs = {};
+const urlValues = {};
+
+function fname(country){ return country.toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-')+'.jpg'; }
+
+// ── Build Drag & Drop grid ────────────────────────────────────────────────────
+const dropGrid = document.getElementById('drop-grid');
+ARTISTS.forEach((a,i)=>{
+  const div=document.createElement('div');
+  div.className='drop-card'; div.id='dc-'+i;
+  div.innerHTML=`
+    <img class="preview" id="prev-${i}" src="">
+    <div class="placeholder">＋</div>
+    <div class="country">${a.country}</div>
+    <div class="artist">${a.artist}</div>
+    <span class="status pending" id="dst-${i}">No photo</span>
+    <input type="file" accept="image/*" onchange="fileChosen(${i},this)">
+  `;
+  div.addEventListener('dragover',e=>{e.preventDefault();div.classList.add('dragover');});
+  div.addEventListener('dragleave',()=>div.classList.remove('dragover'));
+  div.addEventListener('drop',e=>{
+    e.preventDefault(); div.classList.remove('dragover');
+    const f=e.dataTransfer.files[0];
+    if(f) applyFile(i,f);
+  });
+  dropGrid.appendChild(div);
+});
+
+function fileChosen(i,inp){ if(inp.files[0]) applyFile(i,inp.files[0]); }
+
+function applyFile(i,file){
+  fileBlobs[i]=file;
+  const prev=document.getElementById('prev-'+i);
+  const card=document.getElementById('dc-'+i);
+  const reader=new FileReader();
+  reader.onload=e=>{prev.src=e.target.result; card.classList.add('has-photo');};
+  reader.readAsDataURL(file);
+  setSt('dst-'+i,'pending',file.name.slice(0,20));
+}
+
+function clearAll(){
+  Object.keys(fileBlobs).forEach(i=>{ delete fileBlobs[i]; });
+  ARTISTS.forEach((_,i)=>{
+    const prev=document.getElementById('prev-'+i);
+    const card=document.getElementById('dc-'+i);
+    if(prev) prev.src='';
+    if(card) card.classList.remove('has-photo');
+    setSt('dst-'+i,'pending','No photo');
+  });
+}
+
+// ── Build URL grid ────────────────────────────────────────────────────────────
+const urlGrid=document.getElementById('url-grid');
+ARTISTS.forEach((a,i)=>{
+  urlGrid.innerHTML+=`<div class="url-row">
+    <div>
+      <img id="uimg-${i}" src="" style="width:48px;height:32px;object-fit:cover;border-radius:4px;background:#2e2852;display:block">
+    </div>
+    <div class="info">
+      <div class="country">${a.country}</div>
+      <div class="artist">${a.artist}</div>
+      <input type="url" id="uinp-${i}" placeholder="https://…image.jpg"
+        oninput="urlTyped(${i},this)">
+      <span class="status pending" id="ust-${i}">No URL</span>
+    </div>
+  </div>`;
+});
+
+function urlTyped(i,inp){
+  const v=inp.value.trim();
+  urlValues[i]=v;
+  const img=document.getElementById('uimg-'+i);
+  inp.classList.toggle('has-url',!!v);
+  if(v){ img.src=v; setSt('ust-'+i,'pending','URL set'); }
+  else { img.src=''; setSt('ust-'+i,'pending','No URL'); }
+}
+
+// ── Shared ────────────────────────────────────────────────────────────────────
+function switchTab(t){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['drag','url'][i]===t));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+t).classList.add('active');
+}
+
+function setSt(id,cls,txt){
+  const el=document.getElementById(id); if(el){el.className='status '+cls;el.textContent=txt;}
+}
+
+function sum(html){ document.getElementById('summary').innerHTML=html; }
+
+async function uploadBlob(blob, country, stId){
+  setSt(stId,'loading','Uploading…');
+  const f=fname(country);
+  const r=await fetch(`${SB_URL}/storage/v1/object/${BUCKET}/${f}`,{
+    method:'POST',
+    headers:{...H,'Content-Type':'image/jpeg','x-upsert':'true'},
+    body:blob
+  });
+  if(!r.ok){ setSt(stId,'error','Upload failed'); throw new Error(await r.text()); }
+  return `${SB_URL}/storage/v1/object/public/${BUCKET}/${f}`;
+}
+
+async function fetchAndUpload(url, country, stId){
+  setSt(stId,'loading','Fetching…');
+  const r=await fetch(url);
+  if(!r.ok) throw new Error(`HTTP ${r.status}`);
+  const blob=await r.blob();
+  return uploadBlob(blob, country, stId);
+}
+
+async function updateDB(country, photoUrl){
+  const H2={...H,'Content-Type':'application/json'};
+  const enc=encodeURIComponent;
+  for(const cid of ['esc2026_final','esc2026_sf2']){
+    await fetch(`${SB_URL}/rest/v1/contest_songs?contest_id=eq.${enc(cid)}&country=eq.${enc(country)}`,{
+      method:'PATCH',headers:H2,body:JSON.stringify({photo_url:photoUrl})
+    });
+  }
+}
+
+async function uploadAll(method){
+  const prog=document.getElementById('prog');
+  prog.style.display='block'; prog.value=0;
+  let done=0,skipped=0,failed=0;
+  const total=ARTISTS.length;
+
+  for(let i=0;i<ARTISTS.length;i++){
+    const a=ARTISTS[i];
+    prog.value=i;
+    sum(`Uploading <span>${i+1}/${total}</span>: ${a.country}… ✓<span>${done}</span> ✕<span style="color:#e84a6a">${failed}</span>`);
+
+    let publicUrl=null;
+    try{
+      if(method==='drag'){
+        const blob=fileBlobs[i];
+        if(!blob){ setSt('dst-'+i,'pending','Skipped'); skipped++; continue; }
+        publicUrl=await uploadBlob(blob, a.country, 'dst-'+i);
+        setSt('dst-'+i,'done','✓ Uploaded');
+      } else {
+        const url=(urlValues[i]||'').trim();
+        if(!url){ setSt('ust-'+i,'pending','Skipped'); skipped++; continue; }
+        publicUrl=await fetchAndUpload(url, a.country, 'ust-'+i);
+        setSt('ust-'+i,'done','✓ Uploaded');
+      }
+      await updateDB(a.country, publicUrl);
+      done++;
+    } catch(e){
+      failed++;
+      console.error(a.country, e);
+      if(method==='drag') setSt('dst-'+i,'error','Failed');
+      else setSt('ust-'+i,'error','Failed');
+    }
+    await new Promise(r=>setTimeout(r,300));
+  }
+
+  prog.value=total;
+  sum(`Done! ✓ <span>${done}</span> uploaded, ${skipped} skipped, <span style="color:${failed?'#e84a6a':'#4ae8a0'}">${failed} errors</span>. Refresh your Eurovision app to see the photos.`);
+}
+</script>
+</body>
+</html>
