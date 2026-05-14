@@ -6,8 +6,16 @@
 <title>Eurovision 2026 · Vienna · Friends Vote</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 
-<!-- Favicon — Eurovision star in gold -->
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230d0b18'/%3E%3Cpolygon points='50,15 61,40 88,40 66,57 74,82 50,66 26,82 34,57 12,40 39,40' fill='%23e8c84a'/%3E%3C/svg%3E"/>
+<!-- Favicon — pure shape, no fonts needed -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230d0b18'/%3E%3Cg transform='translate(50,50)'%3E%3Cpolygon transform='rotate(0) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(30) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(60) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(90) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(120) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(150) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(180) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(210) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(240) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(270) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(300) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(330) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3C/g%3E%3C/svg%3E"/>
+<style>
+/* ALLEU LOGO */
+.alleu-logo{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:18px;}
+.alleu-logo .star-ring{flex-shrink:0;}
+.alleu-logo .wordmark{text-align:left;line-height:1;}
+.alleu-logo .wordmark .name{font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:900;background:linear-gradient(135deg,var(--gold) 0%,#fff 60%,var(--gold2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-1px;display:block;}
+.alleu-logo .wordmark .tld{font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:300;color:var(--muted);letter-spacing:4px;text-transform:uppercase;display:block;margin-top:2px;}
+</style>
 <style>
 :root{--gold:#e8c84a;--gold2:#f5d96e;--bg:#0d0b18;--card:#16132a;--border:#2e2852;--text:#e8e3ff;--muted:#7b72a8;--red:#e84a6a;--green:#4ae8a0;--blue:#4a9fe8;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -152,11 +160,42 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 .total-score{font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:700;color:var(--gold);white-space:nowrap;}
 .nav-row{display:flex;gap:12px;justify-content:center;margin-top:30px;flex-wrap:wrap;}
 
+/* PRECISION LEADERBOARD */
+.precision-header{text-align:center;margin-bottom:32px;}
+.precision-header h2{font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--gold);margin-bottom:5px;}
+.precision-header p{color:var(--muted);font-size:.88rem;}
+.precision-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:18px 20px;margin-bottom:10px;display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:14px;transition:transform .15s;}
+.precision-card:hover{transform:translateX(4px);}
+.precision-card.top1{border-color:var(--gold);background:rgba(232,200,74,.07);}
+.precision-card.top2{border-color:#b8b8b8;}
+.precision-card.top3{border-color:#cd7f32;}
+.precision-info{min-width:0;}
+.precision-name{font-weight:600;font-size:1rem;}
+.precision-sub{font-size:.78rem;color:var(--muted);margin-top:3px;}
+.precision-bar-wrap{margin-top:8px;display:flex;align-items:center;gap:10px;}
+.precision-bar{flex:1;height:6px;background:var(--border);border-radius:99px;overflow:hidden;}
+.precision-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .8s ease;}
+.precision-pct{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--gold);white-space:nowrap;}
+.no-results-msg{text-align:center;padding:40px 20px;color:var(--muted);font-size:.9rem;background:var(--card);border:1px dashed var(--border);border-radius:13px;}
+
+/* ADMIN PANEL */
+.admin-card{max-width:520px;margin:24px auto 0;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;}
+.admin-card h2{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--gold);margin-bottom:6px;}
+.admin-card .sub{color:var(--muted);font-size:.85rem;margin-bottom:24px;}
+.pin-wrap{display:flex;gap:10px;margin-bottom:20px;}
+.pin-wrap input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:11px 14px;font-size:1rem;font-family:'DM Sans',sans-serif;outline:none;letter-spacing:6px;text-align:center;}
+.pin-wrap input:focus{border-color:var(--gold);}
+.pin-error{color:var(--red);font-size:.8rem;margin-bottom:12px;min-height:16px;}
+.official-song-row{display:grid;grid-template-columns:1fr 90px;align-items:center;gap:10px;margin-bottom:8px;}
+.official-song-row .s-label{font-size:.88rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.official-song-row input[type=number]{background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 10px;font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;text-align:center;width:100%;}
+.official-song-row input[type=number]:focus{border-color:var(--gold);}
+.official-song-row input[type=number].filled{border-color:var(--green);}
+.admin-section-title{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+
 @media(max-width:600px){
-  .song-card{grid-template-columns:24px 1fr auto;gap:9px;padding:11px 12px;}
-  .score-input{width:48px;}header h1{font-size:1.9rem;}
-  #db-badge{display:none;}.join-card{padding:28px 20px;}
-  .contest-item{flex-direction:column;align-items:flex-start;}
+  .precision-card{grid-template-columns:36px 1fr auto;gap:10px;padding:14px;}
+  .admin-card{padding:22px 16px;}
 }
 </style>
 </head>
@@ -166,6 +205,33 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 <div id="db-badge"><div class="dot"></div><span id="db-label">Connecting…</span></div>
 
 <header>
+  <!-- alleu.com logo — pure SVG, no external fonts needed -->
+  <div class="alleu-logo">
+    <!-- 12-star EU ring -->
+    <svg class="star-ring" width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="32" cy="32" r="32" fill="#16132a"/>
+      <g transform="translate(32,32)">
+        <polygon transform="rotate(0)   translate(0,-22)" points="0,-5 1.5,-1.5 5,-1.5 2.3,0.9 3.4,4.6 0,2.6 -3.4,4.6 -2.3,0.9 -5,-1.5 -1.5,-1.5" fill="#e8c84a"/>
+        <polygon transform="rotate(30)  translate(0,-22)" points="0,-5 1.5,-1.5 5,-1.5 2.3,0.9 3.4,4.6 0,2.6 -3.4,4.6 -2.3,0.9 -5,-1.5 -1.5,-1.5" fill="#e8c84a"/>
+        <polygon transform="rotate(60)  translate(0,-22)" points="0,-5 1.5,-1.5 5,-1.5 2.3,0.9 3.4,4.6 0,2.6 -3.4,4.6 -2.3,0.9 -5,-1.5 -1.5,-1.5" fill="#e8c84a"/>
+        <polygon transform="rotate(90)  translate(0,-22)" points="0,-5 1.5,-1.5 5,-1.5 2.3,0.9 3.4,4.6 0,2.6 -3.4,4.6 -2.3,0.9 -5,-1.5 -1.5,-1.5" fill="#e8c84a"/>
+        <polygon transform="rotate(120) translate(0,-22)" points="0,-5 1.5,-1.5 5,-1.5 2.3,0.9 3.4,4.6 0,2.6 -3.4,4.6 -2.3,0.9 -5,-1.5 -1.5,-1.5" fill="#e8c84a"/>
+        <polygon transform="rotate(150) translate(0,-22)" points="0,-5 1.5,-1.5 5,-1.5 2.3,0.9 3.4,4.6 0,2.6 -3.4,4.6 -2.3,0.9 -5,-1.5 -1.5,-1.5" fill="#e8c84a"/>
+        <polygon transform="rotate(180) translate(0,-22)" points="0,-5 1.5,-1.5 5,-1.5 2.3,0.9 3.4,4.6 0,2.6 -3.4,4.6 -2.3,0.9 -5,-1.5 -1.5,-1.5" fill="#e8c84a"/>
+        <polygon transform="rotate(210) translate(0,-22)" points="0,-5 1.5,-1.5 5,-1.5 2.3,0.9 3.4,4.6 0,2.6 -3.4,4.6 -2.3,0.9 -5,-1.5 -1.5,-1.5" fill="#e8c84a"/>
+        <polygon transform="rotate(240) translate(0,-22)" points="0,-5 1.5,-1.5 5,-1.5 2.3,0.9 3.4,4.6 0,2.6 -3.4,4.6 -2.3,0.9 -5,-1.5 -1.5,-1.5" fill="#e8c84a"/>
+        <polygon transform="rotate(270) translate(0,-22)" points="0,-5 1.5,-1.5 5,-1.5 2.3,0.9 3.4,4.6 0,2.6 -3.4,4.6 -2.3,0.9 -5,-1.5 -1.5,-1.5" fill="#e8c84a"/>
+        <polygon transform="rotate(300) translate(0,-22)" points="0,-5 1.5,-1.5 5,-1.5 2.3,0.9 3.4,4.6 0,2.6 -3.4,4.6 -2.3,0.9 -5,-1.5 -1.5,-1.5" fill="#e8c84a"/>
+        <polygon transform="rotate(330) translate(0,-22)" points="0,-5 1.5,-1.5 5,-1.5 2.3,0.9 3.4,4.6 0,2.6 -3.4,4.6 -2.3,0.9 -5,-1.5 -1.5,-1.5" fill="#e8c84a"/>
+      </g>
+    </svg>
+    <!-- Wordmark -->
+    <div class="wordmark">
+      <span class="name">alleu</span>
+      <span class="tld">.com</span>
+    </div>
+  </div>
+
   <div class="flag-strip">🇦🇱🇦🇲🇦🇺🇦🇹🇦🇿🇧🇪🇧🇬🇭🇷🇨🇾🇨🇿🇩🇰🇪🇪🇫🇮🇫🇷🇩🇪🇬🇪🇬🇷🇮🇱🇮🇹🇱🇻🇱🇹🇱🇺🇲🇹🇲🇩🇲🇪🇳🇴🇵🇱🇵🇹🇷🇴🇸🇲🇷🇸🇸🇪🇨🇭🇺🇦🇬🇧</div>
   <h1>Eurovision 2026</h1>
   <p>Vienna · Friends Vote</p>
@@ -238,9 +304,58 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
   </div>
   <div id="results-list"></div>
   <div class="nav-row">
-    <button class="btn btn-sm" onclick="goVoting()">← Back to Voting</button>
+    <button class="btn btn-sm" onclick="showPrecision()">🎯 Voter Precision</button>
+    <button class="btn btn-ghost btn-sm" onclick="goVoting()">← Back to Voting</button>
     <button class="btn btn-ghost btn-sm" onclick="showContestPicker()">⬅ Contests</button>
     <button class="btn btn-del btn-sm" onclick="showJoinScreen()">Sign Out</button>
+  </div>
+</div>
+
+<!-- VOTER PRECISION -->
+<div class="wrap" id="precision-screen" style="display:none">
+  <div class="precision-header">
+    <h2>🎯 Voter Precision</h2>
+    <p id="precision-contest-name"></p>
+  </div>
+  <div id="precision-list"></div>
+  <div class="nav-row">
+    <button class="btn btn-ghost btn-sm" onclick="showResults()">🏆 Scoreboard</button>
+    <button class="btn btn-ghost btn-sm" onclick="showAdminPin()">⚙ Enter Official Results</button>
+    <button class="btn btn-ghost btn-sm" onclick="showContestPicker()">⬅ Contests</button>
+    <button class="btn btn-del btn-sm" onclick="showJoinScreen()">Sign Out</button>
+  </div>
+</div>
+
+<!-- ADMIN — PIN -->
+<div class="wrap" id="admin-pin-screen" style="display:none">
+  <div class="admin-card">
+    <h2>⚙ Admin Access</h2>
+    <p class="sub">Enter the admin PIN to input the official Eurovision results.</p>
+    <div class="pin-wrap">
+      <input type="password" id="inp-pin" placeholder="····" maxlength="6"
+        inputmode="numeric" onkeydown="if(event.key==='Enter')checkPin()"/>
+      <button class="btn btn-sm" onclick="checkPin()" style="width:auto">Unlock</button>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+    <div class="nav-row" style="margin-top:10px">
+      <button class="btn btn-ghost btn-sm" onclick="showPrecision()">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN — RESULTS ENTRY -->
+<div class="wrap" id="admin-screen" style="display:none">
+  <div class="admin-card" style="max-width:640px">
+    <h2>⚙ Official Results</h2>
+    <p class="sub" id="admin-contest-name"></p>
+    <p class="sub">Enter the official finishing position for each song (1 = winner). Leave blank if not placed.</p>
+    <div class="admin-section-title">Songs</div>
+    <div id="admin-songs-list"></div>
+    <div class="nav-row">
+      <button class="btn btn-sm" onclick="saveOfficialResults()">💾 Save Results</button>
+      <button class="btn btn-ghost btn-sm" onclick="showPrecision()">← Cancel</button>
+    </div>
+    <div class="pin-error" id="admin-save-msg" style="margin-top:12px;text-align:center"></div>
   </div>
 </div>
 
@@ -293,7 +408,7 @@ async function sbDelete(table, params){
 // ── UI HELPERS ────────────────────────────────────────────────────────────────
 function show(id){document.getElementById(id).style.display='block';}
 function hide(id){document.getElementById(id).style.display='none';}
-function hideAll(){['join-screen','contest-screen','voting-screen','results-screen'].forEach(hide);}
+function hideAll(){['join-screen','contest-screen','voting-screen','results-screen','precision-screen','admin-pin-screen','admin-screen'].forEach(hide);}
 
 function setStatus(state, label){
   const el=document.getElementById('db-badge'); el.className=state;
@@ -720,6 +835,201 @@ async function showResults(){
 }
 
 function goVoting(){hideAll();show('voting-screen');renderTabs();renderSongs();}
+
+// ── VOTER PRECISION ───────────────────────────────────────────────────────────
+// Uses Spearman rank correlation between each voter's ranking and official result.
+// Score = ((rho + 1) / 2) * 100  →  0% to 100%
+
+function rankArray(arr){
+  // Returns rank positions for an array of values (higher value = rank 1)
+  const indexed = arr.map((v,i)=>({v,i})).filter(x=>x.v!==null);
+  indexed.sort((a,b)=>b.v-a.v);
+  const ranks = Array(arr.length).fill(null);
+  indexed.forEach((x,r)=>{ ranks[x.i]=r+1; });
+  return ranks;
+}
+
+function spearman(ranksA, ranksB){
+  // Only compare positions where both have a rank
+  const pairs=[];
+  ranksA.forEach((ra,i)=>{
+    if(ra!==null && ranksB[i]!==null) pairs.push({ra, rb:ranksB[i]});
+  });
+  if(pairs.length<2) return null;
+  const n=pairs.length;
+  const dSq=pairs.reduce((sum,{ra,rb})=>sum+(ra-rb)*(ra-rb),0);
+  const rho=1-(6*dSq)/(n*(n*n-1));
+  return rho;
+}
+
+async function showPrecision(){
+  hideAll(); show('precision-screen');
+  document.getElementById('precision-contest-name').textContent=currentContest.name;
+  const list=document.getElementById('precision-list');
+  list.innerHTML='<div style="color:var(--muted);text-align:center;padding:30px">Loading…</div>';
+
+  try{
+    // Load official results
+    const officialRows=await sbGet('official_results',
+      `contest_id=eq.${encodeURIComponent(currentContest.id)}&select=song_idx,final_place`);
+
+    if(!officialRows.length){
+      list.innerHTML=`<div class="no-results-msg">
+        <div style="font-size:2rem;margin-bottom:10px">📋</div>
+        Official Eurovision results haven't been entered yet.<br>
+        <small style="color:var(--muted);margin-top:6px;display:block">
+          Use ⚙ Enter Official Results (admin only) after the show.
+        </small>
+      </div>`;
+      return;
+    }
+
+    // Build official rank array (indexed by song_idx)
+    const officialRankArr=Array(contestSongs.length).fill(null);
+    officialRows.forEach(r=>{ officialRankArr[r.song_idx]=r.final_place; });
+    // Convert to score array (invert place so rank() works: place 1 → highest score)
+    const officialScores=officialRankArr.map(p=>p!==null?1000-p:null);
+    const officialRanks=rankArray(officialScores);
+
+    // Load all votes
+    const voteRows=await sbGet('votes',
+      `contest_id=eq.${encodeURIComponent(currentContest.id)}&select=username,song_idx,score`);
+    const userRows=await sbGet('users','select=username&order=username.asc');
+    const voters=userRows.map(r=>r.username);
+    const sc={};
+    voters.forEach(v=>{sc[v]=Array(contestSongs.length).fill(null);});
+    voteRows.forEach(row=>{
+      if(sc[row.username]!==undefined) sc[row.username][row.song_idx]=parseFloat(row.score);
+    });
+
+    // Calculate precision per voter
+    const results=voters.map(voter=>{
+      const voterRanks=rankArray(sc[voter]);
+      const rho=spearman(officialRanks, voterRanks);
+      const pct=rho!==null ? Math.round(((rho+1)/2)*100) : null;
+      const rated=sc[voter].filter(v=>v!==null).length;
+      return {voter, rho, pct, rated};
+    })
+    .filter(r=>r.pct!==null && r.rated>=3)
+    .sort((a,b)=>b.pct-a.pct);
+
+    if(!results.length){
+      list.innerHTML=`<div class="no-results-msg">Not enough votes yet to calculate precision.</div>`;
+      return;
+    }
+
+    const medals=['🥇','🥈','🥉'];
+    list.innerHTML=results.map((r,rank)=>{
+      const rc=rank===0?'top1':rank===1?'top2':rank===2?'top3':'';
+      const bc=rank===0?'r1':rank===1?'r2':rank===2?'r3':'';
+      const m=medals[rank]||rank+1;
+      const isMe=r.voter===currentUser;
+      const label=r.pct>=80?'Excellent taste!':r.pct>=60?'Good taste':r.pct>=40?'Decent taste':'Different taste 😄';
+      return `<div class="precision-card ${rc}">
+        <div class="rank-badge ${bc}">${m}</div>
+        <div class="precision-info">
+          <div class="precision-name">${r.voter}${isMe?' <small style="color:var(--gold);font-size:.72rem">(you)</small>':''}</div>
+          <div class="precision-sub">${label} · rated ${r.rated} of ${contestSongs.length} songs</div>
+          <div class="precision-bar-wrap">
+            <div class="precision-bar"><div class="precision-bar-fill" style="width:${r.pct}%"></div></div>
+          </div>
+        </div>
+        <div class="precision-pct">${r.pct}%</div>
+      </div>`;
+    }).join('');
+
+  } catch(e){
+    list.innerHTML=`<div style="color:var(--red);padding:20px">Error: ${e.message}</div>`;
+  }
+}
+
+// ── ADMIN PIN ─────────────────────────────────────────────────────────────────
+const ADMIN_PIN='4535';
+
+function showAdminPin(){
+  hideAll(); show('admin-pin-screen');
+  document.getElementById('inp-pin').value='';
+  document.getElementById('pin-error').textContent='';
+  setTimeout(()=>document.getElementById('inp-pin').focus(),100);
+}
+
+function checkPin(){
+  const val=document.getElementById('inp-pin').value.trim();
+  if(val===ADMIN_PIN){
+    document.getElementById('pin-error').textContent='';
+    showAdminPanel();
+  } else {
+    document.getElementById('pin-error').textContent='Incorrect PIN. Try again.';
+    document.getElementById('inp-pin').value='';
+    document.getElementById('inp-pin').focus();
+  }
+}
+
+// ── ADMIN PANEL ───────────────────────────────────────────────────────────────
+async function showAdminPanel(){
+  hideAll(); show('admin-screen');
+  document.getElementById('admin-contest-name').textContent=currentContest.name;
+  document.getElementById('admin-save-msg').textContent='';
+
+  // Load existing official results
+  const existing=await sbGet('official_results',
+    `contest_id=eq.${encodeURIComponent(currentContest.id)}&select=song_idx,final_place`);
+  const existingMap={};
+  existing.forEach(r=>{ existingMap[r.song_idx]=r.final_place; });
+
+  document.getElementById('admin-songs-list').innerHTML=contestSongs.map((s,i)=>{
+    const display=s.song&&s.song!=='TBA'?s.song:s.country;
+    const existing=existingMap[i]||'';
+    return `<div class="official-song-row">
+      <div class="s-label">${s.flag||''} ${display} <small style="color:var(--muted)">${s.country}</small></div>
+      <input type="number" id="official-${i}" min="1" max="${contestSongs.length}"
+        placeholder="Place" value="${existing}"
+        class="${existing?'filled':''}"
+        oninput="this.classList.toggle('filled',!!this.value)"/>
+    </div>`;
+  }).join('');
+}
+
+async function saveOfficialResults(){
+  const msg=document.getElementById('admin-save-msg');
+  msg.style.color='var(--muted)'; msg.textContent='Saving…';
+
+  const rows=[];
+  const usedPlaces=new Set();
+  let hasError=false;
+
+  contestSongs.forEach((_,i)=>{
+    const val=document.getElementById(`official-${i}`).value.trim();
+    if(!val) return;
+    const place=parseInt(val);
+    if(isNaN(place)||place<1){ hasError=true; return; }
+    if(usedPlaces.has(place)){
+      msg.style.color='var(--red)';
+      msg.textContent=`⚠ Position ${place} used more than once. Each song must have a unique place.`;
+      hasError=true; return;
+    }
+    usedPlaces.add(place);
+    rows.push({contest_id:currentContest.id, song_idx:i, final_place:place});
+  });
+
+  if(hasError && !msg.textContent.startsWith('⚠')){
+    msg.style.color='var(--red)'; msg.textContent='⚠ Some entries are invalid.'; return;
+  }
+  if(hasError) return;
+  if(!rows.length){
+    msg.style.color='var(--red)'; msg.textContent='⚠ No positions entered.'; return;
+  }
+
+  try{
+    // Delete existing then insert fresh
+    await sbDelete('official_results',`contest_id=eq.${encodeURIComponent(currentContest.id)}`);
+    await sbUpsert('official_results', rows);
+    msg.style.color='var(--green)'; msg.textContent='✅ Official results saved!';
+    setTimeout(()=>showPrecision(), 1500);
+  } catch(e){
+    msg.style.color='var(--red)'; msg.textContent='Error: '+e.message;
+  }
+}
 
 boot();
 </script>
