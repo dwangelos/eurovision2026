@@ -33,40 +33,19 @@ header{text-align:center;padding:44px 20px 24px;position:relative;z-index:1;}
 header h1{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,6vw,3.6rem);font-weight:900;line-height:1.1;letter-spacing:-1px;background:linear-gradient(135deg,var(--gold) 0%,#fff 50%,var(--gold2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 
-/* AUTH CARD */
-.auth-card{max-width:420px;margin:24px auto 0;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px 32px;text-align:center;}
-.auth-card h2{font-family:'Playfair Display',serif;font-size:1.45rem;color:var(--gold);margin-bottom:6px;}
-.auth-card .sub{color:var(--muted);font-size:.87rem;line-height:1.6;margin-bottom:28px;}
-.field{margin-bottom:16px;text-align:left;}
-.field label{display:block;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
-.field-wrap{position:relative;}
-.field-wrap input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px 42px 12px 14px;font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;}
-.field-wrap input:focus{border-color:var(--gold);}
-.field-wrap input.err{border-color:var(--red);}
-.field-wrap input.ok{border-color:var(--green);}
-.field-icon{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:1rem;pointer-events:none;}
-.toggle-pw{pointer-events:all;cursor:pointer;background:none;border:none;color:var(--muted);font-size:1rem;padding:0;}
-.toggle-pw:hover{color:var(--gold);}
-.field-msg{font-size:.77rem;margin-top:5px;min-height:16px;}
-.field-msg.err{color:var(--red);}
-.field-msg.ok{color:var(--green);}
-.pw-strength{height:3px;border-radius:99px;background:var(--border);margin-top:6px;overflow:hidden;}
-.pw-strength-fill{height:100%;border-radius:99px;width:0%;transition:width .3s,background .3s;}
-.form-error{background:rgba(232,74,106,.1);border:1px solid rgba(232,74,106,.35);border-radius:10px;padding:10px 14px;font-size:.83rem;color:var(--red);margin-bottom:16px;display:none;text-align:left;}
-
-/* CONTEST PICKER */
-.contest-card{max-width:520px;margin:24px auto 0;text-align:center;}
-.contest-card h2{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--gold);margin-bottom:8px;}
-.contest-card .sub{color:var(--muted);font-size:.88rem;margin-bottom:28px;}
-.contest-grid{display:grid;gap:14px;}
-.contest-item{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px 24px;cursor:pointer;transition:all .2s;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:16px;}
-.contest-item:hover{border-color:var(--gold);box-shadow:0 0 20px rgba(232,200,74,.1);transform:translateY(-2px);}
-.contest-item .c-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--text);}
-.contest-item .c-desc{font-size:.8rem;color:var(--muted);margin-top:4px;}
-.contest-item .c-badge{background:rgba(232,200,74,.12);border:1px solid rgba(232,200,74,.3);border-radius:20px;padding:4px 12px;font-size:.75rem;color:var(--gold);white-space:nowrap;font-weight:600;}
-.contest-item .c-badge.live{background:rgba(232,74,106,.12);border-color:rgba(232,74,106,.3);color:var(--red);animation:pulse .8s infinite alternate;}
-.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:.83rem;cursor:pointer;margin-top:20px;text-decoration:none;}
-.back-link:hover{color:var(--gold);}
+/* JOIN CARD */
+.join-card{max-width:420px;margin:24px auto 0;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px 32px;text-align:center;}
+.join-card h2{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--gold);margin-bottom:8px;}
+.join-card .sub{color:var(--muted);font-size:.88rem;line-height:1.6;margin-bottom:28px;}
+.name-input-wrap{position:relative;margin-bottom:10px;}
+.name-input-wrap input{width:100%;background:var(--bg);border:2px solid var(--border);border-radius:12px;color:var(--text);padding:14px 18px;font-size:1.1rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;text-align:center;letter-spacing:.5px;}
+.name-input-wrap input:focus{border-color:var(--gold);}
+.name-input-wrap input.err{border-color:var(--red);}
+.name-input-wrap input.ok{border-color:var(--green);}
+.name-msg{font-size:.8rem;min-height:18px;margin-bottom:16px;transition:color .2s;}
+.name-msg.err{color:var(--red);}
+.name-msg.ok{color:var(--green);}
+.name-msg.info{color:var(--muted);}
 
 /* BUTTONS */
 .btn{background:var(--gold);color:#0d0b18;border:none;border-radius:10px;padding:12px 24px;font-size:.95rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .2s,transform .1s;white-space:nowrap;width:100%;}
@@ -79,10 +58,24 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 .btn-del:hover{background:rgba(232,74,106,.08);transform:none;}
 .btn-sm{padding:8px 18px;font-size:.85rem;width:auto;}
 
+/* CONTEST PICKER */
+.contest-card{max-width:520px;margin:24px auto 0;text-align:center;}
+.contest-card h2{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--gold);margin-bottom:8px;}
+.contest-card .sub{color:var(--muted);font-size:.88rem;margin-bottom:28px;}
+.contest-grid{display:grid;gap:14px;}
+.contest-item{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px 24px;cursor:pointer;transition:all .2s;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.contest-item:hover{border-color:var(--gold);box-shadow:0 0 20px rgba(232,200,74,.1);transform:translateY(-2px);}
+.contest-item .c-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--text);}
+.contest-item .c-desc{font-size:.8rem;color:var(--muted);margin-top:4px;}
+.contest-item .c-badge{background:rgba(232,200,74,.12);border:1px solid rgba(232,200,74,.3);border-radius:20px;padding:4px 12px;font-size:.75rem;color:var(--gold);white-space:nowrap;font-weight:600;}
+.contest-item .c-badge.live{background:rgba(232,74,106,.12);border-color:rgba(232,74,106,.3);color:var(--red);animation:pulse .8s infinite alternate;}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:.83rem;cursor:pointer;margin-top:20px;}
+.back-link:hover{color:var(--gold);}
+
 /* SESSION BAR */
 .session-bar{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 18px;margin-bottom:16px;gap:12px;flex-wrap:wrap;}
 .session-bar .who{font-size:.88rem;color:var(--muted);}
-.session-bar .who strong{color:var(--gold);}
+.session-bar .who strong{color:var(--gold);font-size:1rem;}
 
 /* CONTEST BAR */
 .contest-bar{display:flex;align-items:center;justify-content:space-between;background:rgba(232,200,74,.06);border:1px solid rgba(232,200,74,.2);border-radius:12px;padding:10px 18px;margin-bottom:24px;gap:12px;flex-wrap:wrap;}
@@ -120,7 +113,7 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 .song-country{font-size:.76rem;color:var(--muted);margin-top:2px;}
 .song-artist{font-size:.75rem;color:rgba(232,200,74,.6);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .score-control{display:flex;align-items:center;gap:7px;}
-.score-btn{width:27px;height:27px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;transition:background .15s;}
+.score-btn{width:27px;height:27px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;}
 .score-btn:hover{background:rgba(232,200,74,.15);border-color:var(--gold);}
 .score-input{width:56px;text-align:center;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.93rem;font-weight:600;font-family:'DM Sans',sans-serif;padding:5px 3px;outline:none;transition:border-color .2s;}
 .score-input:focus{border-color:var(--gold);}
@@ -153,15 +146,15 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 
 @media(max-width:600px){
   .song-card{grid-template-columns:24px 1fr auto;gap:9px;padding:11px 12px;}
-  .song-title{font-size:.86rem;}.score-input{width:48px;}
-  header h1{font-size:1.9rem;}#db-badge{display:none;}.auth-card{padding:28px 20px;}
+  .score-input{width:48px;}header h1{font-size:1.9rem;}
+  #db-badge{display:none;}.join-card{padding:28px 20px;}
   .contest-item{flex-direction:column;align-items:flex-start;}
 }
 </style>
 </head>
 <body>
 
-<div id="loading"><div class="spinner"></div><p id="loading-msg">Connecting to database…</p></div>
+<div id="loading"><div class="spinner"></div><p id="loading-msg">Connecting…</p></div>
 <div id="db-badge"><div class="dot"></div><span id="db-label">Connecting…</span></div>
 
 <header>
@@ -170,41 +163,19 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
   <p>Vienna · Friends Vote</p>
 </header>
 
-<!-- AUTH -->
-<div class="wrap" id="auth-screen" style="display:none">
-  <div class="auth-card">
-    <h2 id="auth-title">Welcome Back</h2>
-    <p class="sub" id="auth-subtitle">Sign in to cast your scores. Your session is remembered for 3 days.</p>
-    <div class="form-error" id="auth-error"></div>
-    <div class="field">
-      <label for="inp-username">Username</label>
-      <div class="field-wrap">
-        <input type="text" id="inp-username" placeholder="Your username" maxlength="24" autocomplete="username" oninput="liveValidateUsername()"/>
-        <span class="field-icon" id="icon-username">👤</span>
-      </div>
-      <div class="field-msg" id="msg-username"></div>
+<!-- JOIN -->
+<div class="wrap" id="join-screen" style="display:none">
+  <div class="join-card">
+    <h2>What's your name?</h2>
+    <p class="sub">Enter your name to join the vote. If you've voted before, just use the same name to continue where you left off.</p>
+    <div class="name-input-wrap">
+      <input type="text" id="inp-name" placeholder="Your name…" maxlength="24"
+        autocomplete="nickname" autocorrect="off" spellcheck="false"
+        oninput="liveValidateName()"
+        onkeydown="if(event.key==='Enter')submitJoin()"/>
     </div>
-    <div class="field">
-      <label for="inp-password">Password</label>
-      <div class="field-wrap">
-        <input type="password" id="inp-password" placeholder="Your password" maxlength="64" autocomplete="current-password" oninput="liveValidatePassword()" onkeydown="if(event.key==='Enter')submitAuth()"/>
-        <button class="field-icon toggle-pw" onclick="togglePw()" title="Show/hide">👁</button>
-      </div>
-      <div class="pw-strength" id="pw-strength-wrap" style="display:none"><div class="pw-strength-fill" id="pw-strength-fill"></div></div>
-      <div class="field-msg" id="msg-password"></div>
-    </div>
-    <div class="field" id="field-confirm" style="display:none">
-      <label for="inp-confirm">Confirm Password</label>
-      <div class="field-wrap">
-        <input type="password" id="inp-confirm" placeholder="Repeat your password" maxlength="64" autocomplete="new-password" oninput="liveValidateConfirm()" onkeydown="if(event.key==='Enter')submitAuth()"/>
-        <span class="field-icon">🔒</span>
-      </div>
-      <div class="field-msg" id="msg-confirm"></div>
-    </div>
-    <button class="btn" id="auth-submit" onclick="submitAuth()">Sign In</button>
-    <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border);font-size:.83rem;color:var(--muted);text-align:center" id="auth-switch-hint">
-      Don't have an account yet? <a href="#" style="color:var(--gold);text-decoration:none;font-weight:600" onclick="showRegisterScreen();return false">Create one here →</a>
-    </div>
+    <div class="name-msg info" id="name-msg"></div>
+    <button class="btn" id="join-btn" onclick="submitJoin()" disabled>Let's Vote →</button>
   </div>
 </div>
 
@@ -212,20 +183,20 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 <div class="wrap" id="contest-screen" style="display:none">
   <div class="contest-card">
     <h2>Choose a Contest</h2>
-    <p class="sub">Select which show you want to vote for tonight.</p>
+    <p class="sub">Select which show you want to vote for.</p>
     <div class="contest-grid" id="contest-grid"></div>
-    <a class="back-link" onclick="signOut()">← Sign out</a>
+    <div class="back-link" onclick="showJoinScreen()">← Change name</div>
   </div>
 </div>
 
 <!-- VOTING -->
 <div class="wrap" id="voting-screen" style="display:none">
   <div class="session-bar">
-    <div class="who">Voting as <strong id="session-name"></strong> <span id="session-expiry" style="font-size:.75rem;color:var(--muted);margin-left:4px"></span></div>
+    <div class="who">Voting as <strong id="session-name"></strong></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn btn-ghost btn-sm" onclick="showResults()">🏆 Results</button>
       <button class="btn btn-ghost btn-sm" onclick="showContestPicker()">⬅ Contests</button>
-      <button class="btn btn-ghost btn-sm" onclick="signOut()">Sign Out</button>
+      <button class="btn btn-ghost btn-sm" onclick="showJoinScreen()">Sign Out</button>
     </div>
   </div>
   <div class="contest-bar">
@@ -246,7 +217,7 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
   <div class="nav-row">
     <button class="btn btn-sm" onclick="showResults()">🏆 View Scoreboard</button>
     <button class="btn btn-ghost btn-sm" onclick="showContestPicker()">⬅ Contests</button>
-    <button class="btn btn-del btn-sm" onclick="signOut()">Sign Out</button>
+    <button class="btn btn-del btn-sm" onclick="showJoinScreen()">Sign Out</button>
   </div>
 </div>
 
@@ -260,7 +231,7 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
   <div class="nav-row">
     <button class="btn btn-sm" onclick="goVoting()">← Back to Voting</button>
     <button class="btn btn-ghost btn-sm" onclick="showContestPicker()">⬅ Contests</button>
-    <button class="btn btn-del btn-sm" onclick="signOut()">Sign Out</button>
+    <button class="btn btn-del btn-sm" onclick="showJoinScreen()">Sign Out</button>
   </div>
 </div>
 
@@ -269,16 +240,15 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 
 const SUPABASE_URL = 'https://onpsmwempgoopamqodfb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_hHkVZYm10pCjyKwzWAJFeg_GvVpPINX';
-const SESSION_ID   = 'esc2026_session';
-const SESSION_DAYS = 3;
+const SESSION_KEY  = 'esc2026_user';
 const INT_SCORES   = [0,1,2,3,4,5,6,7,8,9,10,11,12];
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let currentUser    = null;
-let currentContest = null;   // full contest row {id, name, description, ...}
-let contestSongs   = [];     // array of song rows for current contest
+let currentContest = null;
+let contestSongs   = [];
 let allVoters      = [];
-let allScores      = {};     // allScores[username][songIdx]
+let allScores      = {};
 let activeVoter    = 0;
 let saveTimer      = null;
 
@@ -311,17 +281,10 @@ async function sbDelete(table, params){
   if(!r.ok) throw new Error(await r.text());
 }
 
-// ── HASH ──────────────────────────────────────────────────────────────────────
-async function hashPw(pw){
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-
 // ── UI HELPERS ────────────────────────────────────────────────────────────────
 function show(id){document.getElementById(id).style.display='block';}
 function hide(id){document.getElementById(id).style.display='none';}
-function hideAll(){ ['auth-screen','contest-screen','voting-screen','results-screen'].forEach(hide); }
-function setLoadingMsg(m){ document.getElementById('loading-msg').textContent=m; }
+function hideAll(){['join-screen','contest-screen','voting-screen','results-screen'].forEach(hide);}
 
 function setStatus(state, label){
   const el=document.getElementById('db-badge'); el.className=state;
@@ -331,27 +294,22 @@ function flashSaving(){
   setStatus('saving','Saving…'); clearTimeout(saveTimer);
   saveTimer=setTimeout(()=>setStatus('ready','Saved'),900);
 }
-
 function hideLoading(){
   const el=document.getElementById('loading');
   el.classList.add('gone'); setTimeout(()=>el.remove(),600);
 }
 
-// ── SESSION ───────────────────────────────────────────────────────────────────
-function saveLocalSession(username, expiresAt, contestId){
-  localStorage.setItem(SESSION_ID, JSON.stringify({username, expiresAt, contestId}));
+// ── LOCAL SESSION (just remembers the name) ───────────────────────────────────
+function saveSession(username, contestId){
+  localStorage.setItem(SESSION_KEY, JSON.stringify({username, contestId}));
 }
-function loadLocalSession(){
-  try{
-    const s=JSON.parse(localStorage.getItem(SESSION_ID)||'null');
-    if(s && s.expiresAt > Date.now()) return s;
-    localStorage.removeItem(SESSION_ID); return null;
-  } catch(e){ return null; }
+function loadSession(){
+  try{ return JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); }
+  catch(e){ return null; }
 }
-function clearLocalSession(){ localStorage.removeItem(SESSION_ID); }
+function clearSession(){ localStorage.removeItem(SESSION_KEY); }
 function updateSessionContest(contestId){
-  const s=loadLocalSession();
-  if(s){ s.contestId=contestId; localStorage.setItem(SESSION_ID, JSON.stringify(s)); }
+  const s=loadSession(); if(s){ s.contestId=contestId; localStorage.setItem(SESSION_KEY,JSON.stringify(s)); }
 }
 
 // ── BOOT ──────────────────────────────────────────────────────────────────────
@@ -366,181 +324,94 @@ async function boot(){
     return;
   }
 
-  const local = loadLocalSession();
-  if(local){
-    try{
-      const rows = await sbGet('users',`username=eq.${encodeURIComponent(local.username)}&select=username`);
-      if(rows.length){
-        setLoadingMsg('Restoring session…');
-        currentUser = local.username;
-        setSessionBar(local.expiresAt);
-        if(local.contestId){
-          // Try to restore directly into contest
-          const contests = await sbGet('contests',`id=eq.${encodeURIComponent(local.contestId)}&select=*`);
-          if(contests.length){
-            hideLoading();
-            await enterContest(contests[0]);
-            return;
-          }
-        }
-        hideLoading();
-        await showContestPicker();
-        return;
-      }
-    } catch(e){}
-    clearLocalSession();
+  // Restore session from localStorage
+  const local = loadSession();
+  if(local && local.username){
+    currentUser = local.username;
+    document.getElementById('session-name').textContent = currentUser;
+    if(local.contestId){
+      try{
+        document.getElementById('loading-msg').textContent = 'Restoring session…';
+        const contests=await sbGet('contests',`id=eq.${encodeURIComponent(local.contestId)}&select=*`);
+        if(contests.length){ hideLoading(); await enterContest(contests[0]); return; }
+      } catch(e){}
+    }
+    hideLoading();
+    await showContestPicker();
+    return;
   }
 
   hideLoading();
-  showLoginScreen();
+  showJoinScreen();
 }
 
-// ── AUTH ──────────────────────────────────────────────────────────────────────
-let authMode='login';
-
-function showLoginScreen(){
-  authMode='login';
-  document.getElementById('auth-title').textContent='Welcome Back';
-  document.getElementById('auth-subtitle').textContent='Sign in to cast your scores. Your session is remembered for 3 days.';
-  document.getElementById('field-confirm').style.display='none';
-  document.getElementById('pw-strength-wrap').style.display='none';
-  document.getElementById('auth-submit').textContent='Sign In';
-  document.getElementById('inp-password').placeholder='Your password';
-  document.getElementById('auth-switch-hint').innerHTML=
-    `Don't have an account yet? <a href="#" style="color:var(--gold);text-decoration:none;font-weight:600" onclick="showRegisterScreen();return false">Create one here →</a>`;
-  clearErrors(); hideAll(); show('auth-screen');
-  setTimeout(()=>document.getElementById('inp-username').focus(),100);
+// ── JOIN SCREEN ───────────────────────────────────────────────────────────────
+function showJoinScreen(){
+  clearSession();
+  currentUser=null; currentContest=null; contestSongs=[];
+  allVoters=[]; allScores=[]; activeVoter=0;
+  hideAll(); show('join-screen');
+  const inp=document.getElementById('inp-name');
+  inp.value=''; inp.classList.remove('ok','err');
+  document.getElementById('name-msg').textContent='';
+  document.getElementById('name-msg').className='name-msg info';
+  document.getElementById('join-btn').disabled=true;
+  setTimeout(()=>inp.focus(),100);
 }
 
-function showRegisterScreen(){
-  authMode='register';
-  document.getElementById('auth-title').textContent='Create Account';
-  document.getElementById('auth-subtitle').textContent='Pick a unique username. Your name appears on the scoreboard.';
-  document.getElementById('field-confirm').style.display='block';
-  document.getElementById('pw-strength-wrap').style.display='block';
-  document.getElementById('auth-submit').textContent='Create Account';
-  document.getElementById('inp-password').placeholder='At least 6 characters';
-  document.getElementById('auth-switch-hint').innerHTML=
-    `Already have an account? <a href="#" style="color:var(--gold);text-decoration:none;font-weight:600" onclick="showLoginScreen();return false">Sign in →</a>`;
-  clearErrors();
-  setTimeout(()=>document.getElementById('inp-username').focus(),100);
-}
+async function liveValidateName(){
+  const val=document.getElementById('inp-name').value.trim();
+  const inp=document.getElementById('inp-name');
+  const msg=document.getElementById('name-msg');
+  const btn=document.getElementById('join-btn');
 
-function clearErrors(){
-  ['username','password','confirm'].forEach(f=>{
-    const m=document.getElementById('msg-'+f); if(m){m.textContent='';m.className='field-msg';}
-    const i=document.getElementById('inp-'+f); if(i){i.classList.remove('err','ok');}
-  });
-  const e=document.getElementById('auth-error'); e.style.display='none'; e.textContent='';
-}
+  if(!val){
+    inp.classList.remove('ok','err'); msg.textContent=''; msg.className='name-msg info';
+    btn.disabled=true; return;
+  }
+  if(val.length<2){
+    inp.classList.remove('ok','err'); inp.classList.add('err');
+    msg.textContent='At least 2 characters'; msg.className='name-msg err';
+    btn.disabled=true; return;
+  }
 
-function setField(f,state,msg){
-  const inp=document.getElementById('inp-'+f), m=document.getElementById('msg-'+f);
-  if(inp){inp.classList.remove('err','ok');if(state)inp.classList.add(state);}
-  if(m){m.textContent=msg||'';m.className='field-msg'+(state?' '+state:'');}
-  if(f==='username'){ const ic=document.getElementById('icon-username'); if(ic) ic.textContent=state==='ok'?'✅':state==='err'?'❌':'👤'; }
-}
-
-function showFormError(msg){ const e=document.getElementById('auth-error'); e.textContent=msg; e.style.display='block'; }
-
-async function liveValidateUsername(){
-  const val=document.getElementById('inp-username').value.trim();
-  if(!val){setField('username','','');return;}
-  if(val.length<2){setField('username','err','At least 2 characters');return;}
-  if(!/^[a-zA-Z0-9 _.\-]+$/.test(val)){setField('username','err','Letters, numbers, spaces, _ - . only');return;}
-  if(authMode==='register'){
-    try{
-      const rows=await sbGet('users',`username=eq.${encodeURIComponent(val)}&select=username`);
-      rows.length ? setField('username','err','Username already taken') : setField('username','ok','Available!');
-    } catch(e){ setField('username','',''); }
-  } else { setField('username','',''); }
-}
-
-function liveValidatePassword(){
-  const val=document.getElementById('inp-password').value;
-  if(authMode==='register'){
-    const s=pwStrength(val);
-    document.getElementById('pw-strength-fill').style.width=s.pct+'%';
-    document.getElementById('pw-strength-fill').style.background=s.color;
-    if(!val){setField('password','','');return;}
-    val.length<6 ? setField('password','err','At least 6 characters') : setField('password','ok',s.label);
-  } else { setField('password','',''); }
-  liveValidateConfirm();
-}
-
-function liveValidateConfirm(){
-  if(authMode!=='register') return;
-  const pw=document.getElementById('inp-password').value;
-  const cf=document.getElementById('inp-confirm').value;
-  if(!cf){setField('confirm','','');return;}
-  pw===cf ? setField('confirm','ok','Passwords match ✓') : setField('confirm','err','Passwords do not match');
-}
-
-function pwStrength(pw){
-  let s=0;
-  if(pw.length>=6)s++;if(pw.length>=10)s++;
-  if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^a-zA-Z0-9]/.test(pw))s++;
-  return [{pct:20,color:'#e84a6a',label:'Very weak'},{pct:40,color:'#e87a4a',label:'Weak'},
-    {pct:60,color:'#e8c84a',label:'Fair'},{pct:80,color:'#a0e84a',label:'Good'},
-    {pct:100,color:'#4ae8a0',label:'Strong'}][Math.min(s,4)];
-}
-
-function togglePw(){ const i=document.getElementById('inp-password'); i.type=i.type==='password'?'text':'password'; }
-
-async function submitAuth(){
-  clearErrors();
-  const username=document.getElementById('inp-username').value.trim();
-  const password=document.getElementById('inp-password').value;
-  const confirm =document.getElementById('inp-confirm').value;
-
-  if(!username){setField('username','err','Required');return;}
-  if(username.length<2){setField('username','err','At least 2 characters');return;}
-  if(!password){setField('password','err','Required');return;}
-
-  const btn=document.getElementById('auth-submit');
-  btn.disabled=true; btn.textContent='Please wait…';
-
+  // Check if name already exists
   try{
-    const hash=await hashPw(password);
-    if(authMode==='register'){
-      if(password.length<6){setField('password','err','At least 6 characters');btn.disabled=false;btn.textContent='Create Account';return;}
-      if(password!==confirm){setField('confirm','err','Passwords do not match');btn.disabled=false;btn.textContent='Create Account';return;}
-      const existing=await sbGet('users',`username=eq.${encodeURIComponent(username)}&select=username`);
-      if(existing.length){setField('username','err','Username already taken');btn.disabled=false;btn.textContent='Create Account';return;}
-      await sbUpsert('users',{username, password_hash:hash});
+    const rows=await sbGet('users',`username=eq.${encodeURIComponent(val)}&select=username`);
+    if(rows.length){
+      inp.classList.remove('ok','err'); inp.classList.add('ok');
+      msg.textContent='Welcome back! Your previous votes are saved.';
+      msg.className='name-msg ok';
     } else {
-      const rows=await sbGet('users',`username=eq.${encodeURIComponent(username)}&select=username,password_hash`);
-      if(!rows.length){setField('username','err','Username not found');btn.disabled=false;btn.textContent='Sign In';return;}
-      if(rows[0].password_hash!==hash){setField('password','err','Incorrect password');btn.disabled=false;btn.textContent='Sign In';return;}
+      inp.classList.remove('ok','err'); inp.classList.add('ok');
+      msg.textContent='New name — you will be added as a voter.';
+      msg.className='name-msg info';
     }
-
-    // Save session
-    const expiresAt = Date.now() + SESSION_DAYS*24*60*60*1000;
-    saveLocalSession(username, expiresAt, null);
-    currentUser = username;
-    setSessionBar(expiresAt);
-    await showContestPicker();
-
-  } catch(e){
-    showFormError('Error: '+e.message);
     btn.disabled=false;
-    btn.textContent=authMode==='register'?'Create Account':'Sign In';
+  } catch(e){
+    btn.disabled=false;
   }
 }
 
-function setSessionBar(expiresAt){
-  document.getElementById('session-name').textContent=currentUser;
-  const exp=new Date(expiresAt);
-  document.getElementById('session-expiry').textContent=
-    `· until ${exp.toLocaleDateString(undefined,{day:'numeric',month:'short'})}`;
-}
+async function submitJoin(){
+  const val=document.getElementById('inp-name').value.trim();
+  if(!val||val.length<2) return;
 
-async function signOut(){
-  clearLocalSession();
-  currentUser=null; currentContest=null; contestSongs=[];
-  allVoters=[]; allScores={}; activeVoter=0;
-  ['inp-username','inp-password','inp-confirm'].forEach(id=>document.getElementById(id).value='');
-  showLoginScreen();
+  const btn=document.getElementById('join-btn');
+  btn.disabled=true; btn.textContent='Joining…';
+
+  try{
+    // Create user if not exists (upsert is safe — no password_hash)
+    await sbUpsert('users',{username:val});
+    currentUser=val;
+    document.getElementById('session-name').textContent=currentUser;
+    saveSession(currentUser, null);
+    await showContestPicker();
+  } catch(e){
+    btn.disabled=false; btn.textContent="Let's Vote →";
+    document.getElementById('name-msg').textContent='Error: '+e.message;
+    document.getElementById('name-msg').className='name-msg err';
+  }
 }
 
 // ── CONTEST PICKER ────────────────────────────────────────────────────────────
@@ -548,19 +419,18 @@ async function showContestPicker(){
   hideAll(); show('contest-screen');
   const grid=document.getElementById('contest-grid');
   grid.innerHTML='<div style="color:var(--muted);font-size:.85rem;padding:20px">Loading contests…</div>';
-
   try{
-    const contests = await sbGet('contests','select=*&order=created_at.asc');
-    grid.innerHTML = contests.map(c=>{
-      const isTonight = c.id==='esc2026_sf2';
-      return `<div class="contest-item" onclick="selectContest('${c.id}')">
+    const contests=await sbGet('contests','select=*&order=created_at.asc');
+    grid.innerHTML=contests.map(c=>`
+      <div class="contest-item" onclick="selectContest('${c.id}')">
         <div>
           <div class="c-title">${c.name}</div>
           <div class="c-desc">${c.description||''}</div>
         </div>
-        <div class="c-badge${isTonight?' live':''}">${isTonight?'🔴 Tonight':'📅 Upcoming'}</div>
-      </div>`;
-    }).join('');
+        <div class="c-badge${c.id==='esc2026_sf2'?' live':''}">
+          ${c.id==='esc2026_sf2'?'🔴 Tonight':'📅 Upcoming'}
+        </div>
+      </div>`).join('');
   } catch(e){
     grid.innerHTML=`<div style="color:var(--red);padding:20px">Error: ${e.message}</div>`;
   }
@@ -570,23 +440,21 @@ async function selectContest(contestId){
   try{
     const contests=await sbGet('contests',`id=eq.${encodeURIComponent(contestId)}&select=*`);
     if(contests.length) await enterContest(contests[0]);
-  } catch(e){ alert('Error loading contest: '+e.message); }
+  } catch(e){ alert('Error: '+e.message); }
 }
 
 async function enterContest(contest){
   currentContest=contest;
   updateSessionContest(contest.id);
 
-  // Load songs for this contest
   const songs=await sbGet('contest_songs',
     `contest_id=eq.${encodeURIComponent(contest.id)}&select=*&order=running_order.asc`);
   contestSongs=songs;
 
-  // Load all voters + votes for this contest
   const userRows=await sbGet('users','select=username&order=username.asc');
   allVoters=userRows.map(r=>r.username);
   allScores={};
-  allVoters.forEach(v=>{ allScores[v]=Array(contestSongs.length).fill(null); });
+  allVoters.forEach(v=>{allScores[v]=Array(contestSongs.length).fill(null);});
 
   const voteRows=await sbGet('votes',
     `contest_id=eq.${encodeURIComponent(contest.id)}&select=username,song_idx,score`);
@@ -598,7 +466,6 @@ async function enterContest(contest){
   activeVoter=allVoters.indexOf(currentUser);
   if(activeVoter<0) activeVoter=0;
 
-  // Update contest bar
   document.getElementById('contest-bar-name').textContent=contest.name;
   document.getElementById('contest-bar-info').textContent=contest.description||'';
 
@@ -614,13 +481,13 @@ function renderTabs(){
     </button>`).join('');
   document.getElementById('tab-name-label').textContent=allVoters[activeVoter]||'—';
 }
-function switchVoter(i){ activeVoter=i; renderTabs(); renderSongs(); }
+function switchVoter(i){activeVoter=i;renderTabs();renderSongs();}
 
 // ── SCORE PILLS ───────────────────────────────────────────────────────────────
 function renderScorePills(){
   const voter=allVoters[activeVoter];
   const used=new Set();
-  (allScores[voter]||[]).forEach(v=>{ if(v!==null && Math.floor(v)===v) used.add(v); });
+  (allScores[voter]||[]).forEach(v=>{if(v!==null&&Math.floor(v)===v)used.add(v);});
   document.getElementById('score-pills').innerHTML=INT_SCORES.map(s=>
     `<div class="score-pill${used.has(s)?' used':''}">${s}</div>`).join('');
 }
@@ -631,7 +498,6 @@ function renderSongs(){
   const vs=allScores[voter]||Array(contestSongs.length).fill(null);
   const isMe=voter===currentUser;
   renderScorePills(); updateProgress();
-
   document.getElementById('songs-list').innerHTML=contestSongs.map((s,i)=>{
     const val=vs[i]; const rated=val!==null;
     const display=s.song&&s.song!=='TBA'?s.song:s.country;
@@ -701,22 +567,22 @@ async function persistScore(songIdx, score){
 function validateAll(){
   const voter=allVoters[activeVoter]; const vs=allScores[voter]||[];
   const intMap={};
-  vs.forEach((v,i)=>{ if(v!==null&&Math.floor(v)===v){ if(!intMap[v])intMap[v]=[]; intMap[v].push(i); } });
+  vs.forEach((v,i)=>{if(v!==null&&Math.floor(v)===v){if(!intMap[v])intMap[v]=[];intMap[v].push(i);}});
   const conflicts=new Set(); const nums=[];
-  Object.entries(intMap).forEach(([k,idxs])=>{ if(idxs.length>1){ idxs.forEach(i=>conflicts.add(i)); nums.push(k); } });
+  Object.entries(intMap).forEach(([k,idxs])=>{if(idxs.length>1){idxs.forEach(i=>conflicts.add(i));nums.push(k);}});
   contestSongs.forEach((_,i)=>{
     const inp=document.getElementById(`score-inp-${i}`); if(!inp) return;
     inp.classList.remove('ok','conflict');
     if(conflicts.has(i)) inp.classList.add('conflict');
     else if(vs[i]!==null) inp.classList.add('ok');
-    updateCard(i, vs[i]!==null && !conflicts.has(i));
+    updateCard(i, vs[i]!==null&&!conflicts.has(i));
   });
   const msg=document.getElementById('conflict-msg');
-  if(nums.length){ msg.style.display='block'; msg.textContent=`⚠ Score${nums.length>1?'s':''} ${nums.join(', ')} used more than once. Use decimals (e.g. 8 and 8.50) to differentiate.`; }
+  if(nums.length){msg.style.display='block';msg.textContent=`⚠ Score${nums.length>1?'s':''} ${nums.join(', ')} used more than once. Use decimals (e.g. 8 and 8.50) to differentiate.`;}
   else msg.style.display='none';
 }
 
-function updateCard(idx,ok){ const c=document.getElementById(`card-${idx}`); if(c) c.classList.toggle('rated',ok); }
+function updateCard(idx,ok){const c=document.getElementById(`card-${idx}`);if(c)c.classList.toggle('rated',ok);}
 function updateProgress(){
   const voter=allVoters[activeVoter];
   const rated=(allScores[voter]||[]).filter(v=>v!==null).length;
@@ -731,16 +597,16 @@ async function showResults(){
   const userRows=await sbGet('users','select=username&order=username.asc');
   const voters=userRows.map(r=>r.username);
   const sc={};
-  voters.forEach(v=>{ sc[v]=Array(contestSongs.length).fill(null); });
-  voteRows.forEach(row=>{ if(sc[row.username]!==undefined) sc[row.username][row.song_idx]=parseFloat(row.score); });
+  voters.forEach(v=>{sc[v]=Array(contestSongs.length).fill(null);});
+  voteRows.forEach(row=>{if(sc[row.username]!==undefined)sc[row.username][row.song_idx]=parseFloat(row.score);});
 
   hideAll(); show('results-screen');
   document.getElementById('results-contest-name').textContent=currentContest.name;
 
   const totals=contestSongs.map((s,i)=>{
     let total=0; const bd={};
-    voters.forEach(v=>{ const x=sc[v][i]; bd[v]=x; if(x!==null) total+=x; });
-    return {...s, idx:i, total, bd};
+    voters.forEach(v=>{const x=sc[v][i];bd[v]=x;if(x!==null)total+=x;});
+    return {...s,idx:i,total,bd};
   }).sort((a,b)=>b.total-a.total);
 
   const maxTotal=totals[0]?.total||1;
@@ -750,7 +616,7 @@ async function showResults(){
     const m=rank===0?'🥇':rank===1?'🥈':rank===2?'🥉':rank+1;
     const pct=maxTotal>0?(s.total/maxTotal)*100:0;
     const display=s.song&&s.song!=='TBA'?s.song:s.country;
-    const bd=voters.map(v=>{ const x=s.bd[v]; return `<div class="vb-chip">${v}: <span>${x!==null?x:'—'}</span></div>`; }).join('');
+    const bd=voters.map(v=>{const x=s.bd[v];return `<div class="vb-chip">${v}: <span>${x!==null?x:'—'}</span></div>`;}).join('');
     return `<div class="result-card ${rc}">
       <div class="rank-badge ${bc}">${m}</div>
       <div class="result-info">
@@ -764,7 +630,7 @@ async function showResults(){
   }).join('');
 }
 
-function goVoting(){ hideAll(); show('voting-screen'); renderTabs(); renderSongs(); }
+function goVoting(){hideAll();show('voting-screen');renderTabs();renderSongs();}
 
 boot();
 </script>
