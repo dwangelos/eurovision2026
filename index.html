@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Eurovision 2026 · Vienna · Friends Vote</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+<!-- Favicon — Eurovision star in gold -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230d0b18'/%3E%3Cpolygon points='50,15 61,40 88,40 66,57 74,82 50,66 26,82 34,57 12,40 39,40' fill='%23e8c84a'/%3E%3C/svg%3E"/>
 <style>
 :root{--gold:#e8c84a;--gold2:#f5d96e;--bg:#0d0b18;--card:#16132a;--border:#2e2852;--text:#e8e3ff;--muted:#7b72a8;--red:#e84a6a;--green:#4ae8a0;--blue:#4a9fe8;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -638,10 +641,21 @@ async function persistScore(songIdx, score){
 // ── VALIDATION ────────────────────────────────────────────────────────────────
 function validateAll(){
   const voter=allVoters[activeVoter]; const vs=allScores[voter]||[];
-  const intMap={};
-  vs.forEach((v,i)=>{if(v!==null&&Math.floor(v)===v){if(!intMap[v])intMap[v]=[];intMap[v].push(i);}});
-  const conflicts=new Set(); const nums=[];
-  Object.entries(intMap).forEach(([k,idxs])=>{if(idxs.length>1){idxs.forEach(i=>conflicts.add(i));nums.push(k);}});
+
+  // Build map of value → [indices] for ALL non-null scores (integers AND decimals)
+  const valMap={};
+  vs.forEach((v,i)=>{
+    if(v===null) return;
+    const key=v.toFixed(2); // normalise so 8 and 8.00 are the same
+    if(!valMap[key]) valMap[key]=[];
+    valMap[key].push(i);
+  });
+
+  const conflicts=new Set(); const conflictVals=[];
+  Object.entries(valMap).forEach(([k,idxs])=>{
+    if(idxs.length>1){ idxs.forEach(i=>conflicts.add(i)); conflictVals.push(k); }
+  });
+
   contestSongs.forEach((_,i)=>{
     const inp=document.getElementById(`score-inp-${i}`); if(!inp) return;
     inp.classList.remove('ok','conflict');
@@ -649,9 +663,12 @@ function validateAll(){
     else if(vs[i]!==null) inp.classList.add('ok');
     updateCard(i, vs[i]!==null&&!conflicts.has(i));
   });
+
   const msg=document.getElementById('conflict-msg');
-  if(nums.length){msg.style.display='block';msg.textContent=`⚠ Score${nums.length>1?'s':''} ${nums.join(', ')} used more than once. Use decimals (e.g. 8 and 8.50) to differentiate.`;}
-  else msg.style.display='none';
+  if(conflictVals.length){
+    msg.style.display='block';
+    msg.textContent=`⚠ Score${conflictVals.length>1?'s':''} ${conflictVals.join(', ')} used more than once. Each score must be unique — no two countries can have the same value.`;
+  } else msg.style.display='none';
 }
 
 function updateCard(idx,ok){const c=document.getElementById(`card-${idx}`);if(c)c.classList.toggle('rated',ok);}
