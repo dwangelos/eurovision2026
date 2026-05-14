@@ -100,7 +100,12 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 .score-pill{min-width:36px;padding:3px 9px;border-radius:20px;font-size:.78rem;font-weight:600;text-align:center;border:1px solid var(--border);color:var(--muted);}
 .score-pill.used{background:rgba(232,74,106,.14);border-color:var(--red);color:var(--red);text-decoration:line-through;}
 
-/* CONFLICT */
+/* VOTING WINDOW BANNER */
+.voting-banner{border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:.88rem;line-height:1.5;text-align:center;font-weight:500;}
+.voting-banner.closed-before{background:rgba(74,159,232,.1);border:1px solid rgba(74,159,232,.3);color:var(--blue);}
+.voting-banner.closed-after{background:rgba(232,74,106,.1);border:1px solid rgba(232,74,106,.3);color:var(--red);}
+.voting-banner.open{background:rgba(74,232,160,.1);border:1px solid rgba(74,232,160,.3);color:var(--green);}
+.voting-banner .countdown{font-family:'Playfair Display',serif;font-size:1.3rem;display:block;margin-top:4px;}
 .conflict-msg{background:rgba(232,74,106,.09);border:1px solid rgba(232,74,106,.3);border-radius:10px;padding:10px 14px;font-size:.82rem;color:var(--red);margin-bottom:14px;display:none;}
 
 /* SONG CARDS */
@@ -212,6 +217,7 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
   </div>
   <div class="progress-label" id="progress-label">0 songs rated</div>
   <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+  <div id="voting-banner"></div>
   <div class="conflict-msg" id="conflict-msg"></div>
   <div id="songs-list"></div>
   <div class="nav-row">
@@ -347,6 +353,7 @@ async function boot(){
 
 // ── JOIN SCREEN ───────────────────────────────────────────────────────────────
 function showJoinScreen(){
+  clearInterval(countdownTimer);
   clearSession();
   currentUser=null; currentContest=null; contestSongs=[];
   allVoters=[]; allScores=[]; activeVoter=0;
@@ -416,6 +423,7 @@ async function submitJoin(){
 
 // ── CONTEST PICKER ────────────────────────────────────────────────────────────
 async function showContestPicker(){
+  clearInterval(countdownTimer);
   hideAll(); show('contest-screen');
   const grid=document.getElementById('contest-grid');
   grid.innerHTML='<div style="color:var(--muted);font-size:.85rem;padding:20px">Loading contests…</div>';
@@ -441,6 +449,66 @@ async function selectContest(contestId){
     const contests=await sbGet('contests',`id=eq.${encodeURIComponent(contestId)}&select=*`);
     if(contests.length) await enterContest(contests[0]);
   } catch(e){ alert('Error: '+e.message); }
+}
+
+// ── VOTING WINDOW ─────────────────────────────────────────────────────────────
+// Returns: 'before' | 'open' | 'closed'
+function votingStatus(contest){
+  const now = Date.now();
+  const opens  = contest.voting_opens_at  ? new Date(contest.voting_opens_at).getTime()  : null;
+  const closes = contest.voting_closes_at ? new Date(contest.voting_closes_at).getTime() : null;
+  if(closes && now > closes)  return 'closed';
+  if(opens  && now < opens)   return 'before';
+  return 'open';
+}
+
+function formatCountdown(ms){
+  if(ms<=0) return '00:00:00';
+  const totalSec = Math.floor(ms/1000);
+  const h = Math.floor(totalSec/3600);
+  const m = Math.floor((totalSec%3600)/60);
+  const s = totalSec%60;
+  return [h,m,s].map(n=>String(n).padStart(2,'0')).join(':');
+}
+
+let countdownTimer = null;
+
+function startCountdown(contest){
+  clearInterval(countdownTimer);
+  const banner = document.getElementById('voting-banner');
+  if(!banner) return;
+
+  function update(){
+    const now = Date.now();
+    const opens  = contest.voting_opens_at  ? new Date(contest.voting_opens_at).getTime()  : null;
+    const closes = contest.voting_closes_at ? new Date(contest.voting_closes_at).getTime() : null;
+    const status = votingStatus(contest);
+
+    if(status==='before'){
+      const diff = opens - now;
+      banner.className='voting-banner closed-before';
+      banner.innerHTML=`🕐 Voting opens at ${new Date(opens).toLocaleString('en-GB',{timeZone:'Asia/Nicosia',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} Cyprus time<span class="countdown">${formatCountdown(diff)}</span>`;
+      renderSongs(); // re-render to keep inputs disabled
+    } else if(status==='closed'){
+      clearInterval(countdownTimer);
+      banner.className='voting-banner closed-after';
+      banner.innerHTML=`🔒 Voting is closed for this contest.`;
+      renderSongs();
+    } else {
+      // open — show closing time if available
+      if(closes){
+        const diff = closes - now;
+        banner.className='voting-banner open';
+        banner.innerHTML=`✅ Voting is open! Closes at ${new Date(closes).toLocaleString('en-GB',{timeZone:'Asia/Nicosia',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} Cyprus time<span class="countdown">${formatCountdown(diff)}</span>`;
+        if(diff<=0){ clearInterval(countdownTimer); update(); }
+      } else {
+        banner.className='voting-banner open';
+        banner.innerHTML=`✅ Voting is open!`;
+      }
+    }
+  }
+  update();
+  countdownTimer = setInterval(update, 1000);
 }
 
 async function enterContest(contest){
@@ -470,6 +538,7 @@ async function enterContest(contest){
   document.getElementById('contest-bar-info').textContent=contest.description||'';
 
   hideAll(); show('voting-screen');
+  startCountdown(contest);
   renderTabs(); renderSongs();
 }
 
@@ -497,11 +566,12 @@ function renderSongs(){
   const voter=allVoters[activeVoter];
   const vs=allScores[voter]||Array(contestSongs.length).fill(null);
   const isMe=voter===currentUser;
+  const canVote = isMe && votingStatus(currentContest)==='open';
   renderScorePills(); updateProgress();
   document.getElementById('songs-list').innerHTML=contestSongs.map((s,i)=>{
     const val=vs[i]; const rated=val!==null;
     const display=s.song&&s.song!=='TBA'?s.song:s.country;
-    const dis=isMe?'':' disabled';
+    const dis=canVote?'':' disabled';
     return `<div class="song-card${rated?' rated':''}" id="card-${i}">
       <div class="song-num">${s.running_order||i+1}</div>
       <div class="song-info">
@@ -525,6 +595,7 @@ function renderSongs(){
 // ── SCORING ───────────────────────────────────────────────────────────────────
 async function setScore(idx, rawVal){
   if(allVoters[activeVoter]!==currentUser) return;
+  if(votingStatus(currentContest)!=='open') return;
   const inp=document.getElementById(`score-inp-${idx}`);
   if(rawVal===''||rawVal===null){
     allScores[currentUser][idx]=null;
@@ -541,6 +612,7 @@ async function setScore(idx, rawVal){
 
 async function adjustScore(idx,delta){
   if(allVoters[activeVoter]!==currentUser) return;
+  if(votingStatus(currentContest)!=='open') return;
   const cur=allScores[currentUser][idx]??0;
   let nv=Math.round((cur+delta)*100)/100; if(nv<0)nv=0; if(nv>12)nv=12;
   const inp=document.getElementById(`score-inp-${idx}`); if(inp) inp.value=nv;
