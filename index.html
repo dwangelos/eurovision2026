@@ -120,10 +120,13 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 .conflict-msg{background:rgba(232,74,106,.09);border:1px solid rgba(232,74,106,.3);border-radius:10px;padding:10px 14px;font-size:.82rem;color:var(--red);margin-bottom:14px;display:none;}
 
 /* SONG CARDS */
-.song-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:13px 16px;display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:13px;transition:border-color .2s,box-shadow .2s;margin-bottom:9px;}
+.song-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:13px 16px;display:grid;grid-template-columns:30px 52px 1fr auto;align-items:center;gap:12px;transition:border-color .2s,box-shadow .2s;margin-bottom:9px;}
 .song-card:hover{border-color:rgba(232,200,74,.28);}
 .song-card.rated{border-color:rgba(232,200,74,.5);box-shadow:0 0 14px rgba(232,200,74,.07);}
 .song-num{font-family:'Playfair Display',serif;font-size:1rem;color:var(--muted);text-align:center;font-weight:700;}
+.song-photo{width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--border);border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;overflow:hidden;}
+.song-photo img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.song-photo.no-photo{background:linear-gradient(135deg,var(--border),var(--card));}
 .song-info{min-width:0;}
 .song-title{font-weight:600;font-size:.93rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .song-country{font-size:.76rem;color:var(--muted);margin-top:2px;}
@@ -196,6 +199,13 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 @media(max-width:600px){
   .precision-card{grid-template-columns:36px 1fr auto;gap:10px;padding:14px;}
   .admin-card{padding:22px 16px;}
+  .song-card{grid-template-columns:24px 36px 1fr auto;gap:8px;padding:10px 12px;}
+  .song-photo{width:36px;height:36px;}
+  .score-input{width:46px;}
+  header h1{font-size:1.9rem;}
+  #db-badge{display:none;}
+  .join-card{padding:28px 20px;}
+  .contest-item{flex-direction:column;align-items:flex-start;}
 }
 </style>
 </head>
@@ -680,6 +690,17 @@ function renderScorePills(){
 }
 
 // ── SONGS ─────────────────────────────────────────────────────────────────────
+function artistPhoto(s){
+  // Build photo element: real photo if available, else flag emoji as fallback
+  if(s.photo_url){
+    return `<div class="song-photo">
+      <img src="${s.photo_url}" alt="${s.artist||s.country}"
+        onerror="this.parentElement.innerHTML='${(s.flag||'🎵').replace(/'/g,'&#39;')}';this.parentElement.classList.add('no-photo')"/>
+    </div>`;
+  }
+  return `<div class="song-photo no-photo">${s.flag||'🎵'}</div>`;
+}
+
 function renderSongs(){
   const voter=allVoters[activeVoter];
   const vs=allScores[voter]||Array(contestSongs.length).fill(null);
@@ -692,6 +713,7 @@ function renderSongs(){
     const dis=canVote?'':' disabled';
     return `<div class="song-card${rated?' rated':''}" id="card-${i}">
       <div class="song-num">${s.running_order||i+1}</div>
+      ${artistPhoto(s)}
       <div class="song-info">
         <div class="song-title">${s.flag||''} ${display}</div>
         <div class="song-country">${s.country}</div>
@@ -979,12 +1001,18 @@ async function showAdminPanel(){
 
   document.getElementById('admin-songs-list').innerHTML=contestSongs.map((s,i)=>{
     const display=s.song&&s.song!=='TBA'?s.song:s.country;
-    const existing=existingMap[i]||'';
+    const existingPlace=existingMap[i]||'';
+    const photoHtml=s.photo_url
+      ? `<img src="${s.photo_url}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--border);flex-shrink:0" onerror="this.style.display='none'">`
+      : `<span style="font-size:1.3rem;flex-shrink:0">${s.flag||'🎵'}</span>`;
     return `<div class="official-song-row">
-      <div class="s-label">${s.flag||''} ${display} <small style="color:var(--muted)">${s.country}</small></div>
+      <div class="s-label" style="display:flex;align-items:center;gap:8px">
+        ${photoHtml}
+        <span>${s.flag||''} ${display} <small style="color:var(--muted)">${s.artist&&s.artist!=='TBA'?'· '+s.artist:''}</small></span>
+      </div>
       <input type="number" id="official-${i}" min="1" max="${contestSongs.length}"
-        placeholder="Place" value="${existing}"
-        class="${existing?'filled':''}"
+        placeholder="Place" value="${existingPlace}"
+        class="${existingPlace?'filled':''}"
         oninput="this.classList.toggle('filled',!!this.value)"/>
     </div>`;
   }).join('');
