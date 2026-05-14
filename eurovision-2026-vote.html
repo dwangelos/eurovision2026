@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Eurovision 2026 · Vienna · Friends Vote</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--gold:#e8c84a;--gold2:#f5d96e;--bg:#0d0b18;--card:#16132a;--border:#2e2852;--text:#e8e3ff;--muted:#7b72a8;--red:#e84a6a;--green:#4ae8a0;--blue:#4a9fe8;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:80px;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(1px 1px at 8% 15%,rgba(255,255,255,.55) 0%,transparent 100%),radial-gradient(1px 1px at 25% 55%,rgba(255,255,255,.30) 0%,transparent 100%),radial-gradient(2px 2px at 48% 8%,rgba(255,255,255,.45) 0%,transparent 100%),radial-gradient(1px 1px at 66% 78%,rgba(255,255,255,.30) 0%,transparent 100%),radial-gradient(1px 1px at 88% 28%,rgba(255,255,255,.50) 0%,transparent 100%),radial-gradient(1px 1px at 13% 88%,rgba(255,255,255,.20) 0%,transparent 100%),radial-gradient(1px 1px at 77% 48%,rgba(255,255,255,.35) 0%,transparent 100%),radial-gradient(1px 1px at 38% 68%,rgba(255,255,255,.40) 0%,transparent 100%),radial-gradient(1px 1px at 59% 83%,rgba(255,255,255,.22) 0%,transparent 100%);}
+.wrap{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:0 20px;}
+
+/* DB STATUS */
+#db-badge{position:fixed;bottom:16px;right:16px;display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.73rem;color:var(--muted);z-index:200;}
+#db-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;}
+#db-badge.ready{color:var(--green);border-color:rgba(74,232,160,.35);}#db-badge.ready .dot{background:var(--green);}
+#db-badge.saving{color:var(--gold);border-color:rgba(232,200,74,.35);}#db-badge.saving .dot{background:var(--gold);animation:pulse .6s infinite alternate;}
+#db-badge.error{color:var(--red);border-color:rgba(232,74,106,.35);}#db-badge.error .dot{background:var(--red);}
+@keyframes pulse{from{opacity:.5}to{opacity:1}}
+
+/* LOADING */
+#loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:999;transition:opacity .5s;}
+#loading.gone{opacity:0;pointer-events:none;}
+.spinner{width:42px;height:42px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading p{color:var(--muted);font-size:.9rem;}
+
+/* HEADER */
+header{text-align:center;padding:44px 20px 24px;position:relative;z-index:1;}
+.flag-strip{display:flex;justify-content:center;flex-wrap:wrap;gap:4px;margin-bottom:16px;font-size:20px;line-height:1.4;}
+header h1{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,6vw,3.6rem);font-weight:900;line-height:1.1;letter-spacing:-1px;background:linear-gradient(135deg,var(--gold) 0%,#fff 50%,var(--gold2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
+
+/* AUTH CARD */
+.auth-card{max-width:420px;margin:24px auto 0;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px 32px;text-align:center;}
+.auth-card h2{font-family:'Playfair Display',serif;font-size:1.45rem;color:var(--gold);margin-bottom:6px;}
+.auth-card .sub{color:var(--muted);font-size:.87rem;line-height:1.6;margin-bottom:28px;}
+
+/* FIELDS */
+.field{margin-bottom:16px;text-align:left;}
+.field label{display:block;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
+.field-wrap{position:relative;}
+.field-wrap input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px 42px 12px 14px;font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;}
+.field-wrap input:focus{border-color:var(--gold);}
+.field-wrap input.err{border-color:var(--red);}
+.field-wrap input.ok{border-color:var(--green);}
+.field-icon{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:1rem;pointer-events:none;}
+.toggle-pw{pointer-events:all;cursor:pointer;background:none;border:none;color:var(--muted);font-size:1rem;padding:0;}
+.toggle-pw:hover{color:var(--gold);}
+.field-msg{font-size:.77rem;margin-top:5px;min-height:16px;}
+.field-msg.err{color:var(--red);}
+.field-msg.ok{color:var(--green);}
+.pw-strength{height:3px;border-radius:99px;background:var(--border);margin-top:6px;overflow:hidden;}
+.pw-strength-fill{height:100%;border-radius:99px;width:0%;transition:width .3s,background .3s;}
+.form-error{background:rgba(232,74,106,.1);border:1px solid rgba(232,74,106,.35);border-radius:10px;padding:10px 14px;font-size:.83rem;color:var(--red);margin-bottom:16px;display:none;text-align:left;}
+
+/* BUTTONS */
+.btn{background:var(--gold);color:#0d0b18;border:none;border-radius:10px;padding:12px 24px;font-size:.95rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .2s,transform .1s;white-space:nowrap;width:100%;}
+.btn:hover{background:var(--gold2);transform:translateY(-1px);}
+.btn:active{transform:translateY(0);}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);width:auto;}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);background:transparent;}
+.btn-del{background:transparent;border:1px solid var(--red);color:var(--red);width:auto;}
+.btn-del:hover{background:rgba(232,74,106,.08);transform:none;}
+.btn-sm{padding:8px 18px;font-size:.85rem;width:auto;}
+
+/* SESSION BAR */
+.session-bar{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 18px;margin-bottom:24px;gap:12px;flex-wrap:wrap;}
+.session-bar .who{font-size:.88rem;color:var(--muted);}
+.session-bar .who strong{color:var(--gold);}
+
+/* VOTER TABS */
+.voter-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;justify-content:center;}
+.tab{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:8px 18px;font-size:.86rem;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;}
+.tab.active{background:var(--gold);border-color:var(--gold);color:#0d0b18;font-weight:600;}
+.tab:hover:not(.active){border-color:var(--gold);color:var(--gold);}
+
+/* PROGRESS */
+.progress-label{text-align:center;font-size:.8rem;color:var(--muted);margin-bottom:10px;}
+.progress-bar-wrap{background:var(--border);border-radius:99px;height:5px;margin-bottom:26px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px;transition:width .4s ease;}
+
+/* USED SCORES */
+.used-scores{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:22px;}
+.used-scores h3{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.score-pills{display:flex;flex-wrap:wrap;gap:5px;}
+.score-pill{min-width:36px;padding:3px 9px;border-radius:20px;font-size:.78rem;font-weight:600;text-align:center;border:1px solid var(--border);color:var(--muted);}
+.score-pill.used{background:rgba(232,74,106,.14);border-color:var(--red);color:var(--red);text-decoration:line-through;}
+
+/* CONFLICT */
+.conflict-msg{background:rgba(232,74,106,.09);border:1px solid rgba(232,74,106,.3);border-radius:10px;padding:10px 14px;font-size:.82rem;color:var(--red);margin-bottom:14px;display:none;}
+
+/* SONG CARDS */
+.song-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:13px 16px;display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:13px;transition:border-color .2s,box-shadow .2s;margin-bottom:9px;}
+.song-card:hover{border-color:rgba(232,200,74,.28);}
+.song-card.rated{border-color:rgba(232,200,74,.5);box-shadow:0 0 14px rgba(232,200,74,.07);}
+.song-num{font-family:'Playfair Display',serif;font-size:1rem;color:var(--muted);text-align:center;font-weight:700;}
+.song-info{min-width:0;}
+.song-title{font-weight:600;font-size:.93rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.song-country{font-size:.76rem;color:var(--muted);margin-top:2px;}
+.song-artist{font-size:.75rem;color:rgba(232,200,74,.6);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.score-control{display:flex;align-items:center;gap:7px;}
+.score-btn{width:27px;height:27px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;transition:background .15s;}
+.score-btn:hover{background:rgba(232,200,74,.15);border-color:var(--gold);}
+.score-input{width:56px;text-align:center;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.93rem;font-weight:600;font-family:'DM Sans',sans-serif;padding:5px 3px;outline:none;transition:border-color .2s;}
+.score-input:focus{border-color:var(--gold);}
+.score-input.conflict{border-color:var(--red);background:rgba(232,74,106,.07);}
+.score-input.ok{border-color:var(--green);}
+
+/* RESULTS */
+.results-header{text-align:center;margin-bottom:32px;}
+.results-header h2{font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--gold);margin-bottom:5px;}
+.results-header p{color:var(--muted);font-size:.88rem;}
+.result-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:15px 18px;margin-bottom:9px;display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:13px;transition:transform .15s;}
+.result-card:hover{transform:translateX(4px);}
+.result-card.top1{border-color:var(--gold);background:rgba(232,200,74,.07);}
+.result-card.top2{border-color:#b8b8b8;}
+.result-card.top3{border-color:#cd7f32;}
+.rank-badge{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1rem;font-weight:900;background:var(--bg);border:2px solid var(--border);color:var(--muted);}
+.rank-badge.r1{border-color:var(--gold);color:var(--gold);background:rgba(232,200,74,.13);}
+.rank-badge.r2{border-color:#b8b8b8;color:#b8b8b8;}
+.rank-badge.r3{border-color:#cd7f32;color:#cd7f32;}
+.result-info{min-width:0;}
+.result-title{font-weight:600;font-size:.96rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.result-country{font-size:.78rem;color:var(--muted);margin-top:2px;}
+.score-bar{height:4px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:6px;}
+.score-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px;}
+.voter-breakdown{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.vb-chip{font-size:.71rem;background:rgba(255,255,255,.05);border-radius:5px;padding:2px 6px;color:var(--muted);}
+.vb-chip span{color:var(--text);font-weight:600;}
+.total-score{font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:700;color:var(--gold);white-space:nowrap;}
+.nav-row{display:flex;gap:12px;justify-content:center;margin-top:30px;flex-wrap:wrap;}
+
+@media(max-width:600px){
+  .song-card{grid-template-columns:24px 1fr auto;gap:9px;padding:11px 12px;}
+  .song-title{font-size:.86rem;}
+  .score-input{width:48px;}
+  header h1{font-size:1.9rem;}
+  #db-badge{display:none;}
+  .auth-card{padding:28px 20px;}
+}
+</style>
+</head>
+<body>
+
+<div id="loading"><div class="spinner"></div><p>Connecting to database…</p></div>
+<div id="db-badge"><div class="dot"></div><span id="db-label">Connecting…</span></div>
+
+<header>
+  <div class="flag-strip">🇦🇱🇦🇲🇦🇺🇦🇹🇦🇿🇧🇪🇧🇬🇭🇷🇨🇾🇨🇿🇩🇰🇪🇪🇫🇮🇫🇷🇩🇪🇬🇪🇬🇷🇮🇱🇮🇹🇱🇻🇱🇹🇱🇺🇲🇹🇲🇩🇲🇪🇳🇴🇵🇱🇵🇹🇷🇴🇸🇲🇷🇸🇸🇪🇨🇭🇺🇦🇬🇧</div>
+  <h1>Eurovision 2026</h1>
+  <p>Vienna · Grand Final · 16 May 2026 · Friends Vote</p>
+</header>
+
+<!-- AUTH -->
+<div class="wrap" id="auth-screen" style="display:none">
+  <div class="auth-card">
+    <h2 id="auth-title">Welcome Back</h2>
+    <p class="sub" id="auth-subtitle">Sign in to cast your Eurovision scores. Your session is remembered for 3 days.</p>
+    <div class="form-error" id="auth-error"></div>
+    <div class="field">
+      <label for="inp-username">Username</label>
+      <div class="field-wrap">
+        <input type="text" id="inp-username" placeholder="Your username" maxlength="24" autocomplete="username" oninput="liveValidateUsername()"/>
+        <span class="field-icon" id="icon-username">👤</span>
+      </div>
+      <div class="field-msg" id="msg-username"></div>
+    </div>
+    <div class="field">
+      <label for="inp-password">Password</label>
+      <div class="field-wrap">
+        <input type="password" id="inp-password" placeholder="Your password" maxlength="64" autocomplete="current-password" oninput="liveValidatePassword()" onkeydown="if(event.key==='Enter')submitAuth()"/>
+        <button class="field-icon toggle-pw" onclick="togglePw()" title="Show/hide">👁</button>
+      </div>
+      <div class="pw-strength" id="pw-strength-wrap" style="display:none"><div class="pw-strength-fill" id="pw-strength-fill"></div></div>
+      <div class="field-msg" id="msg-password"></div>
+    </div>
+    <div class="field" id="field-confirm" style="display:none">
+      <label for="inp-confirm">Confirm Password</label>
+      <div class="field-wrap">
+        <input type="password" id="inp-confirm" placeholder="Repeat your password" maxlength="64" autocomplete="new-password" oninput="liveValidateConfirm()" onkeydown="if(event.key==='Enter')submitAuth()"/>
+        <span class="field-icon">🔒</span>
+      </div>
+      <div class="field-msg" id="msg-confirm"></div>
+    </div>
+    <button class="btn" id="auth-submit" onclick="submitAuth()">Sign In</button>
+    <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border);font-size:.83rem;color:var(--muted);text-align:center" id="auth-switch-hint">
+      Don't have an account yet? <a href="#" style="color:var(--gold);text-decoration:none;font-weight:600" onclick="showRegisterScreen();return false">Create one here →</a>
+    </div>
+  </div>
+</div>
+
+<!-- VOTING -->
+<div class="wrap" id="voting-screen" style="display:none">
+  <div class="session-bar">
+    <div class="who">Voting as <strong id="session-name"></strong> <span id="session-expiry" style="font-size:.75rem;color:var(--muted);margin-left:4px"></span></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="showResults()">🏆 Results</button>
+      <button class="btn btn-ghost btn-sm" onclick="signOut()">Sign Out</button>
+    </div>
+  </div>
+  <div class="voter-tabs" id="voter-tabs"></div>
+  <div class="used-scores">
+    <h3>Scores Used by <span id="tab-name-label">—</span></h3>
+    <div class="score-pills" id="score-pills"></div>
+  </div>
+  <div class="progress-label" id="progress-label">0 of 35 songs rated</div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+  <div class="conflict-msg" id="conflict-msg"></div>
+  <div id="songs-list"></div>
+  <div class="nav-row">
+    <button class="btn btn-sm" onclick="showResults()">🏆 View Scoreboard</button>
+    <button class="btn btn-del btn-sm" onclick="signOut()">Sign Out</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="wrap" id="results-screen" style="display:none">
+  <div class="results-header">
+    <h2>🏆 The Scoreboard</h2>
+    <p>Live scores from all voters.</p>
+  </div>
+  <div id="results-list"></div>
+  <div class="nav-row">
+    <button class="btn btn-sm" onclick="goVoting()">← Back to Voting</button>
+    <button class="btn btn-del btn-sm" onclick="signOut()">Sign Out</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://onpsmwempgoopamqodfb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_hHkVZYm10pCjyKwzWAJFeg_GvVpPINX';
+const SESSION_ID   = 'esc2026_session';
+const SESSION_DAYS = 3;
+
+// ── SONGS ─────────────────────────────────────────────────────────────────────
+const SONGS = [
+  {country:"Albania",        flag:"🇦🇱",artist:"Alis",                           song:"Nân"},
+  {country:"Armenia",        flag:"🇦🇲",artist:"Simón",                          song:"Paloma Rumba"},
+  {country:"Australia",      flag:"🇦🇺",artist:"Delta Goodrem",                  song:"Eclipse"},
+  {country:"Austria",        flag:"🇦🇹",artist:"Cosmó",                          song:"Tanzschein"},
+  {country:"Azerbaijan",     flag:"🇦🇿",artist:"TBA",                            song:"Just Go"},
+  {country:"Belgium",        flag:"🇧🇪",artist:"TBA",                            song:"Dancing on the Ice"},
+  {country:"Bulgaria",       flag:"🇧🇬",artist:"TBA",                            song:"Bangaranga"},
+  {country:"Croatia",        flag:"🇭🇷",artist:"TBA",                            song:"Andromeda"},
+  {country:"Cyprus",         flag:"🇨🇾",artist:"TBA",                            song:"JALLA"},
+  {country:"Czechia",        flag:"🇨🇿",artist:"TBA",                            song:"CROSSROADS"},
+  {country:"Denmark",        flag:"🇩🇰",artist:"TBA",                            song:"Før Vi Går Hjem"},
+  {country:"Estonia",        flag:"🇪🇪",artist:"TBA",                            song:"Too Epic To Be True"},
+  {country:"Finland",        flag:"🇫🇮",artist:"Linda Lampenius & Pete Parkkonen",song:"Liekinheitin"},
+  {country:"France",         flag:"🇫🇷",artist:"TBA",                            song:"Regarde !"},
+  {country:"Germany",        flag:"🇩🇪",artist:"TBA",                            song:"Fire"},
+  {country:"Georgia",        flag:"🇬🇪",artist:"TBA",                            song:"On Replay"},
+  {country:"Greece",         flag:"🇬🇷",artist:"TBA",                            song:"Ferto"},
+  {country:"Israel",         flag:"🇮🇱",artist:"TBA",                            song:"Michelle"},
+  {country:"Italy",          flag:"🇮🇹",artist:"TBA",                            song:"TBA"},
+  {country:"Latvia",         flag:"🇱🇻",artist:"TBA",                            song:"TBA"},
+  {country:"Lithuania",      flag:"🇱🇹",artist:"TBA",                            song:"TBA"},
+  {country:"Luxembourg",     flag:"🇱🇺",artist:"TBA",                            song:"TBA"},
+  {country:"Malta",          flag:"🇲🇹",artist:"TBA",                            song:"TBA"},
+  {country:"Moldova",        flag:"🇲🇩",artist:"TBA",                            song:"TBA"},
+  {country:"Montenegro",     flag:"🇲🇪",artist:"Tamara Živković",                song:"TBA"},
+  {country:"Norway",         flag:"🇳🇴",artist:"TBA",                            song:"TBA"},
+  {country:"Poland",         flag:"🇵🇱",artist:"TBA",                            song:"TBA"},
+  {country:"Portugal",       flag:"🇵🇹",artist:"TBA",                            song:"TBA"},
+  {country:"Romania",        flag:"🇷🇴",artist:"TBA",                            song:"TBA"},
+  {country:"San Marino",     flag:"🇸🇲",artist:"TBA",                            song:"TBA"},
+  {country:"Serbia",         flag:"🇷🇸",artist:"TBA",                            song:"TBA"},
+  {country:"Sweden",         flag:"🇸🇪",artist:"TBA",                            song:"TBA"},
+  {country:"Switzerland",    flag:"🇨🇭",artist:"TBA",                            song:"TBA"},
+  {country:"Ukraine",        flag:"🇺🇦",artist:"TBA",                            song:"TBA"},
+  {country:"United Kingdom", flag:"🇬🇧",artist:"LOOK MUM NO COMPUTER",           song:"Eins, Zwei, Drei"},
+];
+const INT_SCORES = [0,1,2,3,4,5,6,7,8,9,10,11,12];
+
+// ── SUPABASE API ──────────────────────────────────────────────────────────────
+const H = {'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=representation'};
+
+async function sbGet(table, params=''){
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`,{headers:H});
+  if(!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+async function sbUpsert(table, body){
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{
+    method:'POST', headers:{...H,'Prefer':'resolution=merge-duplicates,return=representation'},
+    body:JSON.stringify(body)
+  });
+  if(!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+async function sbDelete(table, params){
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`,{method:'DELETE',headers:H});
+  if(!r.ok) throw new Error(await r.text());
+}
+
+// ── HASH PASSWORD ──────────────────────────────────────────────────────────────
+async function hashPw(pw){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let currentUser = null;
+let allVoters   = [];
+let allScores   = {};
+let activeVoter = 0;
+let saveTimer   = null;
+
+// ── STATUS ────────────────────────────────────────────────────────────────────
+function setStatus(state, label){
+  const el=document.getElementById('db-badge');
+  el.className=state;
+  document.getElementById('db-label').textContent=label;
+}
+function flashSaving(){
+  setStatus('saving','Saving…');
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>setStatus('ready','Saved'),900);
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function show(id){document.getElementById(id).style.display='block';}
+function hide(id){document.getElementById(id).style.display='none';}
+function hideLoading(){
+  const el=document.getElementById('loading');
+  el.classList.add('gone');
+  setTimeout(()=>el.remove(),600);
+}
+
+// ── SESSION (localStorage for remember-me token) ──────────────────────────────
+function saveLocalSession(username, expiresAt){
+  localStorage.setItem(SESSION_ID, JSON.stringify({username, expiresAt}));
+}
+function loadLocalSession(){
+  try{
+    const s = JSON.parse(localStorage.getItem(SESSION_ID)||'null');
+    if(s && s.expiresAt > Date.now()) return s;
+    localStorage.removeItem(SESSION_ID);
+    return null;
+  } catch(e){ return null; }
+}
+function clearLocalSession(){
+  localStorage.removeItem(SESSION_ID);
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+async function boot(){
+  // Test connection
+  try{
+    await sbGet('users','select=username&limit=1');
+    setStatus('ready','Connected');
+  } catch(e){
+    setStatus('error','DB error');
+    document.getElementById('loading').innerHTML=
+      `<p style="color:var(--red);padding:30px;text-align:center">Cannot connect to database.<br><small>${e.message}</small></p>`;
+    return;
+  }
+
+  // Check remembered session
+  const local = loadLocalSession();
+  if(local){
+    try{
+      const rows = await sbGet('users',`username=eq.${encodeURIComponent(local.username)}&select=username`);
+      if(rows.length){
+        hideLoading();
+        await loginAs(local.username, false);
+        return;
+      }
+    } catch(e){}
+    clearLocalSession();
+  }
+
+  hideLoading();
+  showLoginScreen();
+}
+
+// ── AUTH SCREENS ──────────────────────────────────────────────────────────────
+let authMode = 'login';
+
+function showLoginScreen(){
+  authMode='login';
+  document.getElementById('auth-title').textContent='Welcome Back';
+  document.getElementById('auth-subtitle').textContent='Sign in to cast your Eurovision scores. Your session is remembered for 3 days.';
+  document.getElementById('field-confirm').style.display='none';
+  document.getElementById('pw-strength-wrap').style.display='none';
+  document.getElementById('auth-submit').textContent='Sign In';
+  document.getElementById('inp-password').placeholder='Your password';
+  document.getElementById('auth-switch-hint').innerHTML=
+    `Don't have an account yet? <a href="#" style="color:var(--gold);text-decoration:none;font-weight:600" onclick="showRegisterScreen();return false">Create one here →</a>`;
+  clearErrors();
+  show('auth-screen');
+  setTimeout(()=>document.getElementById('inp-username').focus(),100);
+}
+
+function showRegisterScreen(){
+  authMode='register';
+  document.getElementById('auth-title').textContent='Create Account';
+  document.getElementById('auth-subtitle').textContent='Pick a unique username and password. Your name will appear on the scoreboard.';
+  document.getElementById('field-confirm').style.display='block';
+  document.getElementById('pw-strength-wrap').style.display='block';
+  document.getElementById('auth-submit').textContent='Create Account';
+  document.getElementById('inp-password').placeholder='At least 6 characters';
+  document.getElementById('auth-switch-hint').innerHTML=
+    `Already have an account? <a href="#" style="color:var(--gold);text-decoration:none;font-weight:600" onclick="showLoginScreen();return false">Sign in →</a>`;
+  clearErrors();
+  setTimeout(()=>document.getElementById('inp-username').focus(),100);
+}
+
+function clearErrors(){
+  ['username','password','confirm'].forEach(f=>{
+    const m=document.getElementById('msg-'+f); if(m){m.textContent='';m.className='field-msg';}
+    const i=document.getElementById('inp-'+f); if(i){i.classList.remove('err','ok');}
+  });
+  const e=document.getElementById('auth-error'); e.style.display='none'; e.textContent='';
+}
+
+function setField(f,state,msg){
+  const inp=document.getElementById('inp-'+f);
+  const m=document.getElementById('msg-'+f);
+  if(inp){inp.classList.remove('err','ok');if(state)inp.classList.add(state);}
+  if(m){m.textContent=msg||'';m.className='field-msg'+(state?' '+state:'');}
+  if(f==='username'){
+    const ic=document.getElementById('icon-username');
+    if(ic) ic.textContent=state==='ok'?'✅':state==='err'?'❌':'👤';
+  }
+}
+
+function showFormError(msg){
+  const e=document.getElementById('auth-error');
+  e.textContent=msg; e.style.display='block';
+}
+
+// Live validation
+async function liveValidateUsername(){
+  const val=document.getElementById('inp-username').value.trim();
+  if(!val){setField('username','','');return;}
+  if(val.length<2){setField('username','err','At least 2 characters');return;}
+  if(!/^[a-zA-Z0-9 _\-.]+$/.test(val)){setField('username','err','Letters, numbers, spaces, _ - . only');return;}
+  if(authMode==='register'){
+    try{
+      const rows=await sbGet('users',`username=eq.${encodeURIComponent(val)}&select=username`);
+      if(rows.length) setField('username','err','Username already taken');
+      else             setField('username','ok','Available!');
+    } catch(e){ setField('username','',''); }
+  } else { setField('username','',''); }
+}
+
+function liveValidatePassword(){
+  const val=document.getElementById('inp-password').value;
+  if(authMode==='register'){
+    const s=pwStrength(val);
+    document.getElementById('pw-strength-fill').style.width=s.pct+'%';
+    document.getElementById('pw-strength-fill').style.background=s.color;
+    if(!val){setField('password','','');return;}
+    val.length<6?setField('password','err','At least 6 characters'):setField('password','ok',s.label);
+  } else { setField('password','',''); }
+  liveValidateConfirm();
+}
+
+function liveValidateConfirm(){
+  if(authMode!=='register') return;
+  const pw=document.getElementById('inp-password').value;
+  const cf=document.getElementById('inp-confirm').value;
+  if(!cf){setField('confirm','','');return;}
+  pw===cf?setField('confirm','ok','Passwords match ✓'):setField('confirm','err','Passwords do not match');
+}
+
+function pwStrength(pw){
+  let s=0;
+  if(pw.length>=6)s++;if(pw.length>=10)s++;
+  if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^a-zA-Z0-9]/.test(pw))s++;
+  return [{pct:20,color:'#e84a6a',label:'Very weak'},{pct:40,color:'#e87a4a',label:'Weak'},
+          {pct:60,color:'#e8c84a',label:'Fair'},{pct:80,color:'#a0e84a',label:'Good'},
+          {pct:100,color:'#4ae8a0',label:'Strong'}][Math.min(s,4)];
+}
+
+function togglePw(){
+  const i=document.getElementById('inp-password');
+  i.type=i.type==='password'?'text':'password';
+}
+
+// ── SUBMIT AUTH ───────────────────────────────────────────────────────────────
+async function submitAuth(){
+  clearErrors();
+  const username=document.getElementById('inp-username').value.trim();
+  const password=document.getElementById('inp-password').value;
+  const confirm =document.getElementById('inp-confirm').value;
+
+  if(!username){setField('username','err','Required');return;}
+  if(username.length<2){setField('username','err','At least 2 characters');return;}
+  if(!/^[a-zA-Z0-9 _\-.]+$/.test(username)){setField('username','err','Letters, numbers, spaces, _ - . only');return;}
+  if(!password){setField('password','err','Required');return;}
+
+  const btn=document.getElementById('auth-submit');
+  btn.disabled=true; btn.textContent='Please wait…';
+
+  try{
+    const hash=await hashPw(password);
+
+    if(authMode==='register'){
+      if(password.length<6){setField('password','err','At least 6 characters');btn.disabled=false;btn.textContent='Create Account';return;}
+      if(password!==confirm){setField('confirm','err','Passwords do not match');btn.disabled=false;btn.textContent='Create Account';return;}
+      const existing=await sbGet('users',`username=eq.${encodeURIComponent(username)}&select=username`);
+      if(existing.length){setField('username','err','Username already taken');btn.disabled=false;btn.textContent='Create Account';return;}
+      await sbUpsert('users',{username, password_hash:hash});
+      await loginAs(username, true);
+
+    } else {
+      const rows=await sbGet('users',`username=eq.${encodeURIComponent(username)}&select=username,password_hash`);
+      if(!rows.length){setField('username','err','Username not found');btn.disabled=false;btn.textContent='Sign In';return;}
+      if(rows[0].password_hash!==hash){setField('password','err','Incorrect password');btn.disabled=false;btn.textContent='Sign In';return;}
+      await loginAs(username, true);
+    }
+
+  } catch(e){
+    showFormError('Error: '+e.message);
+    btn.disabled=false;
+    btn.textContent=authMode==='register'?'Create Account':'Sign In';
+  }
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
+async function loginAs(username, writeSession=true){
+  currentUser=username;
+
+  if(writeSession){
+    const expiresAt=Date.now()+SESSION_DAYS*24*60*60*1000;
+    saveLocalSession(username, expiresAt);
+    const exp=new Date(expiresAt);
+    document.getElementById('session-expiry').textContent=
+      `· until ${exp.toLocaleDateString(undefined,{day:'numeric',month:'short'})}`;
+  } else {
+    const local=loadLocalSession();
+    if(local){
+      const exp=new Date(local.expiresAt);
+      document.getElementById('session-expiry').textContent=
+        `· until ${exp.toLocaleDateString(undefined,{day:'numeric',month:'short'})}`;
+    }
+  }
+
+  // Load all users + votes from Supabase
+  const userRows=await sbGet('users','select=username&order=username.asc');
+  allVoters=userRows.map(r=>r.username);
+  allScores={};
+  allVoters.forEach(v=>{allScores[v]=Array(SONGS.length).fill(null);});
+  const voteRows=await sbGet('votes','select=username,song_idx,score');
+  voteRows.forEach(row=>{
+    if(allScores[row.username]!==undefined) allScores[row.username][row.song_idx]=parseFloat(row.score);
+  });
+
+  activeVoter=allVoters.indexOf(currentUser);
+  if(activeVoter<0) activeVoter=0;
+
+  document.getElementById('session-name').textContent=currentUser;
+  hide('auth-screen');
+  show('voting-screen');
+  setStatus('ready','Connected');
+  renderTabs();
+  renderSongs();
+}
+
+async function signOut(){
+  clearLocalSession();
+  currentUser=null; allScores={}; allVoters=[]; activeVoter=0;
+  hide('voting-screen'); hide('results-screen');
+  ['inp-username','inp-password','inp-confirm'].forEach(id=>document.getElementById(id).value='');
+  showLoginScreen();
+}
+
+// ── VOTING TABS ───────────────────────────────────────────────────────────────
+function renderTabs(){
+  document.getElementById('voter-tabs').innerHTML=allVoters.map((v,i)=>`
+    <button class="tab${i===activeVoter?' active':''}" onclick="switchVoter(${i})">
+      ${v}${v===currentUser?' <small style="opacity:.6;font-size:.7rem">(you)</small>':''}
+    </button>`).join('');
+  document.getElementById('tab-name-label').textContent=allVoters[activeVoter]||'—';
+}
+
+function switchVoter(i){activeVoter=i;renderTabs();renderSongs();}
+
+// ── SCORE PILLS ───────────────────────────────────────────────────────────────
+function renderScorePills(){
+  const voter=allVoters[activeVoter];
+  const used=new Set();
+  (allScores[voter]||[]).forEach(v=>{if(v!==null&&Math.floor(v)===v)used.add(v);});
+  document.getElementById('score-pills').innerHTML=INT_SCORES.map(s=>
+    `<div class="score-pill${used.has(s)?' used':''}">${s}</div>`).join('');
+}
+
+// ── SONGS ─────────────────────────────────────────────────────────────────────
+function renderSongs(){
+  const voter=allVoters[activeVoter];
+  const vs=allScores[voter]||Array(SONGS.length).fill(null);
+  const isMe=voter===currentUser;
+  renderScorePills(); updateProgress();
+  document.getElementById('songs-list').innerHTML=SONGS.map((s,i)=>{
+    const val=vs[i]; const rated=val!==null;
+    const display=s.song!=='TBA'?s.song:s.country;
+    const dis=isMe?'':' disabled';
+    return `<div class="song-card${rated?' rated':''}" id="card-${i}">
+      <div class="song-num">${i+1}</div>
+      <div class="song-info">
+        <div class="song-title">${s.flag} ${display}</div>
+        <div class="song-country">${s.country}</div>
+        <div class="song-artist">${s.artist!=='TBA'?s.artist:''}</div>
+      </div>
+      <div class="score-control">
+        <button class="score-btn" onclick="adjustScore(${i},-0.5)"${dis}>−</button>
+        <input class="score-input${rated?' ok':''}" id="score-inp-${i}"
+          type="number" min="0" max="12" step="0.01"
+          value="${rated?val:''}" placeholder="—"
+          onchange="setScore(${i},this.value)" oninput="setScore(${i},this.value)"${dis}/>
+        <button class="score-btn" onclick="adjustScore(${i},0.5)"${dis}>+</button>
+      </div>
+    </div>`;
+  }).join('');
+  validateAll();
+}
+
+// ── SCORING ───────────────────────────────────────────────────────────────────
+async function setScore(idx, rawVal){
+  if(allVoters[activeVoter]!==currentUser) return;
+  const inp=document.getElementById(`score-inp-${idx}`);
+  if(rawVal===''||rawVal===null){
+    allScores[currentUser][idx]=null;
+    inp.classList.remove('ok','conflict');
+    updateCard(idx,false); updateProgress(); renderScorePills();
+    await persistScore(idx, null); return;
+  }
+  let val=parseFloat(rawVal);
+  if(isNaN(val)) return;
+  val=Math.round(val*100)/100;
+  if(val<0)val=0; if(val>12)val=12;
+  allScores[currentUser][idx]=val; inp.value=val;
+  validateAll(); updateProgress(); renderScorePills();
+  await persistScore(idx, val);
+}
+
+async function adjustScore(idx,delta){
+  if(allVoters[activeVoter]!==currentUser) return;
+  const cur=allScores[currentUser][idx]??0;
+  let nv=Math.round((cur+delta)*100)/100;
+  if(nv<0)nv=0; if(nv>12)nv=12;
+  const inp=document.getElementById(`score-inp-${idx}`);
+  if(inp) inp.value=nv;
+  await setScore(idx,nv);
+}
+
+async function persistScore(songIdx, score){
+  flashSaving();
+  try{
+    if(score===null){
+      await sbDelete('votes',`username=eq.${encodeURIComponent(currentUser)}&song_idx=eq.${songIdx}`);
+    } else {
+      await sbUpsert('votes',{username:currentUser, song_idx:songIdx, score, updated_at:new Date().toISOString()});
+    }
+    setStatus('ready','Saved');
+  } catch(e){ setStatus('error','Save failed'); }
+}
+
+// ── VALIDATION ────────────────────────────────────────────────────────────────
+function validateAll(){
+  const voter=allVoters[activeVoter];
+  const vs=allScores[voter]||[];
+  const intMap={};
+  vs.forEach((v,i)=>{if(v!==null&&Math.floor(v)===v){if(!intMap[v])intMap[v]=[];intMap[v].push(i);}});
+  const conflicts=new Set(); const nums=[];
+  Object.entries(intMap).forEach(([k,idxs])=>{if(idxs.length>1){idxs.forEach(i=>conflicts.add(i));nums.push(k);}});
+  SONGS.forEach((_,i)=>{
+    const inp=document.getElementById(`score-inp-${i}`); if(!inp) return;
+    inp.classList.remove('ok','conflict');
+    if(conflicts.has(i)) inp.classList.add('conflict');
+    else if(vs[i]!==null) inp.classList.add('ok');
+    updateCard(i, vs[i]!==null && !conflicts.has(i));
+  });
+  const msg=document.getElementById('conflict-msg');
+  if(nums.length){msg.style.display='block';msg.textContent=`⚠ Score${nums.length>1?'s':''} ${nums.join(', ')} used more than once. Use decimals (e.g. 8 and 8.50) to differentiate.`;}
+  else msg.style.display='none';
+}
+
+function updateCard(idx,ok){const c=document.getElementById(`card-${idx}`);if(c)c.classList.toggle('rated',ok);}
+function updateProgress(){
+  const voter=allVoters[activeVoter];
+  const rated=(allScores[voter]||[]).filter(v=>v!==null).length;
+  document.getElementById('progress-label').textContent=`${rated} of ${SONGS.length} songs rated by ${voter}`;
+  document.getElementById('progress-bar').style.width=`${(rated/SONGS.length)*100}%`;
+}
+
+// ── RESULTS ───────────────────────────────────────────────────────────────────
+async function showResults(){
+  // Fresh data from Supabase
+  const userRows=await sbGet('users','select=username&order=username.asc');
+  const voters=userRows.map(r=>r.username);
+  const sc={};
+  voters.forEach(v=>{sc[v]=Array(SONGS.length).fill(null);});
+  const voteRows=await sbGet('votes','select=username,song_idx,score');
+  voteRows.forEach(row=>{if(sc[row.username]!==undefined) sc[row.username][row.song_idx]=parseFloat(row.score);});
+
+  hide('voting-screen');
+  show('results-screen');
+
+  const totals=SONGS.map((s,i)=>{
+    let total=0; const bd={};
+    voters.forEach(v=>{const x=sc[v][i];bd[v]=x;if(x!==null)total+=x;});
+    return {...s,idx:i,total,bd};
+  }).sort((a,b)=>b.total-a.total);
+
+  const maxTotal=totals[0]?.total||1;
+  document.getElementById('results-list').innerHTML=totals.map((s,rank)=>{
+    const rc=rank===0?'top1':rank===1?'top2':rank===2?'top3':'';
+    const bc=rank===0?'r1':rank===1?'r2':rank===2?'r3':'';
+    const m=rank===0?'🥇':rank===1?'🥈':rank===2?'🥉':rank+1;
+    const pct=maxTotal>0?(s.total/maxTotal)*100:0;
+    const display=s.song!=='TBA'?s.song:s.country;
+    const bd=voters.map(v=>{const x=s.bd[v];return `<div class="vb-chip">${v}: <span>${x!==null?x:'—'}</span></div>`;}).join('');
+    return `<div class="result-card ${rc}">
+      <div class="rank-badge ${bc}">${m}</div>
+      <div class="result-info">
+        <div class="result-title">${s.flag} ${display}</div>
+        <div class="result-country">${s.country}${s.artist!=='TBA'?' · '+s.artist:''}</div>
+        <div class="score-bar"><div class="score-bar-fill" style="width:${pct}%"></div></div>
+        <div class="voter-breakdown">${bd}</div>
+      </div>
+      <div class="total-score">${s.total%1===0?s.total:s.total.toFixed(2)}</div>
+    </div>`;
+  }).join('');
+}
+
+function goVoting(){
+  hide('results-screen');
+  show('voting-screen');
+  renderTabs(); renderSongs();
+}
+
+boot();
+</script>
+</body>
+</html>
