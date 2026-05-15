@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 
 <!-- Favicon — pure shape, no fonts needed -->
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230d0b18'/%3E%3Cg transform='translate(50,50)'%3E%3Cpolygon transform='rotate(0) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(30) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(60) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(90) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(120) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(150) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(180) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(210) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(240) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(270) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(300) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3Cpolygon transform='rotate(330) translate(0,-32)' points='0,-6 1.8,-1.8 6,-1.8 2.7,1 4,5.5 0,3 -4,5.5 -2.7,1 -6,-1.8 -1.8,-1.8' fill='%23e8c84a'/%3E%3C/g%3E%3C/svg%3E"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzBkMGIxOCIvPgogIDxwb2x5Z29uIHBvaW50cz0iMTYsNCAxOC45LDEyLjIgMjcuNiwxMi4yIDIwLjksMTcuNCAyMy40LDI1LjggMTYsMjAuOCA4LjYsMjUuOCAxMS4xLDE3LjQgNC40LDEyLjIgMTMuMSwxMi4yIiBmaWxsPSIjZThjODRhIi8+Cjwvc3ZnPg==">
 <style>
 /* ALLEU LOGO */
 .alleu-logo{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:18px;}
@@ -163,6 +163,29 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 .vb-chip span{color:var(--text);font-weight:600;}
 .total-score{font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:700;color:var(--gold);white-space:nowrap;}
 .nav-row{display:flex;gap:12px;justify-content:center;margin-top:30px;flex-wrap:wrap;}
+
+/* CHAT PANEL */
+#chat-panel{position:fixed;bottom:0;right:20px;width:320px;max-height:480px;background:var(--card);border:1px solid var(--border);border-bottom:none;border-radius:16px 16px 0 0;display:flex;flex-direction:column;z-index:300;box-shadow:0 -4px 40px rgba(0,0,0,.4);}
+.chat-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:.9rem;color:var(--gold);flex-shrink:0;}
+.chat-close{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;line-height:1;padding:2px 6px;border-radius:6px;}
+.chat-close:hover{color:var(--text);}
+.chat-messages{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-height:0;}
+.chat-msg{display:flex;flex-direction:column;gap:2px;max-width:88%;}
+.chat-msg.mine{align-self:flex-end;align-items:flex-end;}
+.chat-msg.theirs{align-self:flex-start;}
+.chat-bubble{padding:8px 12px;border-radius:12px;font-size:.84rem;line-height:1.4;word-break:break-word;}
+.chat-msg.mine .chat-bubble{background:var(--gold);color:#0d0b18;border-radius:12px 12px 2px 12px;}
+.chat-msg.theirs .chat-bubble{background:var(--bg);border:1px solid var(--border);border-radius:12px 12px 12px 2px;}
+.chat-meta{font-size:.68rem;color:var(--muted);padding:0 4px;}
+.chat-input-row{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;}
+.chat-input-row input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 12px;font-size:.84rem;font-family:'DM Sans',sans-serif;outline:none;}
+.chat-input-row input:focus{border-color:var(--gold);}
+.chat-input-row button{background:var(--gold);color:#0d0b18;border:none;border-radius:8px;padding:8px 14px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;}
+.chat-input-row button:hover{background:var(--gold2);}
+.chat-empty{color:var(--muted);font-size:.82rem;text-align:center;padding:20px 0;}
+@media(max-width:600px){
+  #chat-panel{right:0;left:0;width:100%;border-radius:16px 16px 0 0;max-height:60vh;}
+}
 
 /* VOTER MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .2s;}
@@ -343,6 +366,7 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
   <div class="session-bar">
     <div class="who">Voting as <strong id="session-name"></strong></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="toggleChat()">💬 Chat <span id="chat-unread" style="display:none;background:var(--red);color:#fff;border-radius:99px;padding:1px 6px;font-size:.7rem;margin-left:2px"></span></button>
       <button class="btn btn-ghost btn-sm" onclick="showResults()">🏆 Results</button>
       <button class="btn btn-ghost btn-sm" onclick="showContestPicker()">⬅ Contests</button>
       <button class="btn btn-ghost btn-sm" onclick="showJoinScreen()">Sign Out</button>
@@ -400,7 +424,20 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
   </div>
 </div>
 
-<!-- ADMIN — PIN -->
+<!-- CHAT PANEL -->
+<div id="chat-panel" style="display:none">
+  <div class="chat-header">
+    <span>💬 Group Chat</span>
+    <button class="chat-close" onclick="toggleChat()">×</button>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-input-row">
+    <input type="text" id="chat-inp" placeholder="Say something…" maxlength="500"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"/>
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
 <!-- VOTER BREAKDOWN MODAL -->
 <div class="modal-overlay" id="voter-modal" onclick="closeVoterModal(event)">
   <div class="modal">
@@ -547,10 +584,7 @@ async function liveValidateName(){
   const msg=document.getElementById('name-msg');
   const btn=document.getElementById('join-btn');
 
-  if(!first||!last){
-    msg.textContent=''; msg.className='name-msg info';
-    btn.disabled=true; return;
-  }
+  if(!first||!last){ msg.textContent=''; msg.className='name-msg info'; btn.disabled=true; return; }
   if(first.length<2||last.length<2){
     msg.textContent='Both names must be at least 2 characters.'; msg.className='name-msg err';
     btn.disabled=true; return;
@@ -558,16 +592,15 @@ async function liveValidateName(){
 
   const fullName = first+' '+last;
   try{
-    const rows=await sbGet('users',`username=eq.${encodeURIComponent(fullName)}&select=username`);
+    // Case-insensitive search using ilike
+    const rows=await sbGet('users',`username=ilike.${encodeURIComponent(fullName)}&select=username`);
     if(rows.length){
       msg.textContent='Welcome back! Your previous votes are saved.'; msg.className='name-msg ok';
     } else {
       msg.textContent='New voter — you will be added.'; msg.className='name-msg info';
     }
     btn.disabled=false;
-  } catch(e){
-    btn.disabled=false;
-  }
+  } catch(e){ btn.disabled=false; }
 }
 
 async function submitJoin(){
@@ -580,8 +613,15 @@ async function submitJoin(){
   btn.disabled=true; btn.textContent='Joining…';
 
   try{
-    await sbUpsert('users',{username:fullName, first_name:first, last_name:last});
-    currentUser=fullName;
+    // Case-insensitive duplicate check before inserting
+    const existing=await sbGet('users',`username=ilike.${encodeURIComponent(fullName)}&select=username`);
+    if(existing.length){
+      // Use the existing casing from DB
+      currentUser=existing[0].username;
+    } else {
+      await sbUpsert('users',{username:fullName, first_name:first, last_name:last});
+      currentUser=fullName;
+    }
     document.getElementById('session-name').textContent=currentUser;
     saveSession(currentUser, null);
     await showContestPicker();
@@ -1126,6 +1166,116 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 
 
 
+
+// ── CHAT ──────────────────────────────────────────────────────────────────────
+let chatOpen = false;
+let chatSub = null;
+let chatUnread = 0;
+let lastChatId = null;
+
+function toggleChat(){
+  chatOpen = !chatOpen;
+  const panel = document.getElementById('chat-panel');
+  panel.style.display = chatOpen ? 'flex' : 'none';
+  if(chatOpen){
+    chatUnread = 0;
+    updateUnreadBadge();
+    loadMessages();
+    subscribeChat();
+    setTimeout(()=>document.getElementById('chat-inp').focus(), 100);
+  } else {
+    unsubscribeChat();
+  }
+}
+
+function updateUnreadBadge(){
+  const b = document.getElementById('chat-unread');
+  if(chatUnread > 0){ b.textContent = chatUnread > 9 ? '9+' : chatUnread; b.style.display='inline'; }
+  else { b.style.display='none'; }
+}
+
+async function loadMessages(){
+  const el = document.getElementById('chat-messages');
+  try{
+    const msgs = await sbGet('messages','select=*&order=created_at.asc&limit=100');
+    renderMessages(msgs);
+    if(msgs.length) lastChatId = msgs[msgs.length-1].id;
+  } catch(e){ el.innerHTML=`<div class="chat-empty">Could not load messages.</div>`; }
+}
+
+function renderMessages(msgs){
+  const el = document.getElementById('chat-messages');
+  if(!msgs.length){ el.innerHTML='<div class="chat-empty">No messages yet. Say hello! 👋</div>'; return; }
+  el.innerHTML = msgs.map(m=>{
+    const mine = m.username === currentUser;
+    const time = new Date(m.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="chat-msg ${mine?'mine':'theirs'}">
+      ${!mine?`<div class="chat-meta">${m.username}</div>`:''}
+      <div class="chat-bubble">${escapeHtml(m.message)}</div>
+      <div class="chat-meta">${time}</div>
+    </div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function appendMessage(m){
+  const el = document.getElementById('chat-messages');
+  const empty = el.querySelector('.chat-empty');
+  if(empty) empty.remove();
+  const mine = m.username === currentUser;
+  const time = new Date(m.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  const div = document.createElement('div');
+  div.className = `chat-msg ${mine?'mine':'theirs'}`;
+  div.innerHTML = `${!mine?`<div class="chat-meta">${m.username}</div>`:''}
+    <div class="chat-bubble">${escapeHtml(m.message)}</div>
+    <div class="chat-meta">${time}</div>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function subscribeChat(){
+  if(chatSub) return;
+  // Poll every 5 seconds as Supabase realtime requires extra setup
+  chatSub = setInterval(async()=>{
+    if(!lastChatId) return;
+    try{
+      const newMsgs = await sbGet('messages',`created_at=gt.${encodeURIComponent(new Date(Date.now()-6000).toISOString())}&order=created_at.asc&limit=20`);
+      newMsgs.forEach(m=>{
+        if(m.id === lastChatId) return;
+        lastChatId = m.id;
+        if(chatOpen){ appendMessage(m); }
+        else if(m.username !== currentUser){ chatUnread++; updateUnreadBadge(); }
+      });
+    } catch(e){}
+  }, 5000);
+}
+
+function unsubscribeChat(){
+  if(chatSub){ clearInterval(chatSub); chatSub=null; }
+}
+
+async function sendMessage(){
+  const inp = document.getElementById('chat-inp');
+  const msg = inp.value.trim();
+  if(!msg || !currentUser) return;
+  inp.value='';
+  try{
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/messages`,{
+      method:'POST',
+      headers:{...H,'Prefer':'return=representation'},
+      body:JSON.stringify({username:currentUser, message:msg})
+    });
+    if(r.ok){
+      const [m] = await r.json();
+      appendMessage(m);
+      lastChatId = m.id;
+    }
+  } catch(e){ inp.value=msg; }
+}
 
 boot();
 </script>
