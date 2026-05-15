@@ -201,27 +201,27 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
 .no-results-msg{text-align:center;padding:40px 20px;color:var(--muted);font-size:.9rem;background:var(--card);border:1px dashed var(--border);border-radius:13px;}
 
 /* ADMIN PANEL */
-.admin-user-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;}
-.admin-user-row .u-name{font-size:.88rem;font-weight:500;}
-.admin-user-row .u-meta{font-size:.75rem;color:var(--muted);margin-top:2px;}
-.delete-btn{background:rgba(232,74,106,.12);border:1px solid rgba(232,74,106,.3);color:#e84a6a;border-radius:6px;padding:4px 10px;font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
-.delete-btn:hover{background:rgba(232,74,106,.25);border-color:#e84a6a;}
-.admin-card h2{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--gold);margin-bottom:6px;}
-.admin-card .sub{color:var(--muted);font-size:.85rem;margin-bottom:24px;}
-.pin-wrap{display:flex;gap:10px;margin-bottom:20px;}
-.pin-wrap input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:11px 14px;font-size:1rem;font-family:'DM Sans',sans-serif;outline:none;letter-spacing:6px;text-align:center;}
+
+
+
+
+
+
+
+
+
 .pin-wrap input:focus{border-color:var(--gold);}
-.pin-error{color:var(--red);font-size:.8rem;margin-bottom:12px;min-height:16px;}
-.official-song-row{display:grid;grid-template-columns:1fr 90px;align-items:center;gap:10px;margin-bottom:8px;}
-.official-song-row .s-label{font-size:.88rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+
+
 .official-song-row input[type=number]{background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 10px;font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;text-align:center;width:100%;}
 .official-song-row input[type=number]:focus{border-color:var(--gold);}
 .official-song-row input[type=number].filled{border-color:var(--green);}
-.admin-section-title{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+
 
 @media(max-width:600px){
   .precision-card{grid-template-columns:36px 1fr auto;gap:10px;padding:14px;}
-  .admin-card{padding:22px 16px;}
+  
   .song-card{grid-template-columns:24px 36px 1fr auto;gap:8px;padding:10px 12px;}
   .song-photo{width:36px;height:36px;}
   .score-input{width:46px;}
@@ -395,50 +395,12 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;font-weight:300;}
   <div id="precision-list"></div>
   <div class="nav-row">
     <button class="btn btn-ghost btn-sm" onclick="showResults()">🏆 Scoreboard</button>
-    <button class="btn btn-ghost btn-sm" onclick="showAdminPin()">⚙ Enter Official Results</button>
     <button class="btn btn-ghost btn-sm" onclick="showContestPicker()">⬅ Contests</button>
     <button class="btn btn-del btn-sm" onclick="showJoinScreen()">Sign Out</button>
   </div>
 </div>
 
 <!-- ADMIN — PIN -->
-<div class="wrap" id="admin-pin-screen" style="display:none">
-  <div class="admin-card">
-    <h2>⚙ Admin Access</h2>
-    <p class="sub">Enter the admin PIN to input the official Eurovision results.</p>
-    <div class="pin-wrap">
-      <input type="password" id="inp-pin" placeholder="····" maxlength="6"
-        inputmode="numeric" onkeydown="if(event.key==='Enter')checkPin()"/>
-      <button class="btn btn-sm" onclick="checkPin()" style="width:auto">Unlock</button>
-    </div>
-    <div class="pin-error" id="pin-error"></div>
-    <div class="nav-row" style="margin-top:10px">
-      <button class="btn btn-ghost btn-sm" onclick="showPrecision()">← Back</button>
-    </div>
-  </div>
-</div>
-
-<!-- ADMIN — RESULTS ENTRY -->
-<div class="wrap" id="admin-screen" style="display:none">
-  <div class="admin-card" style="max-width:640px">
-    <h2>⚙ Admin Panel</h2>
-    <p class="sub" id="admin-contest-name"></p>
-
-    <div class="admin-section-title">Official Results</div>
-    <p class="sub" style="margin-bottom:12px">Enter the official finishing position for each song (1 = winner). Leave blank if not placed.</p>
-    <div id="admin-songs-list"></div>
-    <div class="nav-row">
-      <button class="btn btn-sm" onclick="saveOfficialResults()">💾 Save Results</button>
-      <button class="btn btn-ghost btn-sm" onclick="showPrecision()">← Cancel</button>
-    </div>
-    <div class="pin-error" id="admin-save-msg" style="margin-top:12px;text-align:center"></div>
-
-    <div class="admin-section-title" style="margin-top:28px">Voters</div>
-    <div id="admin-users-list" style="margin-bottom:12px"></div>
-    <div class="pin-error" id="admin-users-msg" style="text-align:center"></div>
-  </div>
-</div>
-
 <!-- VOTER BREAKDOWN MODAL -->
 <div class="modal-overlay" id="voter-modal" onclick="closeVoterModal(event)">
   <div class="modal">
@@ -502,7 +464,7 @@ async function sbDelete(table, params){
 // ── UI HELPERS ────────────────────────────────────────────────────────────────
 function show(id){document.getElementById(id).style.display='block';}
 function hide(id){document.getElementById(id).style.display='none';}
-function hideAll(){['join-screen','contest-screen','voting-screen','results-screen','precision-screen','admin-pin-screen','admin-screen'].forEach(hide);}
+function hideAll(){['join-screen','contest-screen','voting-screen','results-screen','precision-screen'].forEach(hide);}
 
 function setStatus(state, label){
   const el=document.getElementById('db-badge'); el.className=state;
@@ -1107,102 +1069,13 @@ async function showPrecision(){
 }
 
 // ── ADMIN PIN ─────────────────────────────────────────────────────────────────
-const ADMIN_PIN='4535';
 
-function showAdminPin(){
-  hideAll(); show('admin-pin-screen');
-  document.getElementById('inp-pin').value='';
-  document.getElementById('pin-error').textContent='';
-  setTimeout(()=>document.getElementById('inp-pin').focus(),100);
-}
 
-function checkPin(){
-  const val=document.getElementById('inp-pin').value.trim();
-  if(val===ADMIN_PIN){
-    document.getElementById('pin-error').textContent='';
-    showAdminPanel();
-  } else {
-    document.getElementById('pin-error').textContent='Incorrect PIN. Try again.';
-    document.getElementById('inp-pin').value='';
-    document.getElementById('inp-pin').focus();
-  }
-}
 
-// ── ADMIN PANEL ───────────────────────────────────────────────────────────────
-async function showAdminPanel(){
-  hideAll(); show('admin-screen');
-  document.getElementById('admin-contest-name').textContent=currentContest.name;
-  document.getElementById('admin-save-msg').textContent='';
-  document.getElementById('admin-users-msg').textContent='';
 
-  // Load existing official results
-  const existing=await sbGet('official_results',
-    `contest_id=eq.${encodeURIComponent(currentContest.id)}&select=song_idx,final_place`);
-  const existingMap={};
-  existing.forEach(r=>{ existingMap[r.song_idx]=r.final_place; });
 
-  document.getElementById('admin-songs-list').innerHTML=contestSongs.map((s,i)=>{
-    const display=s.song&&s.song!=='TBA'?s.song:s.country;
-    const existingPlace=existingMap[i]||'';
-    const photoHtml=s.photo_url
-      ? `<img src="${s.photo_url}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--border);flex-shrink:0" onerror="this.style.display='none'">`
-      : `<span style="font-size:1.3rem;flex-shrink:0">${s.flag||'🎵'}</span>`;
-    return `<div class="official-song-row">
-      <div class="s-label" style="display:flex;align-items:center;gap:8px">
-        ${photoHtml}
-        <span>${flagImg(s.country,20)} ${display} <small style="color:var(--muted)">${s.artist&&s.artist!=='TBA'?'· '+s.artist:''}</small></span>
-      </div>
-      <input type="number" id="official-${i}" min="1" max="${contestSongs.length}"
-        placeholder="Place" value="${existingPlace}"
-        class="${existingPlace?'filled':''}"
-        oninput="this.classList.toggle('filled',!!this.value)"/>
-    </div>`;
-  }).join('');
 
-  // Load voters list
-  await loadAdminUsers();
-}
 
-async function saveOfficialResults(){
-  const msg=document.getElementById('admin-save-msg');
-  msg.style.color='var(--muted)'; msg.textContent='Saving…';
-
-  const rows=[];
-  const usedPlaces=new Set();
-  let hasError=false;
-
-  contestSongs.forEach((_,i)=>{
-    const val=document.getElementById(`official-${i}`).value.trim();
-    if(!val) return;
-    const place=parseInt(val);
-    if(isNaN(place)||place<1){ hasError=true; return; }
-    if(usedPlaces.has(place)){
-      msg.style.color='var(--red)';
-      msg.textContent=`⚠ Position ${place} used more than once. Each song must have a unique place.`;
-      hasError=true; return;
-    }
-    usedPlaces.add(place);
-    rows.push({contest_id:currentContest.id, song_idx:i, final_place:place});
-  });
-
-  if(hasError && !msg.textContent.startsWith('⚠')){
-    msg.style.color='var(--red)'; msg.textContent='⚠ Some entries are invalid.'; return;
-  }
-  if(hasError) return;
-  if(!rows.length){
-    msg.style.color='var(--red)'; msg.textContent='⚠ No positions entered.'; return;
-  }
-
-  try{
-    // Delete existing then insert fresh
-    await sbDelete('official_results',`contest_id=eq.${encodeURIComponent(currentContest.id)}`);
-    await sbUpsert('official_results', rows);
-    msg.style.color='var(--green)'; msg.textContent='✅ Official results saved!';
-    setTimeout(()=>showPrecision(), 1500);
-  } catch(e){
-    msg.style.color='var(--red)'; msg.textContent='Error: '+e.message;
-  }
-}
 
 // ── VOTER MODAL ───────────────────────────────────────────────────────────────
 function openVoterModal(songIdx){
@@ -1251,49 +1124,8 @@ function closeVoterModal(e){
 // Close on Escape key
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 
-// ── ADMIN USERS ───────────────────────────────────────────────────────────────
-async function loadAdminUsers(){
-  const el=document.getElementById('admin-users-list');
-  el.innerHTML='<div style="color:var(--muted);font-size:.82rem;padding:8px 0">Loading voters…</div>';
-  try{
-    const users=await sbGet('users','select=username,first_name,last_name,created_at&order=last_name.asc,first_name.asc');
-    if(!users.length){ el.innerHTML='<div style="color:var(--muted);font-size:.82rem;padding:8px">No voters yet.</div>'; return; }
-    el.innerHTML=users.map(u=>{
-      const name=u.first_name&&u.last_name ? `${u.first_name} ${u.last_name}` : u.username;
-      const joined=u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '';
-      const isMe = u.username===currentUser;
-      return `<div class="admin-user-row" id="urow-${encodeURIComponent(u.username)}">
-        <div>
-          <div class="u-name">${name}${isMe?' <small style="color:var(--gold);font-size:.7rem">(you)</small>':''}</div>
-          ${joined?`<div class="u-meta">Joined ${joined}</div>`:''}
-        </div>
-        <button class="delete-btn" onclick="deleteUser('${u.username.replace(/'/g,"\\'")}')">Delete</button>
-      </div>`;
-    }).join('');
-  } catch(e){
-    el.innerHTML=`<div style="color:#e84a6a;font-size:.82rem">${e.message}</div>`;
-  }
-}
 
-async function deleteUser(username){
-  if(!confirm(`Delete "${username}" and all their votes? This cannot be undone.`)) return;
-  const msg=document.getElementById('admin-users-msg');
-  msg.textContent='Deleting…'; msg.style.color='var(--muted)';
-  try{
-    // Delete votes first
-    await sbDelete('votes',`username=eq.${encodeURIComponent(username)}`);
-    // Delete user
-    await sbDelete('users',`username=eq.${encodeURIComponent(username)}`);
-    msg.textContent=`✓ "${username}" deleted.`; msg.style.color='#4ae8a0';
-    // Remove row from DOM
-    const row=document.getElementById('urow-'+encodeURIComponent(username));
-    if(row) row.remove();
-    // If deleted self, log out
-    if(username===currentUser){ setTimeout(()=>showJoin(),1500); }
-  } catch(e){
-    msg.textContent='Error: '+e.message; msg.style.color='#e84a6a';
-  }
-}
+
 
 boot();
 </script>
