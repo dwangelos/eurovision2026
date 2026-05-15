@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Eurovision 2026 — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d0b18;--card:#16132a;--border:#2e2852;
+  --gold:#e8c84a;--text:#e8e3ff;--muted:#7b72a8;
+  --green:#4ae8a0;--red:#e84a6a;--blue:#4a9fe8;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* PIN SCREEN */
+#pin-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+.pin-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:48px 40px;text-align:center;max-width:380px;width:100%;}
+.pin-card h1{font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);margin-bottom:8px;}
+.pin-card p{color:var(--muted);font-size:.88rem;margin-bottom:28px;}
+.pin-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:14px 16px;font-size:1.1rem;text-align:center;letter-spacing:.3em;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:12px;}
+.pin-input:focus{border-color:var(--gold);}
+.pin-error{color:var(--red);font-size:.82rem;min-height:18px;margin-bottom:12px;}
+
+/* ADMIN LAYOUT */
+#admin-screen{display:none;}
+header{background:var(--card);border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;}
+header h1{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold);}
+.header-sub{color:var(--muted);font-size:.8rem;}
+.sign-out{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:6px 14px;font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.sign-out:hover{border-color:var(--red);color:var(--red);}
+
+.layout{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 57px);}
+.sidebar{background:var(--card);border-right:1px solid var(--border);padding:20px 0;}
+.nav-item{padding:11px 22px;font-size:.88rem;cursor:pointer;color:var(--muted);display:flex;align-items:center;gap:10px;transition:all .15s;border-left:3px solid transparent;}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.03);}
+.nav-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(232,200,74,.05);}
+.nav-section{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:16px 22px 6px;opacity:.6;}
+
+.content{padding:28px;max-width:900px;}
+.page{display:none;} .page.active{display:block;}
+.page-title{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold);margin-bottom:4px;}
+.page-sub{color:var(--muted);font-size:.85rem;margin-bottom:24px;}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-bottom:14px;}
+.card-title{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;}
+
+/* STATS ROW */
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:24px;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+.stat .val{font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);font-weight:700;}
+.stat .lbl{font-size:.78rem;color:var(--muted);margin-top:2px;}
+
+/* USERS TABLE */
+.user-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);gap:12px;}
+.user-row:last-child{border-bottom:none;}
+.user-row:hover{background:rgba(255,255,255,.02);}
+.u-name{font-weight:500;font-size:.9rem;}
+.u-meta{font-size:.75rem;color:var(--muted);margin-top:2px;}
+.u-badge{font-size:.72rem;padding:3px 8px;border-radius:20px;font-weight:500;}
+.voted{background:rgba(74,232,160,.12);color:var(--green);}
+.no-vote{background:rgba(123,114,168,.12);color:var(--muted);}
+.del-btn{background:rgba(232,74,106,.1);border:1px solid rgba(232,74,106,.25);color:var(--red);border-radius:6px;padding:5px 12px;font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0;}
+.del-btn:hover{background:rgba(232,74,106,.22);border-color:var(--red);}
+
+/* CONTESTS */
+.contest-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:12px;}
+.contest-row:last-child{border-bottom:none;}
+.c-name{font-weight:600;font-size:.92rem;}
+.c-meta{font-size:.75rem;color:var(--muted);margin-top:3px;}
+.toggle-btn{border-radius:20px;padding:5px 14px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;}
+.toggle-on{background:rgba(74,232,160,.15);color:var(--green);border:1px solid rgba(74,232,160,.3);}
+.toggle-on:hover{background:rgba(74,232,160,.28);}
+.toggle-off{background:rgba(123,114,168,.12);color:var(--muted);border:1px solid var(--border);}
+.toggle-off:hover{background:rgba(123,114,168,.22);color:var(--text);}
+.badge-active{background:rgba(74,232,160,.12);color:var(--green);border:1px solid rgba(74,232,160,.2);border-radius:20px;padding:3px 10px;font-size:.72rem;font-weight:600;}
+.badge-off{background:rgba(123,114,168,.08);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:.72rem;}
+
+/* RESULTS */
+.result-song-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.result-song-row:last-child{border-bottom:none;}
+.r-num{width:28px;text-align:center;font-size:.78rem;color:var(--muted);flex-shrink:0;}
+.r-photo{width:36px;height:36px;border-radius:50%;object-fit:cover;background:var(--border);flex-shrink:0;}
+.r-info{flex:1;min-width:0;}
+.r-title{font-size:.88rem;font-weight:500;}
+.r-artist{font-size:.72rem;color:var(--muted);}
+.r-place-input{width:60px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 8px;font-size:.82rem;text-align:center;font-family:'DM Sans',sans-serif;outline:none;}
+.r-place-input:focus{border-color:var(--gold);}
+.r-place-input.filled{border-color:var(--gold);color:var(--gold);}
+
+/* BUTTONS */
+.btn{background:var(--gold);color:#0d0b18;border:none;border-radius:8px;padding:10px 22px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn:hover{background:#f5d96e;}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.msg{font-size:.82rem;margin-top:10px;min-height:18px;}
+.msg.ok{color:var(--green);} .msg.err{color:var(--red);}
+
+.loading{color:var(--muted);font-size:.85rem;padding:20px 0;text-align:center;}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+@media(max-width:640px){
+  .layout{grid-template-columns:1fr;}
+  .sidebar{display:flex;flex-direction:row;overflow-x:auto;padding:0;border-right:none;border-bottom:1px solid var(--border);}
+  .nav-item{border-left:none;border-bottom:3px solid transparent;white-space:nowrap;padding:12px 16px;}
+  .nav-item.active{border-left-color:transparent;border-bottom-color:var(--gold);}
+  .nav-section{display:none;}
+  .content{padding:18px;}
+}
+</style>
+</head>
+<body>
+
+<!-- PIN SCREEN -->
+<div id="pin-screen">
+  <div class="pin-card">
+    <h1>⚙ Admin</h1>
+    <p>Eurovision 2026 — Admin Panel<br>Enter your PIN to continue.</p>
+    <input class="pin-input" type="password" id="pin-inp" maxlength="6" placeholder="••••"
+      oninput="pinInput()" onkeydown="if(event.key==='Enter')checkPin()"/>
+    <div class="pin-error" id="pin-err"></div>
+    <button class="btn" style="width:100%" onclick="checkPin()">Enter</button>
+  </div>
+</div>
+
+<!-- ADMIN SCREEN -->
+<div id="admin-screen">
+  <header>
+    <div>
+      <h1>⚙ Eurovision 2026 Admin</h1>
+      <div class="header-sub" id="header-sub">Loading…</div>
+    </div>
+    <button class="sign-out" onclick="signOut()">Sign Out</button>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="nav-section">Overview</div>
+      <div class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">📊 Dashboard</div>
+      <div class="nav-section">Manage</div>
+      <div class="nav-item" onclick="showPage('users')" id="nav-users">👥 Voters</div>
+      <div class="nav-item" onclick="showPage('contests')" id="nav-contests">🗓 Contests</div>
+      <div class="nav-item" onclick="showPage('results')" id="nav-results">🏆 Official Results</div>
+    </nav>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub">Live overview of Eurovision 2026 voting.</div>
+        <div class="stats" id="stats-row">
+          <div class="stat"><div class="val" id="stat-voters">—</div><div class="lbl">Total Voters</div></div>
+          <div class="stat"><div class="val" id="stat-voted">—</div><div class="lbl">Fully Voted</div></div>
+          <div class="stat"><div class="val" id="stat-votes">—</div><div class="lbl">Total Votes Cast</div></div>
+          <div class="stat"><div class="val" id="stat-songs">—</div><div class="lbl">Songs in Final</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Top 5 Leading Songs</div>
+          <div id="dash-top5"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Voters Progress</div>
+          <div id="dash-voters"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="page" id="page-users">
+        <div class="page-title">Voters</div>
+        <div class="page-sub">Manage who can vote. Deleting a voter removes all their votes.</div>
+        <div class="card" style="padding:0">
+          <div id="users-list"><div class="loading" style="padding:20px"><span class="spinner"></span>Loading…</div></div>
+        </div>
+        <div class="msg" id="users-msg"></div>
+      </div>
+
+      <!-- CONTESTS -->
+      <div class="page" id="page-contests">
+        <div class="page-title">Contests</div>
+        <div class="page-sub">Toggle contests on/off and manage voting windows.</div>
+        <div class="card" style="padding:14px 20px">
+          <div id="contests-list"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+        </div>
+        <div class="msg" id="contests-msg"></div>
+      </div>
+
+      <!-- OFFICIAL RESULTS -->
+      <div class="page" id="page-results">
+        <div class="page-title">Official Results</div>
+        <div class="page-sub">Enter the official finishing position for each song (1 = winner) after the Grand Final.</div>
+        <div class="card" style="padding:14px 20px">
+          <div id="results-list"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:10px;align-items:center">
+          <button class="btn" onclick="saveResults()">💾 Save Results</button>
+          <div class="msg" id="results-msg" style="margin:0"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const SB = 'https://onpsmwempgoopamqodfb.supabase.co';
+const KEY = 'sb_publishable_hHkVZYm10pCjyKwzWAJFeg_GvVpPINX';
+const PIN = '4535';
+const H = {'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
+
+let currentContest = null;
+let songs = [];
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+function pinInput(){ document.getElementById('pin-err').textContent=''; }
+
+function checkPin(){
+  const v = document.getElementById('pin-inp').value;
+  if(v === PIN){
+    document.getElementById('pin-screen').style.display='none';
+    document.getElementById('admin-screen').style.display='block';
+    boot();
+  } else {
+    document.getElementById('pin-err').textContent='Incorrect PIN.';
+    document.getElementById('pin-inp').value='';
+  }
+}
+
+function signOut(){
+  document.getElementById('pin-screen').style.display='flex';
+  document.getElementById('admin-screen').style.display='none';
+  document.getElementById('pin-inp').value='';
+}
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='users') loadUsers();
+  if(name==='contests') loadContests();
+  if(name==='results') loadResults();
+}
+
+// ── API HELPERS ───────────────────────────────────────────────────────────────
+async function get(table, params=''){
+  const r = await fetch(`${SB}/rest/v1/${table}?${params}`,{headers:H});
+  if(!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function patch(table, params, body){
+  const r = await fetch(`${SB}/rest/v1/${table}?${params}`,{method:'PATCH',headers:H,body:JSON.stringify(body)});
+  if(!r.ok) throw new Error(await r.text());
+}
+async function del(table, params){
+  const r = await fetch(`${SB}/rest/v1/${table}?${params}`,{method:'DELETE',headers:H});
+  if(!r.ok) throw new Error(await r.text());
+}
+async function upsert(table, body){
+  const r = await fetch(`${SB}/rest/v1/${table}`,{method:'POST',
+    headers:{...H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(body)});
+  if(!r.ok) throw new Error(await r.text());
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+async function boot(){
+  try{
+    const contests = await get('contests','active=eq.true&select=*');
+    currentContest = contests[0] || null;
+    document.getElementById('header-sub').textContent =
+      currentContest ? `Active: ${currentContest.name}` : 'No active contest';
+    await loadDashboard();
+  } catch(e){ console.error(e); }
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+async function loadDashboard(){
+  if(!currentContest) return;
+  try{
+    const [users, votes, songsData] = await Promise.all([
+      get('users','select=username'),
+      get('votes',`contest_id=eq.${encodeURIComponent(currentContest.id)}&select=username,song_idx,score`),
+      get('contest_songs',`contest_id=eq.${encodeURIComponent(currentContest.id)}&select=*&order=running_order.asc`),
+    ]);
+    songs = songsData;
+    const totalSongs = songs.length;
+    const totalVoters = users.length;
+
+    // Count votes per voter
+    const voterVotes = {};
+    votes.forEach(v=>{ voterVotes[v.username]=(voterVotes[v.username]||0)+1; });
+    const fullyVoted = Object.values(voterVotes).filter(c=>c>=totalSongs).length;
+
+    document.getElementById('stat-voters').textContent = totalVoters;
+    document.getElementById('stat-voted').textContent = fullyVoted;
+    document.getElementById('stat-votes').textContent = votes.length;
+    document.getElementById('stat-songs').textContent = totalSongs;
+
+    // Top 5
+    const totals = {};
+    votes.forEach(v=>{ totals[v.song_idx]=(totals[v.song_idx]||0)+parseFloat(v.score); });
+    const ranked = Object.entries(totals)
+      .map(([idx,total])=>({idx:parseInt(idx),total,song:songs[parseInt(idx)]}))
+      .filter(x=>x.song)
+      .sort((a,b)=>b.total-a.total)
+      .slice(0,5);
+
+    document.getElementById('dash-top5').innerHTML = ranked.length
+      ? ranked.map((s,i)=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div style="width:24px;font-family:'Playfair Display',serif;color:var(--gold);text-align:center">${i+1}</div>
+          ${s.song.photo_url?`<img src="${s.song.photo_url}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.display='none'">`:''}
+          <div style="flex:1">
+            <div style="font-weight:500;font-size:.88rem">${s.song.song||s.song.country}</div>
+            <div style="font-size:.72rem;color:var(--muted)">${s.song.country} · ${s.song.artist||''}</div>
+          </div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold)">${s.total%1===0?s.total:s.total.toFixed(2)}</div>
+        </div>`).join('')
+      : '<div style="color:var(--muted);font-size:.85rem">No votes yet.</div>';
+
+    // Voter progress
+    document.getElementById('dash-voters').innerHTML = users.map(u=>{
+      const count = voterVotes[u.username]||0;
+      const pct = totalSongs>0?Math.round((count/totalSongs)*100):0;
+      return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+        <div style="flex:1;font-size:.85rem;font-weight:500">${u.username}</div>
+        <div style="width:120px;height:6px;background:var(--border);border-radius:99px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:${pct===100?'var(--green)':'var(--gold)'};border-radius:99px"></div>
+        </div>
+        <div style="font-size:.75rem;color:var(--muted);width:40px;text-align:right">${count}/${totalSongs}</div>
+      </div>`;
+    }).join('');
+
+  } catch(e){ console.error(e); }
+}
+
+// ── USERS ─────────────────────────────────────────────────────────────────────
+async function loadUsers(){
+  const el = document.getElementById('users-list');
+  el.innerHTML='<div class="loading" style="padding:20px"><span class="spinner"></span>Loading…</div>';
+  try{
+    const [users, votes] = await Promise.all([
+      get('users','select=username,first_name,last_name,created_at&order=last_name.asc,first_name.asc'),
+      currentContest ? get('votes',`contest_id=eq.${encodeURIComponent(currentContest.id)}&select=username,song_idx`) : Promise.resolve([]),
+    ]);
+    const voteCount = {};
+    votes.forEach(v=>{ voteCount[v.username]=(voteCount[v.username]||0)+1; });
+    const totalSongs = songs.length || 25;
+
+    el.innerHTML = users.map(u=>{
+      const count = voteCount[u.username]||0;
+      const joined = u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '';
+      const fullName = u.first_name&&u.last_name&&u.first_name!==u.username ? `${u.first_name} ${u.last_name}` : u.username;
+      return `<div class="user-row" id="urow-${encodeURIComponent(u.username)}">
+        <div style="flex:1;min-width:0">
+          <div class="u-name">${fullName}</div>
+          <div class="u-meta">${joined ? 'Joined '+joined : ''} · ${count} vote${count!==1?'s':''}</div>
+        </div>
+        <span class="u-badge ${count>=totalSongs?'voted':'no-vote'}">${count>=totalSongs?'✓ Done':'Pending'}</span>
+        <button class="del-btn" onclick="deleteUser('${u.username.replace(/'/g,"\\'")}')">Delete</button>
+      </div>`;
+    }).join('');
+  } catch(e){
+    el.innerHTML=`<div style="color:var(--red);padding:20px">${e.message}</div>`;
+  }
+}
+
+async function deleteUser(username){
+  if(!confirm(`Delete "${username}" and ALL their votes? This cannot be undone.`)) return;
+  const msg = document.getElementById('users-msg');
+  msg.className='msg'; msg.textContent='Deleting…';
+  try{
+    await del('votes',`username=eq.${encodeURIComponent(username)}`);
+    await del('users',`username=eq.${encodeURIComponent(username)}`);
+    const row = document.getElementById('urow-'+encodeURIComponent(username));
+    if(row) row.remove();
+    msg.className='msg ok'; msg.textContent=`✓ "${username}" deleted.`;
+  } catch(e){
+    msg.className='msg err'; msg.textContent='Error: '+e.message;
+  }
+}
+
+// ── CONTESTS ──────────────────────────────────────────────────────────────────
+async function loadContests(){
+  const el = document.getElementById('contests-list');
+  el.innerHTML='<div class="loading"><span class="spinner"></span>Loading…</div>';
+  try{
+    const contests = await get('contests','select=*&order=created_at.asc');
+    el.innerHTML = contests.map(c=>{
+      const opens = c.voting_opens_at ? new Date(c.voting_opens_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : 'Not set';
+      const closes = c.voting_closes_at ? new Date(c.voting_closes_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : 'Not set';
+      return `<div class="contest-row">
+        <div style="flex:1">
+          <div class="c-name">${c.name}</div>
+          <div class="c-meta">Opens: ${opens} · Closes: ${closes}</div>
+        </div>
+        <span class="${c.active?'badge-active':'badge-off'}" id="cbadge-${c.id}">${c.active?'Active':'Off'}</span>
+        <button class="toggle-btn ${c.active?'toggle-on':'toggle-off'}" id="ctoggle-${c.id}"
+          onclick="toggleContest('${c.id}',${c.active})">
+          ${c.active?'Deactivate':'Activate'}
+        </button>
+      </div>`;
+    }).join('');
+  } catch(e){
+    el.innerHTML=`<div style="color:var(--red)">${e.message}</div>`;
+  }
+}
+
+async function toggleContest(id, currentlyActive){
+  const msg = document.getElementById('contests-msg');
+  try{
+    await patch('contests',`id=eq.${encodeURIComponent(id)}`,{active:!currentlyActive});
+    msg.className='msg ok'; msg.textContent=`✓ ${id} ${!currentlyActive?'activated':'deactivated'}.`;
+    await loadContests();
+    const contests = await get('contests','active=eq.true&select=*');
+    currentContest = contests[0]||null;
+    document.getElementById('header-sub').textContent =
+      currentContest?`Active: ${currentContest.name}`:'No active contest';
+  } catch(e){
+    msg.className='msg err'; msg.textContent='Error: '+e.message;
+  }
+}
+
+// ── OFFICIAL RESULTS ──────────────────────────────────────────────────────────
+async function loadResults(){
+  const el = document.getElementById('results-list');
+  el.innerHTML='<div class="loading"><span class="spinner"></span>Loading…</div>';
+  try{
+    if(!currentContest){ el.innerHTML='<div style="color:var(--muted)">No active contest.</div>'; return; }
+    const [songsData, existing] = await Promise.all([
+      get('contest_songs',`contest_id=eq.${encodeURIComponent(currentContest.id)}&select=*&order=running_order.asc`),
+      get('official_results',`contest_id=eq.${encodeURIComponent(currentContest.id)}&select=song_idx,final_place`),
+    ]);
+    songs = songsData;
+    const existingMap = {};
+    existing.forEach(r=>{ existingMap[r.song_idx]=r.final_place; });
+
+    el.innerHTML = songs.map((s,i)=>{
+      const display = s.song&&s.song!=='TBA'?s.song:s.country;
+      const place = existingMap[i]||'';
+      return `<div class="result-song-row">
+        <div class="r-num">${s.running_order||i+1}</div>
+        ${s.photo_url?`<img class="r-photo" src="${s.photo_url}" onerror="this.style.display='none'">`
+          :`<div class="r-photo" style="display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--muted)">${s.country.slice(0,2).toUpperCase()}</div>`}
+        <div class="r-info">
+          <div class="r-title">${display}</div>
+          <div class="r-artist">${s.country}${s.artist&&s.artist!=='TBA'?' · '+s.artist:''}</div>
+        </div>
+        <input class="r-place-input ${place?'filled':''}" type="number" id="place-${i}"
+          min="1" max="${songs.length}" placeholder="—" value="${place}"
+          oninput="this.classList.toggle('filled',!!this.value)"/>
+      </div>`;
+    }).join('');
+  } catch(e){
+    el.innerHTML=`<div style="color:var(--red)">${e.message}</div>`;
+  }
+}
+
+async function saveResults(){
+  const msg = document.getElementById('results-msg');
+  msg.className='msg'; msg.textContent='Saving…';
+  const rows = [];
+  const used = new Set();
+  let err = false;
+  songs.forEach((_,i)=>{
+    const val = document.getElementById(`place-${i}`)?.value.trim();
+    if(!val) return;
+    const place = parseInt(val);
+    if(isNaN(place)||place<1){ err=true; return; }
+    if(used.has(place)){ err=true; return; }
+    used.add(place);
+    rows.push({contest_id:currentContest.id, song_idx:i, final_place:place});
+  });
+  if(err){ msg.className='msg err'; msg.textContent='Invalid or duplicate positions.'; return; }
+  try{
+    await upsert('official_results', rows);
+    msg.className='msg ok'; msg.textContent=`✓ ${rows.length} positions saved.`;
+  } catch(e){
+    msg.className='msg err'; msg.textContent='Error: '+e.message;
+  }
+}
+</script>
+</body>
+</html>
