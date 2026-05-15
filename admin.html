@@ -347,22 +347,50 @@ async function loadUsers(){
   try{
     const [users, votes] = await Promise.all([
       get('users','select=username,first_name,last_name,created_at&order=last_name.asc,first_name.asc'),
-      currentContest ? get('votes',`contest_id=eq.${encodeURIComponent(currentContest.id)}&select=username,song_idx`) : Promise.resolve([]),
+      currentContest ? get('votes',`contest_id=eq.${encodeURIComponent(currentContest.id)}&select=username,song_idx,score`) : Promise.resolve([]),
     ]);
-    const voteCount = {};
-    votes.forEach(v=>{ voteCount[v.username]=(voteCount[v.username]||0)+1; });
     const totalSongs = songs.length || 25;
 
+    // Build per-voter stats
+    const stats = {};
+    votes.forEach(v=>{
+      const u = v.username;
+      if(!stats[u]) stats[u] = {count:0, total:0, max:-Infinity, min:Infinity};
+      stats[u].count++;
+      stats[u].total += parseFloat(v.score);
+      stats[u].max = Math.max(stats[u].max, parseFloat(v.score));
+      stats[u].min = Math.min(stats[u].min, parseFloat(v.score));
+    });
+
     el.innerHTML = users.map(u=>{
-      const count = voteCount[u.username]||0;
+      const s = stats[u.username];
+      const count = s?.count || 0;
+      const pct = Math.round((count/totalSongs)*100);
+      const done = count >= totalSongs;
       const joined = u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '';
-      const fullName = u.first_name&&u.last_name&&u.first_name!==u.username ? `${u.first_name} ${u.last_name}` : u.username;
+      const fullName = u.first_name && u.last_name && u.first_name !== u.username
+        ? `${u.first_name} ${u.last_name}` : u.username;
+
       return `<div class="user-row" id="urow-${encodeURIComponent(u.username)}">
         <div style="flex:1;min-width:0">
-          <div class="u-name">${fullName}</div>
-          <div class="u-meta">${joined ? 'Joined '+joined : ''} · ${count} vote${count!==1?'s':''}</div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <div class="u-name">${fullName}</div>
+            <span class="u-badge ${done?'voted':'no-vote'}">${done?'✓ Done':'Pending'}</span>
+          </div>
+          <div class="u-meta" style="margin-top:4px">
+            ${joined?'Joined '+joined+' · ':''}
+            <strong style="color:var(--text)">${count}/${totalSongs}</strong> songs voted
+            ${s && count>0 ? `
+              &nbsp;·&nbsp; Avg <strong style="color:var(--gold)">${(s.total/count).toFixed(2)}</strong>
+              &nbsp;·&nbsp; High <strong style="color:var(--green)">${s.max%1===0?s.max:s.max.toFixed(2)}</strong>
+              &nbsp;·&nbsp; Low <strong style="color:var(--muted)">${s.min%1===0?s.min:s.min.toFixed(2)}</strong>
+              &nbsp;·&nbsp; Total <strong style="color:var(--gold)">${s.total%1===0?s.total:s.total.toFixed(2)}</strong>
+            ` : count===0 ? '&nbsp;·&nbsp; <span style="color:var(--muted)">No votes yet</span>' : ''}
+          </div>
+          <div style="margin-top:6px;height:4px;background:var(--border);border-radius:99px;overflow:hidden;max-width:260px">
+            <div style="width:${pct}%;height:100%;background:${done?'var(--green)':'var(--gold)'};border-radius:99px;transition:width .4s"></div>
+          </div>
         </div>
-        <span class="u-badge ${count>=totalSongs?'voted':'no-vote'}">${count>=totalSongs?'✓ Done':'Pending'}</span>
         <button class="del-btn" onclick="deleteUser('${u.username.replace(/'/g,"\\'")}')">Delete</button>
       </div>`;
     }).join('');
