@@ -535,7 +535,7 @@ async function boot(){
     if(local.contestId){
       try{
         document.getElementById('loading-msg').textContent = 'Restoring session…';
-        const contests=await sbGet('contests',`id=eq.${encodeURIComponent(local.contestId)}&select=*`);
+        const contests=await sbGet('contests',`id=eq.${encodeURIComponent(local.contestId)}&active=eq.true&select=*`);
         if(contests.length){ hideLoading(); await enterContest(contests[0]); return; }
       } catch(e){}
     }
@@ -625,16 +625,19 @@ async function showContestPicker(){
   const grid=document.getElementById('contest-grid');
   grid.innerHTML='<div style="color:var(--muted);font-size:.85rem;padding:20px">Loading contests…</div>';
   try{
-    const contests=await sbGet('contests','select=*&order=created_at.asc');
+    const contests=await sbGet('contests','select=*&active=eq.true&order=created_at.asc');
+    // If only one active contest, go straight in — no picker needed
+    if(contests.length===1){
+      await enterContest(contests[0]);
+      return;
+    }
     grid.innerHTML=contests.map(c=>`
       <div class="contest-item" onclick="selectContest('${c.id}')">
         <div>
           <div class="c-title">${c.name}</div>
           <div class="c-desc">${c.description||''}</div>
         </div>
-        <div class="c-badge${c.id==='esc2026_sf2'?' live':''}">
-          ${c.id==='esc2026_sf2'?'🔴 Tonight':'📅 Upcoming'}
-        </div>
+        <div class="c-badge">📅 Open</div>
       </div>`).join('');
   } catch(e){
     grid.innerHTML=`<div style="color:var(--red);padding:20px">Error: ${e.message}</div>`;
