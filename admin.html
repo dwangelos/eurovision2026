@@ -29,7 +29,7 @@ header h1{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold
 .nav-item:hover{color:var(--text);background:rgba(255,255,255,.03);}
 .nav-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(232,200,74,.05);}
 .nav-section{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:16px 22px 6px;opacity:.6;}
-.content{padding:28px;max-width:900px;}
+.content{padding:28px;max-width:960px;}
 .page{display:none;} .page.active{display:block;}
 .page-title{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold);margin-bottom:4px;}
 .page-sub{color:var(--muted);font-size:.85rem;margin-bottom:24px;}
@@ -39,18 +39,45 @@ header h1{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold
 .stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
 .stat .val{font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);font-weight:700;}
 .stat .lbl{font-size:.78rem;color:var(--muted);margin-top:2px;}
-.user-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);gap:12px;}
-.user-row:last-child{border-bottom:none;}
-.user-row:hover{background:rgba(255,255,255,.02);}
-.u-name{font-weight:500;font-size:.9rem;}
-.u-meta{font-size:.75rem;color:var(--muted);margin-top:2px;line-height:1.6;}
-.u-badge{font-size:.72rem;padding:3px 8px;border-radius:20px;font-weight:500;flex-shrink:0;}
-.voted{background:rgba(74,232,160,.12);color:var(--green);}
-.no-vote{background:rgba(123,114,168,.12);color:var(--muted);}
-.del-btn{background:rgba(232,74,106,.1);border:1px solid rgba(232,74,106,.25);color:var(--red);border-radius:6px;padding:5px 12px;font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0;}
-.del-btn:hover{background:rgba(232,74,106,.22);border-color:var(--red);}
-.search-bar{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 14px;font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;max-width:320px;}
-.search-bar:focus{border-color:var(--gold);}
+
+/* SMART USER TABLE */
+.users-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+.search-inp{background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 14px;font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;width:260px;}
+.search-inp:focus{border-color:var(--gold);}
+.filter-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:8px 14px;font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.filter-btn.active{background:rgba(232,200,74,.1);border-color:var(--gold);color:var(--gold);}
+.filter-btn:hover{border-color:var(--gold);color:var(--gold);}
+.users-count{font-size:.8rem;color:var(--muted);margin-left:auto;}
+/* Card-grid view for users */
+.users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:14px;}
+.user-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;position:relative;transition:border-color .15s;}
+.user-card:hover{border-color:rgba(232,200,74,.2);}
+.user-card .uc-name{font-weight:600;font-size:.92rem;margin-bottom:2px;padding-right:60px;}
+.user-card .uc-joined{font-size:.72rem;color:var(--blue);margin-bottom:8px;}
+.user-card .uc-progress{height:3px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:8px;}
+.user-card .uc-progress-fill{height:100%;border-radius:99px;transition:width .4s;}
+.user-card .uc-stats{font-size:.75rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px;}
+.uc-stat{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px 8px;}
+.uc-stat span{color:var(--gold);}
+.uc-badge{position:absolute;top:14px;right:14px;font-size:.7rem;padding:3px 8px;border-radius:20px;font-weight:600;}
+.uc-done{background:rgba(74,232,160,.12);color:var(--green);}
+.uc-pending{background:rgba(123,114,168,.1);color:var(--muted);}
+.uc-none{background:rgba(232,74,106,.08);color:var(--red);}
+.uc-actions{display:flex;gap:6px;margin-top:10px;}
+.del-btn{background:rgba(232,74,106,.1);border:1px solid rgba(232,74,106,.2);color:var(--red);border-radius:6px;padding:4px 10px;font-size:.73rem;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.del-btn:hover{background:rgba(232,74,106,.22);}
+.chat-toggle-btn{background:var(--bg);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 10px;font-size:.73rem;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.chat-toggle-btn.on{border-color:rgba(74,232,160,.3);color:var(--green);background:rgba(74,232,160,.08);}
+.chat-toggle-btn:hover{border-color:var(--gold);color:var(--gold);}
+/* Pagination */
+.pagination{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;}
+.pg-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:6px 12px;font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;min-width:36px;text-align:center;}
+.pg-btn.active{background:var(--gold);border-color:var(--gold);color:#0d0b18;font-weight:600;}
+.pg-btn:hover:not(.active){border-color:var(--gold);color:var(--gold);}
+.pg-btn:disabled{opacity:.3;cursor:not-allowed;}
+.pg-info{font-size:.78rem;color:var(--muted);padding:0 8px;}
+
+/* CONTESTS */
 .contest-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:12px;}
 .contest-row:last-child{border-bottom:none;}
 .c-name{font-weight:600;font-size:.92rem;}
@@ -59,9 +86,9 @@ header h1{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold
 .toggle-on{background:rgba(74,232,160,.15);color:var(--green);border:1px solid rgba(74,232,160,.3);}
 .toggle-on:hover{background:rgba(74,232,160,.28);}
 .toggle-off{background:rgba(123,114,168,.12);color:var(--muted);border:1px solid var(--border);}
-.toggle-off:hover{background:rgba(123,114,168,.22);color:var(--text);}
 .badge-active{background:rgba(74,232,160,.12);color:var(--green);border:1px solid rgba(74,232,160,.2);border-radius:20px;padding:3px 10px;font-size:.72rem;font-weight:600;}
 .badge-off{background:rgba(123,114,168,.08);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:.72rem;}
+/* RESULTS */
 .result-song-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
 .result-song-row:last-child{border-bottom:none;}
 .r-num{width:28px;text-align:center;font-size:.78rem;color:var(--muted);flex-shrink:0;}
@@ -74,19 +101,19 @@ header h1{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold
 .r-place-input.filled{border-color:var(--gold);color:var(--gold);}
 .btn{background:var(--gold);color:#0d0b18;border:none;border-radius:8px;padding:10px 22px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
 .btn:hover{background:#f5d96e;}
-.btn:disabled{opacity:.35;cursor:not-allowed;}
 .msg{font-size:.82rem;margin-top:10px;min-height:18px;}
 .msg.ok{color:var(--green);} .msg.err{color:var(--red);}
 .loading{color:var(--muted);font-size:.85rem;padding:20px 0;text-align:center;}
 .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle;}
 @keyframes spin{to{transform:rotate(360deg);}}
-@media(max-width:640px){
+@media(max-width:700px){
   .layout{grid-template-columns:1fr;}
   .sidebar{display:flex;flex-direction:row;overflow-x:auto;padding:0;border-right:none;border-bottom:1px solid var(--border);}
   .nav-item{border-left:none;border-bottom:3px solid transparent;white-space:nowrap;padding:12px 16px;}
   .nav-item.active{border-left-color:transparent;border-bottom-color:var(--gold);}
   .nav-section{display:none;}
   .content{padding:16px;}
+  .users-grid{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -106,10 +133,7 @@ header h1{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold
 
 <div id="admin-screen">
   <header>
-    <div>
-      <h1>&#9881; Eurovision 2026 Admin</h1>
-      <div class="header-sub" id="header-sub">Loading&#8230;</div>
-    </div>
+    <div><h1>&#9881; Eurovision 2026 Admin</h1><div class="header-sub" id="header-sub">Loading&#8230;</div></div>
     <button class="sign-out" onclick="signOut()">Sign Out</button>
   </header>
   <div class="layout">
@@ -129,11 +153,11 @@ header h1{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold
         <div class="stats">
           <div class="stat"><div class="val" id="stat-voters">&#8212;</div><div class="lbl">Total Voters</div></div>
           <div class="stat"><div class="val" id="stat-voted">&#8212;</div><div class="lbl">Fully Voted</div></div>
-          <div class="stat"><div class="val" id="stat-votes">&#8212;</div><div class="lbl">Total Votes Cast</div></div>
+          <div class="stat"><div class="val" id="stat-votes">&#8212;</div><div class="lbl">Votes Cast</div></div>
           <div class="stat"><div class="val" id="stat-songs">&#8212;</div><div class="lbl">Songs in Final</div></div>
         </div>
         <div class="card">
-          <div class="card-title">Top 5 Leading Songs</div>
+          <div class="card-title">Top 5 Songs</div>
           <div id="dash-top5"><div class="loading"><span class="spinner"></span>Loading&#8230;</div></div>
         </div>
         <div class="card">
@@ -144,15 +168,17 @@ header h1{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold
 
       <div class="page" id="page-users">
         <div class="page-title">Voters</div>
-        <div class="page-sub">Manage who can vote. Deleting a voter removes all their votes.</div>
-        <div style="margin-bottom:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <input type="search" class="search-bar" id="user-search" placeholder="&#128269; Search by name&#8230;" oninput="filterUsers()"/>
-          <span id="user-count" style="font-size:.8rem;color:var(--muted)"></span>
+        <div class="page-sub">Search, filter and manage voters. Chat access can be toggled per voter.</div>
+        <div class="users-toolbar">
+          <input type="search" class="search-inp" id="user-search" placeholder="&#128269; Search name&#8230;" oninput="onSearch()"/>
+          <button class="filter-btn active" id="filter-all" onclick="setFilter('all')">All</button>
+          <button class="filter-btn" id="filter-done" onclick="setFilter('done')">&#10003; Done</button>
+          <button class="filter-btn" id="filter-pending" onclick="setFilter('pending')">&#9679; Pending</button>
+          <button class="filter-btn" id="filter-none" onclick="setFilter('none')">&#10006; No votes</button>
+          <span class="users-count" id="user-count"></span>
         </div>
-        <div class="card" style="padding:0">
-          <div id="users-list"><div class="loading" style="padding:20px"><span class="spinner"></span>Loading&#8230;</div></div>
-        </div>
-        <div style="display:flex;justify-content:center;gap:8px;margin-top:12px;flex-wrap:wrap" id="user-pagination"></div>
+        <div class="users-grid" id="users-grid"></div>
+        <div class="pagination" id="user-pagination"></div>
         <div class="msg" id="users-msg"></div>
       </div>
 
@@ -167,7 +193,7 @@ header h1{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold
 
       <div class="page" id="page-results">
         <div class="page-title">Official Results</div>
-        <div class="page-sub">Enter the official finishing position for each song (1 = winner) after the Grand Final.</div>
+        <div class="page-sub">Enter the official finishing position for each song (1 = winner).</div>
         <div class="card" style="padding:14px 20px">
           <div id="results-list"><div class="loading"><span class="spinner"></span>Loading&#8230;</div></div>
         </div>
@@ -182,25 +208,20 @@ header h1{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold
 </div>
 
 <script>
-const SB = 'https://onpsmwempgoopamqodfb.supabase.co';
-const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ucHNtd2VtcGdvb3BhbXFvZGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NzEzNTEsImV4cCI6MjA5NDM0NzM1MX0.v8iz-BPQc_GDncSgwsHvUhBm5wFV0rI6mRGyLD15T8E';
-const PIN = '4535';
-const H = {'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
-let currentContest = null;
-let songs = [];
-let allUsers = [];
-let allVoteStats = {};
-const PAGE_SIZE = 20;
-let userPage = 0;
-let userFilter = '';
+const SB='https://onpsmwempgoopamqodfb.supabase.co';
+const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ucHNtd2VtcGdvb3BhbXFvZGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NzEzNTEsImV4cCI6MjA5NDM0NzM1MX0.v8iz-BPQc_GDncSgwsHvUhBm5wFV0rI6mRGyLD15T8E';
+const PIN='4535';
+const H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
+let currentContest=null, songs=[], allUsers=[], allVoteStats={};
+const PAGE_SIZE=12;
+let userPage=0, userFilter='', userFilterMode='all';
 
-// ── AUTH ──────────────────────────────────────────────────────────────────────
 function checkPin(){
-  if(document.getElementById('pin-inp').value === PIN){
+  if(document.getElementById('pin-inp').value===PIN){
     document.getElementById('pin-screen').style.display='none';
     document.getElementById('admin-screen').style.display='block';
     boot();
-  } else {
+  }else{
     document.getElementById('pin-err').textContent='Incorrect PIN.';
     document.getElementById('pin-inp').value='';
   }
@@ -210,8 +231,6 @@ function signOut(){
   document.getElementById('admin-screen').style.display='none';
   document.getElementById('pin-inp').value='';
 }
-
-// ── NAV ───────────────────────────────────────────────────────────────────────
 function showPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -221,94 +240,64 @@ function showPage(name){
   if(name==='contests') loadContests();
   if(name==='results') loadResults();
 }
+async function get(t,p){const r=await fetch(SB+'/rest/v1/'+t+'?'+(p||''),{headers:H});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function patch(t,p,b){const r=await fetch(SB+'/rest/v1/'+t+'?'+p,{method:'PATCH',headers:H,body:JSON.stringify(b)});if(!r.ok)throw new Error(await r.text());}
+async function del(t,p){const r=await fetch(SB+'/rest/v1/'+t+'?'+p,{method:'DELETE',headers:H});if(!r.ok)throw new Error(await r.text());}
+async function upsert(t,b){const r=await fetch(SB+'/rest/v1/'+t,{method:'POST',headers:{...H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(b)});if(!r.ok)throw new Error(await r.text());}
+function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
 
-// ── API ───────────────────────────────────────────────────────────────────────
-async function get(table,params){
-  const r=await fetch(SB+'/rest/v1/'+table+'?'+(params||''),{headers:H});
-  if(!r.ok) throw new Error(await r.text());
-  return r.json();
-}
-async function patch(table,params,body){
-  const r=await fetch(SB+'/rest/v1/'+table+'?'+params,{method:'PATCH',headers:H,body:JSON.stringify(body)});
-  if(!r.ok) throw new Error(await r.text());
-}
-async function del(table,params){
-  const r=await fetch(SB+'/rest/v1/'+table+'?'+params,{method:'DELETE',headers:H});
-  if(!r.ok) throw new Error(await r.text());
-}
-async function upsert(table,body){
-  const r=await fetch(SB+'/rest/v1/'+table,{method:'POST',headers:{...H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(body)});
-  if(!r.ok) throw new Error(await r.text());
-}
-
-// ── BOOT ──────────────────────────────────────────────────────────────────────
 async function boot(){
   try{
     const contests=await get('contests','active=eq.true&select=*');
     currentContest=contests[0]||null;
-    document.getElementById('header-sub').textContent=
-      currentContest ? 'Active: '+currentContest.name : 'No active contest';
+    document.getElementById('header-sub').textContent=currentContest?'Active: '+currentContest.name:'No active contest';
     await loadDashboard();
-  }catch(e){
-    document.getElementById('header-sub').textContent='Error: '+e.message;
-  }
+  }catch(e){document.getElementById('header-sub').textContent='Error: '+e.message;}
 }
 
-// ── DASHBOARD ─────────────────────────────────────────────────────────────────
 async function loadDashboard(){
   if(!currentContest) return;
-  try{
-    const [users,votes,songsData]=await Promise.all([
-      get('users','select=username'),
-      get('votes','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&select=username,song_idx,score'),
-      get('contest_songs','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&select=*&order=running_order.asc'),
-    ]);
-    songs=songsData;
-    const totalSongs=songs.length;
-    const voterVotes={};
-    votes.forEach(v=>{ voterVotes[v.username]=(voterVotes[v.username]||0)+1; });
-    const fullyVoted=Object.values(voterVotes).filter(c=>c>=totalSongs).length;
-    document.getElementById('stat-voters').textContent=users.length;
-    document.getElementById('stat-voted').textContent=fullyVoted;
-    document.getElementById('stat-votes').textContent=votes.length;
-    document.getElementById('stat-songs').textContent=totalSongs;
-
-    const totals={};
-    votes.forEach(v=>{ totals[v.song_idx]=(totals[v.song_idx]||0)+parseFloat(v.score); });
-    const ranked=Object.entries(totals)
-      .map(([idx,total])=>({idx:parseInt(idx),total,song:songs[parseInt(idx)]}))
-      .filter(x=>x.song).sort((a,b)=>b.total-a.total).slice(0,5);
-
-    document.getElementById('dash-top5').innerHTML=ranked.length
-      ? ranked.map((s,i)=>'<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)">'
-          +'<div style="width:24px;font-family:\'Playfair Display\',serif;color:var(--gold);text-align:center">'+(i+1)+'</div>'
-          +(s.song.photo_url?'<img src="'+s.song.photo_url+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.display=\'none\'">':'')
-          +'<div style="flex:1"><div style="font-weight:500;font-size:.88rem">'+(s.song.song||s.song.country)+'</div>'
-          +'<div style="font-size:.72rem;color:var(--muted)">'+s.song.country+' &middot; '+(s.song.artist||'')+'</div></div>'
-          +'<div style="font-family:\'Playfair Display\',serif;font-size:1.2rem;color:var(--gold)">'+(s.total%1===0?s.total:s.total.toFixed(2))+'</div>'
-          +'</div>').join('')
-      : '<div style="color:var(--muted);font-size:.85rem">No votes yet.</div>';
-
-    document.getElementById('dash-voters').innerHTML=users.map(u=>{
-      const count=voterVotes[u.username]||0;
-      const pct=totalSongs>0?Math.round((count/totalSongs)*100):0;
-      return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">'
-        +'<div style="flex:1;font-size:.85rem;font-weight:500">'+u.username+'</div>'
-        +'<div style="width:120px;height:6px;background:var(--border);border-radius:99px;overflow:hidden">'
-        +'<div style="width:'+pct+'%;height:100%;background:'+(pct===100?'var(--green)':'var(--gold)')+';border-radius:99px"></div></div>'
-        +'<div style="font-size:.75rem;color:var(--muted);width:40px;text-align:right">'+count+'/'+totalSongs+'</div>'
-        +'</div>';
-    }).join('');
-  }catch(e){ console.error(e); }
+  const [users,votes,songsData]=await Promise.all([
+    get('users','select=username'),
+    get('votes','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&select=username,song_idx,score'),
+    get('contest_songs','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&select=*&order=running_order.asc'),
+  ]);
+  songs=songsData;
+  const vv={};votes.forEach(v=>{vv[v.username]=(vv[v.username]||0)+1;});
+  const done=Object.values(vv).filter(c=>c>=songs.length).length;
+  document.getElementById('stat-voters').textContent=users.length;
+  document.getElementById('stat-voted').textContent=done;
+  document.getElementById('stat-votes').textContent=votes.length;
+  document.getElementById('stat-songs').textContent=songs.length;
+  const tot={};votes.forEach(v=>{tot[v.song_idx]=(tot[v.song_idx]||0)+parseFloat(v.score);});
+  const ranked=Object.entries(tot).map(([i,t])=>({i:+i,t,s:songs[+i]})).filter(x=>x.s).sort((a,b)=>b.t-a.t).slice(0,5);
+  document.getElementById('dash-top5').innerHTML=ranked.length
+    ?ranked.map((s,i)=>'<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)">'
+        +'<div style="width:24px;font-family:\'Playfair Display\',serif;color:var(--gold);text-align:center">'+(i+1)+'</div>'
+        +(s.s.photo_url?'<img src="'+s.s.photo_url+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.display=\'none\'">':'')
+        +'<div style="flex:1"><div style="font-weight:500;font-size:.88rem">'+(s.s.song||s.s.country)+'</div>'
+        +'<div style="font-size:.72rem;color:var(--muted)">'+s.s.country+'</div></div>'
+        +'<div style="font-family:\'Playfair Display\',serif;font-size:1.2rem;color:var(--gold)">'+(s.t%1===0?s.t:s.t.toFixed(2))+'</div></div>').join('')
+    :'<div style="color:var(--muted);font-size:.85rem">No votes yet.</div>';
+  document.getElementById('dash-voters').innerHTML=users.map(u=>{
+    const count=vv[u.username]||0;
+    const pct=songs.length>0?Math.round((count/songs.length)*100):0;
+    return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">'
+      +'<div style="flex:1;font-size:.85rem;font-weight:500">'+esc(u.username)+'</div>'
+      +'<div style="width:120px;height:5px;background:var(--border);border-radius:99px;overflow:hidden">'
+      +'<div style="width:'+pct+'%;height:100%;background:'+(pct===100?'var(--green)':'var(--gold)')+';border-radius:99px"></div></div>'
+      +'<div style="font-size:.75rem;color:var(--muted);width:44px;text-align:right">'+count+'/'+songs.length+'</div>'
+      +'</div>';
+  }).join('');
 }
 
 // ── USERS ─────────────────────────────────────────────────────────────────────
 async function loadUsers(){
-  document.getElementById('users-list').innerHTML='<div class="loading" style="padding:20px"><span class="spinner"></span>Loading&#8230;</div>';
+  document.getElementById('users-grid').innerHTML='<div class="loading" style="grid-column:1/-1;padding:30px"><span class="spinner"></span>Loading voters&#8230;</div>';
   try{
     const [users,votes]=await Promise.all([
-      get('users','select=username,first_name,last_name,created_at&order=last_name.asc,first_name.asc'),
-      currentContest ? get('votes','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&select=username,score') : Promise.resolve([]),
+      get('users','select=username,first_name,last_name,created_at,chat_enabled&order=last_name.asc,first_name.asc'),
+      currentContest?get('votes','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&select=username,score'):Promise.resolve([]),
     ]);
     allVoteStats={};
     votes.forEach(v=>{
@@ -321,81 +310,93 @@ async function loadUsers(){
     });
     allUsers=users;
     userPage=0;
-    document.getElementById('user-count').textContent=users.length+' voters';
     renderUsers();
-  }catch(e){
-    document.getElementById('users-list').innerHTML='<div style="color:var(--red);padding:20px">'+e.message+'</div>';
-  }
+  }catch(e){document.getElementById('users-grid').innerHTML='<div style="color:var(--red);grid-column:1/-1;padding:20px">'+e.message+'</div>';}
 }
 
-function filterUsers(){
-  userFilter=document.getElementById('user-search').value.toLowerCase().trim();
+function onSearch(){userPage=0;renderUsers();}
+function setFilter(mode){
+  userFilterMode=mode;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('filter-'+mode).classList.add('active');
   userPage=0; renderUsers();
+}
+
+function getFilteredUsers(){
+  const q=(document.getElementById('user-search')?.value||'').toLowerCase().trim();
+  const totalSongs=songs.length||25;
+  return allUsers.filter(u=>{
+    if(q){
+      const hay=(u.username+' '+(u.first_name||'')+' '+(u.last_name||'')).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    const count=allVoteStats[u.username]?.count||0;
+    if(userFilterMode==='done' && count<totalSongs) return false;
+    if(userFilterMode==='pending' && (count===0||count>=totalSongs)) return false;
+    if(userFilterMode==='none' && count>0) return false;
+    return true;
+  });
 }
 
 function renderUsers(){
   const totalSongs=songs.length||25;
-  const filtered=allUsers.filter(u=>{
-    if(!userFilter) return true;
-    return u.username.toLowerCase().includes(userFilter)||
-      (u.first_name||'').toLowerCase().includes(userFilter)||
-      (u.last_name||'').toLowerCase().includes(userFilter);
-  });
+  const filtered=getFilteredUsers();
+  const total=filtered.length;
   document.getElementById('user-count').textContent=
-    userFilter?(filtered.length+' of '+allUsers.length+' voters'):(allUsers.length+' voters');
+    total===allUsers.length?total+' voters':total+' of '+allUsers.length+' voters';
   const page=filtered.slice(userPage*PAGE_SIZE,(userPage+1)*PAGE_SIZE);
-  const el=document.getElementById('users-list');
+  const grid=document.getElementById('users-grid');
   if(!page.length){
-    el.innerHTML='<div style="color:var(--muted);padding:20px;text-align:center">No voters found.</div>';
-    renderPagination(0); return;
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:40px">No voters match.</div>';
+    document.getElementById('user-pagination').innerHTML=''; return;
   }
-  el.innerHTML=page.map(u=>{
+  grid.innerHTML=page.map(u=>{
     const s=allVoteStats[u.username];
     const count=s?s.count:0;
     const pct=Math.round((count/totalSongs)*100);
-    const done=count>=totalSongs;
-    const joined=u.created_at
-      ? new Date(u.created_at).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})
-      : '';
-    const fullName=u.first_name&&u.last_name&&u.first_name!==u.username
-      ? u.first_name+' '+u.last_name : u.username;
-    const statsStr=s&&count>0
-      ? ' &middot; Avg <b style="color:var(--gold)">'+(s.total/count).toFixed(2)
-        +'</b> &middot; High <b style="color:var(--green)">'+(s.max%1===0?s.max:s.max.toFixed(2))
-        +'</b> &middot; Low <b style="color:var(--muted)">'+(s.min%1===0?s.min:s.min.toFixed(2))
-        +'</b> &middot; Total <b style="color:var(--gold)">'+(s.total%1===0?s.total:s.total.toFixed(2))+'</b>'
-      : count===0 ? ' &middot; <span style="color:var(--muted)">No votes yet</span>' : '';
-    const safeUser=u.username.replace(/'/g,"\\'");
-    return '<div class="user-row" id="urow-'+encodeURIComponent(u.username)+'">'
-      +'<div style="flex:1;min-width:0">'
-      +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
-      +'<span class="u-name">'+fullName+'</span>'
-      +'<span class="u-badge '+(done?'voted':'no-vote')+'">'+(done?'&#10003; Done':'Pending')+'</span>'
+    const done=count>=totalSongs, none=count===0;
+    const badgeCls=done?'uc-done':none?'uc-none':'uc-pending';
+    const badgeTxt=done?'&#10003; Done':none?'No votes':'In progress';
+    const joined=u.created_at?new Date(u.created_at).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+    const fullName=u.first_name&&u.last_name&&u.first_name!==u.username?u.first_name+' '+u.last_name:u.username;
+    const chatOn=u.chat_enabled!==false;
+    const safeUser=u.username.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<div class="user-card" id="ucard-'+encodeURIComponent(u.username)+'">'
+      +'<span class="uc-badge '+badgeCls+'">'+badgeTxt+'</span>'
+      +'<div class="uc-name">'+esc(fullName)+'</div>'
+      +(joined?'<div class="uc-joined">&#128197; '+joined+'</div>':'')
+      +'<div class="uc-progress"><div class="uc-progress-fill" style="width:'+pct+'%;background:'+(done?'var(--green)':'var(--gold)')+'"></div></div>'
+      +'<div class="uc-stats">'
+      +'<div class="uc-stat">'+count+'/'+totalSongs+' <small>songs</small></div>'
+      +(s&&count>0?'<div class="uc-stat">Avg <span>'+(s.total/count).toFixed(1)+'</span></div>'
+        +'<div class="uc-stat">High <span>'+(s.max%1===0?s.max:s.max.toFixed(1))+'</span></div>'
+        +'<div class="uc-stat">Total <span>'+(s.total%1===0?s.total:s.total.toFixed(1))+'</span></div>':'')
       +'</div>'
-      +'<div class="u-meta">'
-      +(joined?'<span style="color:var(--blue)">&#128197; '+joined+'</span> &middot; ':'')
-      +'<b style="color:var(--text)">'+count+'/'+totalSongs+'</b> songs'+statsStr
+      +'<div class="uc-actions">'
+      +'<button class="del-btn" onclick="deleteUser(\''+safeUser+'\')">&#128465; Delete</button>'
+      +'<button class="chat-toggle-btn'+(chatOn?' on':'')+'" id="chattog-'+encodeURIComponent(u.username)+'" onclick="toggleChat(\''+safeUser+'\','+chatOn+')">'
+      +(chatOn?'&#128172; Chat ON':'&#128172; Chat OFF')+'</button>'
       +'</div>'
-      +'<div style="margin-top:5px;height:3px;background:var(--border);border-radius:99px;overflow:hidden;max-width:200px">'
-      +'<div style="width:'+pct+'%;height:100%;background:'+(done?'var(--green)':'var(--gold)')+';border-radius:99px"></div>'
-      +'</div>'
-      +'</div>'
-      +'<button class="del-btn" onclick="deleteUser(\''+safeUser+'\')">Delete</button>'
       +'</div>';
   }).join('');
-  renderPagination(filtered.length);
+  renderPagination(total);
 }
 
 function renderPagination(total){
   const pages=Math.ceil(total/PAGE_SIZE);
   const el=document.getElementById('user-pagination');
   if(pages<=1){el.innerHTML='';return;}
-  el.innerHTML=Array.from({length:pages},(_,i)=>{
-    const a=i===userPage;
-    return '<button onclick="gotoPage('+i+')" style="background:'+(a?'var(--gold)':'var(--card)')
-      +';color:'+(a?'#0d0b18':'var(--muted)')+';border:1px solid '+(a?'var(--gold)':'var(--border)')
-      +';border-radius:6px;padding:5px 11px;font-size:.8rem;cursor:pointer;font-family:\'DM Sans\',sans-serif">'+(i+1)+'</button>';
-  }).join('');
+  let html='<span class="pg-info">Page '+(userPage+1)+' of '+pages+'</span>';
+  // Show first, prev, up to 5 pages around current, next, last
+  const show=new Set([0,pages-1]);
+  for(let i=Math.max(0,userPage-2);i<=Math.min(pages-1,userPage+2);i++) show.add(i);
+  let prev=-1;
+  [...show].sort((a,b)=>a-b).forEach(i=>{
+    if(prev!==-1&&i>prev+1) html+='<span class="pg-info">&hellip;</span>';
+    html+='<button class="pg-btn'+(i===userPage?' active':'')+'" onclick="gotoPage('+i+')">'+(i+1)+'</button>';
+    prev=i;
+  });
+  el.innerHTML=html;
 }
 
 function gotoPage(p){userPage=p;renderUsers();document.getElementById('page-users').scrollIntoView({behavior:'smooth'});}
@@ -406,13 +407,30 @@ async function deleteUser(username){
   msg.className='msg'; msg.textContent='Deleting\u2026';
   try{
     await del('votes','username=eq.'+encodeURIComponent(username));
+    await del('chat_messages','username=eq.'+encodeURIComponent(username));
     await del('users','username=eq.'+encodeURIComponent(username));
-    const row=document.getElementById('urow-'+encodeURIComponent(username));
-    if(row) row.remove();
+    const card=document.getElementById('ucard-'+encodeURIComponent(username));
+    if(card) card.remove();
     allUsers=allUsers.filter(u=>u.username!==username);
+    delete allVoteStats[username];
     document.getElementById('user-count').textContent=allUsers.length+' voters';
-    msg.className='msg ok'; msg.textContent='&#10003; "'+username+'" deleted.';
+    msg.className='msg ok'; msg.textContent='&#10003; Deleted.';
   }catch(e){msg.className='msg err'; msg.textContent='Error: '+e.message;}
+}
+
+async function toggleChat(username,currentlyOn){
+  try{
+    await patch('users','username=eq.'+encodeURIComponent(username),{chat_enabled:!currentlyOn});
+    const btn=document.getElementById('chattog-'+encodeURIComponent(username));
+    if(btn){
+      const now=!currentlyOn;
+      btn.className='chat-toggle-btn'+(now?' on':'');
+      btn.innerHTML=now?'&#128172; Chat ON':'&#128172; Chat OFF';
+    }
+    // Update allUsers cache
+    const u=allUsers.find(u=>u.username===username);
+    if(u) u.chat_enabled=!currentlyOn;
+  }catch(e){alert('Error: '+e.message);}
 }
 
 // ── CONTESTS ──────────────────────────────────────────────────────────────────
@@ -420,16 +438,15 @@ async function loadContests(){
   const el=document.getElementById('contests-list');
   el.innerHTML='<div class="loading"><span class="spinner"></span>Loading\u2026</div>';
   try{
-    const contests=await get('contests','select=*&order=created_at.asc');
-    el.innerHTML=contests.map(c=>{
-      const opens=c.voting_opens_at?new Date(c.voting_opens_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Not set';
-      const closes=c.voting_closes_at?new Date(c.voting_closes_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Not set';
+    const c=await get('contests','select=*&order=created_at.asc');
+    el.innerHTML=c.map(ct=>{
+      const opens=ct.voting_opens_at?new Date(ct.voting_opens_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Not set';
+      const closes=ct.voting_closes_at?new Date(ct.voting_closes_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Not set';
       return '<div class="contest-row">'
-        +'<div style="flex:1"><div class="c-name">'+c.name+'</div>'
+        +'<div style="flex:1"><div class="c-name">'+esc(ct.name)+'</div>'
         +'<div class="c-meta">Opens: '+opens+' &middot; Closes: '+closes+'</div></div>'
-        +'<span class="'+(c.active?'badge-active':'badge-off')+'" id="cbadge-'+c.id+'">'+(c.active?'Active':'Off')+'</span>'
-        +'<button class="toggle-btn '+(c.active?'toggle-on':'toggle-off')+'" id="ctoggle-'+c.id
-        +'" onclick="toggleContest(\''+c.id+'\','+c.active+')">'+(c.active?'Deactivate':'Activate')+'</button>'
+        +'<span class="'+(ct.active?'badge-active':'badge-off')+'">'+(ct.active?'Active':'Off')+'</span>'
+        +'<button class="toggle-btn '+(ct.active?'toggle-on':'toggle-off')+'" onclick="toggleContest(\''+ct.id+'\','+ct.active+')">'+(ct.active?'Deactivate':'Activate')+'</button>'
         +'</div>';
     }).join('');
   }catch(e){el.innerHTML='<div style="color:var(--red)">'+e.message+'</div>';}
@@ -438,39 +455,35 @@ async function loadContests(){
 async function toggleContest(id,active){
   try{
     await patch('contests','id=eq.'+encodeURIComponent(id),{active:!active});
+    await loadContests();
+    const c=await get('contests','active=eq.true&select=*');
+    currentContest=c[0]||null;
+    document.getElementById('header-sub').textContent=currentContest?'Active: '+currentContest.name:'No active contest';
     const msg=document.getElementById('contests-msg');
     msg.className='msg ok'; msg.textContent='&#10003; Updated.';
-    await loadContests();
-    const contests=await get('contests','active=eq.true&select=*');
-    currentContest=contests[0]||null;
-    document.getElementById('header-sub').textContent=currentContest?'Active: '+currentContest.name:'No active contest';
-  }catch(e){
-    document.getElementById('contests-msg').className='msg err';
-    document.getElementById('contests-msg').textContent='Error: '+e.message;
-  }
+  }catch(e){document.getElementById('contests-msg').className='msg err';document.getElementById('contests-msg').textContent='Error: '+e.message;}
 }
 
-// ── OFFICIAL RESULTS ──────────────────────────────────────────────────────────
+// ── RESULTS ───────────────────────────────────────────────────────────────────
 async function loadResults(){
   const el=document.getElementById('results-list');
   el.innerHTML='<div class="loading"><span class="spinner"></span>Loading\u2026</div>';
   try{
     if(!currentContest){el.innerHTML='<div style="color:var(--muted)">No active contest.</div>';return;}
-    const [songsData,existing]=await Promise.all([
+    const [sd,ex]=await Promise.all([
       get('contest_songs','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&select=*&order=running_order.asc'),
       get('official_results','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&select=song_idx,final_place'),
     ]);
-    songs=songsData;
-    const existingMap={};
-    existing.forEach(r=>{existingMap[r.song_idx]=r.final_place;});
+    songs=sd;
+    const em={};ex.forEach(r=>{em[r.song_idx]=r.final_place;});
     el.innerHTML=songs.map((s,i)=>{
-      const display=s.song&&s.song!=='TBA'?s.song:s.country;
-      const place=existingMap[i]||'';
+      const d=s.song&&s.song!=='TBA'?s.song:s.country;
+      const p=em[i]||'';
       return '<div class="result-song-row">'
         +'<div class="r-num">'+(s.running_order||i+1)+'</div>'
         +(s.photo_url?'<img class="r-photo" src="'+s.photo_url+'" onerror="this.style.display=\'none\'">':'<div class="r-photo" style="display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--muted)">'+s.country.slice(0,2).toUpperCase()+'</div>')
-        +'<div class="r-info"><div class="r-title">'+display+'</div><div class="r-artist">'+s.country+(s.artist&&s.artist!=='TBA'?' &middot; '+s.artist:'')+'</div></div>'
-        +'<input class="r-place-input'+(place?' filled':')+'" type="number" id="place-'+i+'" min="1" max="'+songs.length+'" placeholder="&mdash;" value="'+place+'" oninput="this.classList.toggle(\'filled\',!!this.value)"/>'
+        +'<div class="r-info"><div class="r-title">'+esc(d)+'</div><div class="r-artist">'+esc(s.country)+(s.artist&&s.artist!=='TBA'?' &middot; '+esc(s.artist):'')+'</div></div>'
+        +'<input class="r-place-input'+(p?' filled':'')+'" type="number" id="place-'+i+'" min="1" max="'+songs.length+'" placeholder="&mdash;" value="'+p+'" oninput="this.classList.toggle(\'filled\',!!this.value)"/>'
         +'</div>';
     }).join('');
   }catch(e){el.innerHTML='<div style="color:var(--red)">'+e.message+'</div>';}
@@ -479,21 +492,18 @@ async function loadResults(){
 async function saveResults(){
   const msg=document.getElementById('results-msg');
   msg.className='msg'; msg.textContent='Saving\u2026';
-  const rows=[];
-  const used=new Set();
-  let err=false;
+  const rows=[],used=new Set();let err=false;
   songs.forEach((_,i)=>{
-    const val=document.getElementById('place-'+i)?.value.trim();
-    if(!val) return;
-    const place=parseInt(val);
-    if(isNaN(place)||place<1||used.has(place)){err=true;return;}
-    used.add(place);
-    rows.push({contest_id:currentContest.id,song_idx:i,final_place:place});
+    const v=document.getElementById('place-'+i)?.value.trim();
+    if(!v) return;
+    const p=parseInt(v);
+    if(isNaN(p)||p<1||used.has(p)){err=true;return;}
+    used.add(p); rows.push({contest_id:currentContest.id,song_idx:i,final_place:p});
   });
   if(err){msg.className='msg err';msg.textContent='Invalid or duplicate positions.';return;}
   try{
     await upsert('official_results',rows);
-    msg.className='msg ok'; msg.textContent='&#10003; '+rows.length+' positions saved.';
+    msg.className='msg ok'; msg.textContent='&#10003; '+rows.length+' saved.';
   }catch(e){msg.className='msg err';msg.textContent='Error: '+e.message;}
 }
 </script>
