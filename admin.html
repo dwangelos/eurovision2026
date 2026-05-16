@@ -181,6 +181,7 @@ header h1{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold
             <button class="filter-btn active" id="sort-date" onclick="setSort('date')" title="Sort by date joined">&#128197; Newest</button>
             <button class="filter-btn" id="view-cards" title="Card view" onclick="setViewMode('cards')">&#9638;</button>
             <button class="filter-btn active" id="view-list" title="List view" onclick="setViewMode('list')">&#9776;</button>
+            <button class="filter-btn" onclick="refreshUsers()" title="Refresh" style="font-size:1rem">&#8635;</button>
           </div>
         </div>
         <div class="users-grid" id="users-grid" style="display:none"></div>
@@ -371,6 +372,14 @@ function sortUsers(){
 }
 
 function onSearch(){userPage=0;renderUsers();}
+
+async function refreshUsers(){
+  const btn=document.querySelector('[onclick="refreshUsers()"]');
+  if(btn){btn.style.transform='rotate(360deg)';btn.style.transition='transform .5s';setTimeout(()=>{btn.style.transform='';btn.style.transition=''},600);}
+  document.getElementById('users-msg').textContent='';
+  await loadUsers();
+  await loadDashboard();
+}
 function setFilter(mode){
   userFilterMode=mode;
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
