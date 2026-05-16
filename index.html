@@ -114,6 +114,22 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
 .score-input:focus{border-color:var(--gold);}
 .score-input.ok{border-color:rgba(74,232,160,.5);color:var(--green);}
 .score-input.conflict{border-color:var(--red);color:var(--red);}
+/* PRIZE BANNER */
+.prize-banner{display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,rgba(232,200,74,.12),rgba(232,200,74,.04));border:1px solid rgba(232,200,74,.3);border-radius:14px;padding:14px 18px;margin-bottom:18px;}
+.prize-icon{font-size:2rem;flex-shrink:0;}
+.prize-title{font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold);font-weight:700;margin-bottom:3px;}
+.prize-sub{font-size:.78rem;color:#b8b2d8;line-height:1.5;}
+.prize-sub strong{color:var(--text);}
+/* AVG INDICATOR */
+.avg-indicator{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;font-weight:600;padding:1px 5px;border-radius:4px;margin-left:6px;}
+.avg-above{background:rgba(74,232,160,.15);color:var(--green);}
+.avg-below{background:rgba(232,74,106,.1);color:var(--red);}
+.avg-equal{background:rgba(232,200,74,.1);color:var(--gold);}
+/* PULSE */
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+/* CONFETTI */
+.confetti-piece{position:fixed;width:8px;height:8px;top:-10px;z-index:9999;pointer-events:none;border-radius:2px;animation:confetti-fall linear forwards;}
+@keyframes confetti-fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
 /* RESULTS TABS */
 .results-tabs{display:flex;gap:6px;margin-bottom:20px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:5px;}
 .results-tab{flex:1;background:transparent;border:none;border-radius:8px;padding:9px 12px;font-size:.82rem;font-family:'DM Sans',sans-serif;color:var(--muted);cursor:pointer;transition:all .2s;font-weight:500;white-space:nowrap;}
@@ -328,11 +344,31 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
     <p id="results-contest-name"></p>
   </div>
 
+  <!-- PRIZE BANNER -->
+  <div class="prize-banner">
+    <div class="prize-icon">🏆</div>
+    <div>
+      <div class="prize-title">Winner's Prize</div>
+      <div class="prize-sub">The voter whose taste matches the official results most closely wins a <strong>20,000mAh Wireless Fast Charger Power Bank</strong> — with built-in iPhone &amp; USB-C cables!</div>
+    </div>
+  </div>
+
   <!-- TAB SWITCHER -->
   <div class="results-tabs">
     <button class="results-tab active" id="rtab-group" onclick="switchResultsTab('group')">&#127942; Group Votes</button>
     <button class="results-tab" id="rtab-member" onclick="switchResultsTab('member')">&#128101; Member Rankings</button>
     <button class="results-tab" id="rtab-odds" onclick="switchResultsTab('odds')">&#127922; Bookmaker Odds</button>
+  </div>
+
+  <!-- LIVE TOGGLE -->
+  <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:12px">
+    <span id="live-dot" style="width:8px;height:8px;border-radius:50%;background:var(--green);display:none;animation:pulse 1.5s infinite"></span>
+    <span id="live-label" style="font-size:.75rem;color:var(--muted);display:none">Live</span>
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;color:var(--muted)">
+      <input type="checkbox" id="live-toggle" onchange="toggleLiveResults(this.checked)"
+        style="width:14px;height:14px;accent-color:var(--green);cursor:pointer"/>
+      Auto-refresh
+    </label>
   </div>
 
   <!-- GROUP VOTES -->
@@ -998,7 +1034,7 @@ async function setScore(i,raw){
   if(isNaN(val)||val<0||val>12) return;
   const rounded=Math.round(val*100)/100;
   allScores[voter][i]=rounded;
-  renderScorePills(); updateProgress(); validateAll();
+  renderScorePills(); updateProgress(); validateAll(); checkConfetti();
   const hasConflict=document.getElementById('score-inp-'+i)?.classList.contains('conflict');
   if(hasConflict) return;
   setDB('saving','Saving\u2026');
@@ -1084,7 +1120,11 @@ async function showResults(){
     return '<div class="result-card '+rc+'">'
       +'<div class="rank-badge '+bc+'">'+m+'</div>'
       +'<div class="result-info">'
-      +'<div class="result-title">'+flagImg(s.country,20)+' '+escapeHtml(display)+'</div>'
+      +'<div class="result-title">'+flagImg(s.country,20)+' '+escapeHtml(display)
+      +(sc[currentUser]?.[s.idx]!==null&&sc[currentUser]?.[s.idx]!==undefined
+        ? avgIndicatorHtml(sc[currentUser][s.idx], s.total, voters.filter(v=>s.bd[v]!==null).length)
+        : '')
+      +'</div>'
       +'<div class="result-country">'+escapeHtml(s.country)+(s.artist&&s.artist!=='TBA'?' &middot; '+escapeHtml(s.artist):'')+'</div>'
       +oddsHtml
       +'<div class="score-bar"><div class="score-bar-fill" style="width:'+pct+'%"></div></div>'
@@ -1268,6 +1308,23 @@ async function showPrecision(){
       return {voter,pct,rated:ratedIdxs.length,label};
     }).filter(r=>r.rated>0).sort((a,b)=>b.pct-a.pct);
     if(!results.length){list.innerHTML='<div style="text-align:center;color:var(--muted);padding:40px">No votes yet.</div>';return;}
+
+    // Who agrees with you most (highest correlation with currentUser, excluding self)
+    const myResult=results.find(r=>r.voter===currentUser);
+    if(myResult&&results.length>1){
+      const others=results.filter(r=>r.voter!==currentUser&&r.pct>0).sort((a,b)=>{
+        // Compare by closeness of pct to mine
+        return Math.abs(a.pct-myResult.pct)-Math.abs(b.pct-myResult.pct);
+      });
+      if(others.length){
+        const twin=others[0];
+        list.innerHTML='<div style="background:rgba(74,159,232,.08);border:1px solid rgba(74,159,232,.2);border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:.85rem">'
+          +'<span style="color:var(--blue)">&#128101; Your taste twin: </span>'
+          +'<strong style="color:var(--text)">'+escapeHtml(twin.voter)+'</strong>'
+          +' — both of you score with similar precision to the official results.'
+          +'</div>';
+      } else { list.innerHTML=''; }
+    } else { list.innerHTML=''; }
     list.innerHTML=results.map((r,rank)=>{
       const rc=rank===0?'top1':rank===1?'top2':rank===2?'top3':'';
       const bc=rank===0?'r1':rank===1?'r2':rank===2?'r3':'';
@@ -1594,6 +1651,66 @@ function sendChatNotification(sender, message){
     sender,
     message: message.length > 80 ? message.slice(0,80)+'…' : message
   });
+}
+
+// ── LIVE RESULTS REFRESH ──────────────────────────────────────────────────────
+let liveResultsTimer = null;
+
+function toggleLiveResults(on){
+  const dot = document.getElementById('live-dot');
+  const lbl = document.getElementById('live-label');
+  if(on){
+    dot.style.display='inline-block'; lbl.style.display='inline';
+    liveResultsTimer = setInterval(()=>{ if(_activeResultsTab==='group') showResults(); }, 15000);
+  } else {
+    dot.style.display='none'; lbl.style.display='none';
+    clearInterval(liveResultsTimer); liveResultsTimer=null;
+  }
+}
+
+// ── CONFETTI ──────────────────────────────────────────────────────────────────
+function launchConfetti(){
+  const colors=['#e8c84a','#4ae8a0','#4a9fe8','#e84a6a','#ffffff','#f5d96e'];
+  for(let i=0;i<80;i++){
+    setTimeout(()=>{
+      const el=document.createElement('div');
+      el.className='confetti-piece';
+      el.style.left=Math.random()*100+'vw';
+      el.style.background=colors[Math.floor(Math.random()*colors.length)];
+      el.style.width=(6+Math.random()*8)+'px';
+      el.style.height=(6+Math.random()*8)+'px';
+      el.style.animationDuration=(2+Math.random()*2)+'s';
+      el.style.animationDelay=(Math.random()*0.5)+'s';
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(), 4500);
+    }, i*25);
+  }
+}
+
+// Track if confetti already fired this session
+let _confettiFired = false;
+
+function checkConfetti(){
+  const voter=allVoters[activeVoter];
+  if(voter!==currentUser||_confettiFired) return;
+  const vs=allScores[voter]||[];
+  const rated=vs.filter(x=>x!==null).length;
+  if(rated===contestSongs.length && contestSongs.length>0){
+    _confettiFired=true;
+    setTimeout(launchConfetti, 300);
+  }
+}
+
+// ── AVG INDICATOR ─────────────────────────────────────────────────────────────
+function avgIndicatorHtml(myScore, groupTotal, voterCount){
+  if(myScore===null || voterCount<2) return '';
+  const othersAvg=(groupTotal-myScore)/(voterCount-1);
+  if(othersAvg===0) return '';
+  const diff=myScore-othersAvg;
+  if(Math.abs(diff)<0.25) return '<span class="avg-indicator avg-equal">≈ avg</span>';
+  const sign=diff>0?'+':'';
+  const cls=diff>0?'avg-above':'avg-below';
+  return '<span class="avg-indicator '+cls+'">'+sign+diff.toFixed(1)+' vs avg</span>';
 }
 
 boot();
