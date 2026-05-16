@@ -1041,9 +1041,10 @@ function snapAndSet(i, inp){
 
 function adjustScore(i,direction){
   const inp=document.getElementById('score-inp-'+i);
-  const cur=inp.value===''?null:parseFloat(inp.value);
-  const base=cur===null?0:cur;
-  const newVal=Math.max(0,Math.min(12,Math.round((base+(direction*0.5))*100)/100));
+  const raw=inp.value===''?null:parseFloat(inp.value);
+  // Snap current value to nearest 0.5 first, then add step
+  const base=raw===null?0:Math.round(raw*2)/2;
+  const newVal=Math.max(0,Math.min(12,Math.round((base+(direction*0.5))*10)/10));
   inp.value=newVal;
   setScore(i,newVal);
 }
