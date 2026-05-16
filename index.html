@@ -101,7 +101,8 @@ header p{display:none;}
 .voting-banner{background:rgba(74,232,160,.08);border:1px solid rgba(74,232,160,.2);border-radius:10px;padding:10px 16px;font-size:.82rem;color:var(--green);margin-bottom:12px;display:none;}
 .voting-banner.show{display:block;}
 .voting-banner.warn{background:rgba(232,200,74,.08);border-color:rgba(232,200,74,.2);color:var(--gold);}
-.conflict-msg{font-size:.82rem;min-height:0;margin-bottom:10px;text-align:left;}
+.conflict-hint{font-size:.72rem;color:var(--red);margin-top:3px;display:none;}
+.conflict-hint.active{display:block;}
 /* SONG CARDS */
 .song-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:13px 16px;display:grid;grid-template-columns:30px 52px 1fr auto;align-items:center;gap:12px;transition:border-color .2s,box-shadow .2s;margin-bottom:9px;}
 .song-card:hover{border-color:rgba(232,200,74,.28);}
@@ -115,10 +116,10 @@ header p{display:none;}
 .song-country{font-size:.74rem;color:var(--muted);margin-top:2px;}
 .song-artist{font-size:.72rem;color:var(--gold);margin-top:1px;}
 .score-control{display:flex;align-items:center;gap:5px;}
-.score-btn{background:var(--gold);border:none;border-radius:10px;color:#0d0b18;width:44px;height:44px;cursor:pointer;font-size:1.3rem;display:flex;align-items:center;justify-content:center;transition:background .1s;flex-shrink:0;font-weight:800;user-select:none;-webkit-user-select:none;touch-action:manipulation;}
-.score-btn:hover:not(:disabled){background:var(--gold2);}
-.score-btn:active:not(:disabled){background:var(--gold2);transform:scale(0.93);}
-.score-btn:disabled{opacity:.3;cursor:not-allowed;}
+.score-btn{background:transparent;border:1.5px solid var(--border);border-radius:10px;color:var(--muted);width:44px;height:44px;cursor:pointer;font-size:1.3rem;display:flex;align-items:center;justify-content:center;transition:all .1s;flex-shrink:0;font-weight:700;user-select:none;-webkit-user-select:none;touch-action:manipulation;}
+.score-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold);background:rgba(232,200,74,.08);}
+.score-btn:active:not(:disabled){border-color:var(--gold);color:var(--gold);background:rgba(232,200,74,.15);transform:scale(0.93);}
+.score-btn:disabled{opacity:.25;cursor:not-allowed;}
 .score-input{width:68px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:5px 8px;font-size:.88rem;text-align:center;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;}
 .score-input:focus{border-color:var(--gold);}
 .score-input.ok{border-color:rgba(74,232,160,.5);color:var(--green);}
@@ -1251,19 +1252,20 @@ function renderSongs(){
         +';margin-top:2px">'
         +(s.odds.odds_rank<=3?'🔥':s.odds.odds_rank<=8?'⭐':'')
         +' #'+s.odds.odds_rank+' favourite &middot; '+(s.odds.win_chance<0.01?'<1%':Math.round(s.odds.win_chance*100)+'%')+' win &middot; best '+s.odds.best_odds+'</div>':'')
+      +'<div class="conflict-hint" id="conflict-hint-'+i+'"></div>'
       +'</div>'
       +'<div class="score-control">'
       +'<button class="score-btn" '
-      +'onmousedown="startPress('+i+',-1)" onmouseup="stopPress()" onmouseleave="stopPress()" '
-      +'ontouchstart="startPress('+i+',-1);event.preventDefault()" ontouchend="stopPress()"'
+      +'onmousedown="startPress('+i+',-1,event)" onmouseup="stopPress()" onmouseleave="stopPress()" '
+      +'ontouchstart="startPress('+i+',-1,event);event.preventDefault()" ontouchend="stopPress()" ontouchmove="onPressMove(event)"'
       +dis+'>&minus;</button>'
       +'<input class="score-input'+(rated?' ok':'')+'" id="score-inp-'+i+'"'
       +' type="number" min="0" max="12" step="0.5"'
       +' value="'+(rated?val:'')+'" placeholder="&mdash;"'
       +' onchange="snapAndSet('+i+',this)" oninput="snapAndSet('+i+',this)" onblur="snapAndSet('+i+',this)"'+dis+'/>'
       +'<button class="score-btn" '
-      +'onmousedown="startPress('+i+',1)" onmouseup="stopPress()" onmouseleave="stopPress()" '
-      +'ontouchstart="startPress('+i+',1);event.preventDefault()" ontouchend="stopPress()"'
+      +'onmousedown="startPress('+i+',1,event)" onmouseup="stopPress()" onmouseleave="stopPress()" '
+      +'ontouchstart="startPress('+i+',1,event);event.preventDefault()" ontouchend="stopPress()" ontouchmove="onPressMove(event)"'
       +dis+'>+</button>'
       +'</div></div>';
   }).join('');
@@ -1365,16 +1367,36 @@ async function chatDeleteMessage(){
   closeChatActionMenu();
 }
 let _pressTimer = null;
+let _pressRepeat = null;
+let _touchStartY = 0;
+let _touchMoved = false;
 
-function startPress(i, direction){
-  // Fire immediately on first press
-  adjustScore(i, direction);
-  // Then repeat every 500ms while held
-  _pressTimer = setInterval(()=> adjustScore(i, direction), 250);
+function startPress(i, direction, e){
+  _touchMoved = false;
+  if(e && e.touches) _touchStartY = e.touches[0].clientY;
+  // 150ms delay — filters accidental scroll touches
+  _pressTimer = setTimeout(()=>{
+    if(_touchMoved) return;
+    adjustScore(i, direction);
+    // Repeat every 600ms while held
+    _pressRepeat = setInterval(()=>{
+      if(_touchMoved){ stopPress(); return; }
+      adjustScore(i, direction);
+    }, 600);
+  }, 150);
 }
 
 function stopPress(){
-  if(_pressTimer){ clearInterval(_pressTimer); _pressTimer = null; }
+  clearTimeout(_pressTimer); _pressTimer = null;
+  clearInterval(_pressRepeat); _pressRepeat = null;
+}
+
+function onPressMove(e){
+  if(e && e.touches){
+    if(Math.abs(e.touches[0].clientY - _touchStartY) > 8){
+      _touchMoved = true; stopPress();
+    }
+  }
 }
 
 const SCORES=[0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12];
@@ -1394,80 +1416,73 @@ function validateAll(){
   const voter=allVoters[activeVoter];
   if(voter!==currentUser) return;
   const vs=allScores[voter]||[];
+
+  // score value -> [song indices]
   const valMap={};
   vs.forEach((v,i)=>{
     if(v===null) return;
-    const key=String(Math.round(v*100)/100);
+    const key=Math.round(v*100)/100;
     if(!valMap[key]) valMap[key]=[];
     valMap[key].push(i);
   });
+
+  // which indices are in conflict
   const conflicts=new Set();
   Object.values(valMap).forEach(idxs=>{ if(idxs.length>1) idxs.forEach(i=>conflicts.add(i)); });
+
+  // update each card
   contestSongs.forEach((_,i)=>{
     const inp=document.getElementById('score-inp-'+i);
     const card=document.getElementById('card-'+i);
+    const hint=document.getElementById('conflict-hint-'+i);
     if(!inp) return;
     const hasVal=vs[i]!==null;
     const isConflict=conflicts.has(i);
     inp.classList.toggle('conflict',isConflict);
     inp.classList.toggle('ok',hasVal&&!isConflict);
     if(card) card.classList.toggle('rated',hasVal&&!isConflict);
-    // Show/hide inline conflict hint on the card
-    let hint=document.getElementById('conflict-hint-'+i);
+    if(!hint) return;
     if(isConflict){
-      if(!hint){
-        hint=document.createElement('div');
-        hint.id='conflict-hint-'+i;
-        hint.style.cssText='font-size:.72rem;color:var(--red);margin-top:4px;grid-column:1/-1;';
-        card&&card.appendChild(hint);
+      const score=Math.round(vs[i]*100)/100;
+      const others=(valMap[score]||[]).filter(j=>j!==i);
+      if(others.length){
+        const other=others[0];
+        const os=contestSongs[other];
+        const oName=os?(os.song&&os.song!=='TBA'?os.song:os.country):'?';
+        hint.innerHTML='&#9888; Score '+score+' also used for <b>'+escapeHtml(oName)+'</b>'
+          +' &mdash; <button onclick="clearScoreFor('+other+')" style="background:rgba(232,200,74,.15);border:1px solid rgba(232,200,74,.4);color:var(--gold);border-radius:6px;padding:1px 8px;font-size:.7rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">Clear '+escapeHtml(oName)+'</button>';
+        hint.classList.add('active');
       }
-      // Find what other song has the same score
-      const score=vs[i];
-      const dupeIdx=idxs.find(j=>j!==i&&allScores[voter][j]===score);
-      if(dupeIdx!==undefined){
-        const dupeSong=contestSongs[dupeIdx];
-        const dupeName=dupeSong?(dupeSong.song&&dupeSong.song!=='TBA'?dupeSong.song:dupeSong.country):'?';
-        hint.innerHTML='&#9888; Also used for <b>'+escapeHtml(dupeName)+'</b>'
-          +' &nbsp;<button onclick="clearScoreFor('+dupeIdx+')" style="background:rgba(232,200,74,.15);border:1px solid rgba(232,200,74,.4);color:var(--gold);border-radius:6px;padding:1px 7px;font-size:.7rem;cursor:pointer;font-family:\'DM Sans\',sans-serif">Clear it</button>';
-      }
-    } else if(hint){
-      hint.remove();
+    } else {
+      hint.innerHTML='';
+      hint.classList.remove('active');
     }
   });
 
-  // Build conflict messages
-  const msgHtmlParts=[];
-  const seenPairs=new Set();
+  // top banner
+  const parts=[];
+  const seen=new Set();
   Object.entries(valMap).forEach(([score,idxs])=>{
     if(idxs.length<2) return;
-    // For each conflicting pair show once
-    for(let a=0;a<idxs.length;a++){
-      for(let b=a+1;b<idxs.length;b++){
-        const ia=idxs[a], ib=idxs[b];
-        const pairKey=Math.min(ia,ib)+'-'+Math.max(ia,ib);
-        if(seenPairs.has(pairKey)) continue;
-        seenPairs.add(pairKey);
-        const songA=contestSongs[ia], songB=contestSongs[ib];
-        const nameA=songA?(songA.song&&songA.song!=='TBA'?songA.song:songA.country):'?';
-        const nameB=songB?(songB.song&&songB.song!=='TBA'?songB.song:songB.country):'?';
-        msgHtmlParts.push(
-          '<div style="background:rgba(232,74,106,.1);border:1px solid rgba(232,74,106,.3);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">'
-          +'<span style="color:var(--red);font-size:.8rem">&#9888; Score <b>'+score+'</b>: <b>'+escapeHtml(nameA)+'</b> &amp; <b>'+escapeHtml(nameB)+'</b> both have this score</span>'
-          +'<div style="display:flex;gap:6px;flex-shrink:0">'
-          +'<button onclick="clearScoreFor('+ia+')" style="background:rgba(232,200,74,.15);border:1px solid rgba(232,200,74,.4);color:var(--gold);border-radius:6px;padding:3px 10px;font-size:.75rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">Clear '+escapeHtml(nameA)+'</button>'
-          +'<button onclick="clearScoreFor('+ib+')" style="background:rgba(232,200,74,.15);border:1px solid rgba(232,200,74,.4);color:var(--gold);border-radius:6px;padding:3px 10px;font-size:.75rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">Clear '+escapeHtml(nameB)+'</button>'
-          +'</div></div>'
-        );
-      }
+    for(let a=0;a<idxs.length;a++) for(let b=a+1;b<idxs.length;b++){
+      const ia=idxs[a],ib=idxs[b],pk=Math.min(ia,ib)+'-'+Math.max(ia,ib);
+      if(seen.has(pk)) continue; seen.add(pk);
+      const nA=contestSongs[ia]?(contestSongs[ia].song&&contestSongs[ia].song!=='TBA'?contestSongs[ia].song:contestSongs[ia].country):'?';
+      const nB=contestSongs[ib]?(contestSongs[ib].song&&contestSongs[ib].song!=='TBA'?contestSongs[ib].song:contestSongs[ib].country):'?';
+      parts.push('<div style="background:rgba(232,74,106,.1);border:1px solid rgba(232,74,106,.3);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">'
+        +'<span style="color:var(--red);font-size:.8rem">&#9888; Score <b>'+score+'</b>: <b>'+escapeHtml(nA)+'</b> &amp; <b>'+escapeHtml(nB)+'</b></span>'
+        +'<div style="display:flex;gap:5px;flex-shrink:0">'
+        +'<button onclick="clearScoreFor('+ia+')" style="background:rgba(232,200,74,.15);border:1px solid rgba(232,200,74,.4);color:var(--gold);border-radius:6px;padding:3px 9px;font-size:.73rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">Clear '+escapeHtml(nA)+'</button>'
+        +'<button onclick="clearScoreFor('+ib+')" style="background:rgba(232,200,74,.15);border:1px solid rgba(232,200,74,.4);color:var(--gold);border-radius:6px;padding:3px 9px;font-size:.73rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">Clear '+escapeHtml(nB)+'</button>'
+        +'</div></div>');
     }
   });
-
   ['conflict-msg','conflict-msg-r'].forEach(id=>{
-    const msg=document.getElementById(id);
-    if(!msg) return;
-    msg.innerHTML=msgHtmlParts.join('');
+    const el=document.getElementById(id);
+    if(el) el.innerHTML=parts.join('');
   });
 }
+
 
 async function clearScoreFor(i){
   const voter=allVoters[activeVoter];
