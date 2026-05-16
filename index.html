@@ -230,7 +230,8 @@ header p{display:none;}
 .chat-msg.mine .chat-bubble{background:var(--gold);color:#0d0b18;border-radius:12px 12px 2px 12px;}
 .chat-msg.theirs .chat-bubble{background:var(--bg);border:1px solid var(--border);border-radius:12px 12px 12px 2px;}
 .chat-meta{font-size:.68rem;color:var(--muted);padding:0 4px;}
-.chat-name{font-size:.72rem;font-weight:600;color:var(--text);padding:0 4px;margin-bottom:1px;}
+.chat-name{font-size:.72rem;font-weight:600;color:var(--text);padding:0 4px;margin-bottom:1px;display:flex;align-items:center;gap:5px;}
+.host-badge{background:linear-gradient(135deg,#e8c84a,#f5d96e);color:#0d0b18;font-size:.6rem;font-weight:800;padding:1px 5px;border-radius:4px;letter-spacing:.3px;text-transform:uppercase;flex-shrink:0;}
 .chat-input-row{padding:8px 10px;border-top:1px solid var(--border);display:flex;gap:6px;flex-shrink:0;}
 .chat-input-row input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 10px;font-size:16px;font-family:'DM Sans',sans-serif;outline:none;}
 .chat-input-row input:focus{border-color:var(--gold);}
@@ -250,7 +251,11 @@ header p{display:none;}
 .msg-action-btn{background:none;border:none;font-size:.68rem;color:var(--muted);cursor:pointer;padding:1px 5px;border-radius:4px;font-family:'DM Sans',sans-serif;}
 .msg-action-btn:hover{color:var(--text);background:rgba(255,255,255,.08);}
 .msg-editing{width:100%;background:var(--bg);border:1px solid var(--gold);border-radius:8px;color:var(--text);padding:6px 10px;font-size:.84rem;font-family:'DM Sans',sans-serif;outline:none;resize:none;}
-.chat-empty{color:var(--muted);font-size:.82rem;text-align:center;padding:20px 0;}
+.emoji-btn{background:transparent;border:none;font-size:1.3rem;cursor:pointer;padding:4px 6px;border-radius:6px;flex-shrink:0;line-height:1;transition:transform .15s;}
+.emoji-btn:hover{transform:scale(1.2);}
+#emoji-picker button{background:transparent;border:none;font-size:1.2rem;cursor:pointer;padding:4px;border-radius:4px;line-height:1;transition:transform .1s;}
+#emoji-picker button:hover{transform:scale(1.25);background:rgba(255,255,255,.08);}
+.chat-msg.mine.editing .chat-bubble{outline:2px solid var(--gold);border-radius:12px;}
 /* NAV */
 .nav-row{display:flex;gap:12px;justify-content:center;margin-top:30px;flex-wrap:wrap;}
 /* RESPONSIVE */
@@ -575,12 +580,22 @@ header p{display:none;}
   </div>
   <div class="chat-messages" id="chat-messages"><div class="chat-empty">Loading&hellip;</div></div>
   <div class="chat-input-row">
+    <button class="emoji-btn" onclick="toggleEmojiPicker()" ontouchend="event.preventDefault();toggleEmojiPicker()" title="Emoji">&#128512;</button>
     <input type="text" id="chat-inp" placeholder="Say something&hellip;" maxlength="500"
       inputmode="text"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"
       onkeypress="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"/>
     <button onclick="sendMessage()" ontouchend="event.preventDefault();sendMessage()">Send</button>
   </div>
+  <!-- EMOJI PICKER -->
+  <div id="emoji-picker" style="display:none;padding:8px 10px;border-top:1px solid var(--border);flex-wrap:wrap;gap:2px;max-height:120px;overflow-y:auto">
+  </div>
+</div>
+
+<!-- CHAT MESSAGE ACTION MENU -->
+<div id="chat-action-menu" style="display:none;position:fixed;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:6px;z-index:600;box-shadow:0 8px 30px rgba(0,0,0,.5);min-width:140px">
+  <div id="cam-edit" onclick="chatEditMessage()" style="padding:10px 14px;font-size:.85rem;cursor:pointer;border-radius:8px;display:flex;align-items:center;gap:8px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background=''">&#9998; Edit</div>
+  <div id="cam-delete" onclick="chatDeleteMessage()" style="padding:10px 14px;font-size:.85rem;cursor:pointer;border-radius:8px;color:var(--red);display:flex;align-items:center;gap:8px" onmouseover="this.style.background='rgba(232,74,106,.08)'" onmouseout="this.style.background=''">&#128465; Delete</div>
 </div>
 
 <!-- EDIT NAME MODAL -->
@@ -847,7 +862,8 @@ async function boot(){
       initNotifications();
       // Fetch chat_enabled for this user and init chat FAB
       try{
-        const urows=await sbGet('users','username=ilike.'+encodeURIComponent(local.username)+'&select=chat_enabled');
+        const urows=await sbGet('users','username=ilike.'+encodeURIComponent(local.username)+'&select=chat_enabled,is_host');
+        currentUserIsHost=urows.length?!!urows[0].is_host:false;
         initChat(urows.length?urows[0].chat_enabled!==false:true);
       }catch(e){ initChat(true); }
       if(local.contestId){
@@ -912,9 +928,10 @@ async function submitJoin(){
   const btn=document.getElementById('join-btn');
   btn.disabled=true; btn.textContent='Joining\u2026';
   try{
-    const existing=await sbGet('users','username=ilike.'+encodeURIComponent(fullName)+'&select=username,chat_enabled');
+    const existing=await sbGet('users','username=ilike.'+encodeURIComponent(fullName)+'&select=username,chat_enabled,is_host');
     if(existing.length){
       currentUser=existing[0].username;
+      currentUserIsHost=!!existing[0].is_host;
       initChat(existing[0].chat_enabled!==false);
     }else{
       await sbUpsert('users',{username:fullName,first_name:first,last_name:last,chat_enabled:true});
@@ -1255,7 +1272,82 @@ function snapAndSet(i, inp){
   setScore(i, snapped);
 }
 
-// ── CONTINUOUS PRESS ─────────────────────────────────────────────────────────
+// ── EMOJI PICKER ──────────────────────────────────────────────────────────────
+const EMOJIS=['😀','😂','🤣','😍','🥰','😎','🤩','😜','🤔','😮','😭','😡','🥳','🎉','🔥','❤️','💛','💙','👏','🙌','👍','👎','🫶','🎵','🎶','🏆','⭐','🌟','💫','✨','🎤','🎧','🇨🇾','🇬🇷','🇪🇺','🎊','🥂','🍾','😱','🤯','🙈','💯','🫡','🤌','👑'];
+
+function toggleEmojiPicker(){
+  const p=document.getElementById('emoji-picker');
+  if(p.style.display==='none'||!p.style.display){
+    // Build emojis lazily
+    if(!p.children.length){
+      p.innerHTML=EMOJIS.map(e=>'<button onclick="insertEmoji(\''+e+'\')" ontouchend="event.preventDefault();insertEmoji(\''+e+'\')">'+e+'</button>').join('');
+    }
+    p.style.display='flex';
+    document.getElementById('chat-inp').focus();
+  } else {
+    p.style.display='none';
+  }
+}
+
+function insertEmoji(emoji){
+  const inp=document.getElementById('chat-inp');
+  const pos=inp.selectionStart||inp.value.length;
+  inp.value=inp.value.slice(0,pos)+emoji+inp.value.slice(pos);
+  inp.focus();
+  inp.setSelectionRange(pos+emoji.length,pos+emoji.length);
+}
+
+// Close emoji picker when clicking outside
+document.addEventListener('click',e=>{
+  const p=document.getElementById('emoji-picker');
+  if(p&&p.style.display!=='none'&&!e.target.closest('#emoji-picker')&&!e.target.closest('.emoji-btn'))
+    p.style.display='none';
+});
+
+// ── CHAT MESSAGE EDIT/DELETE ───────────────────────────────────────────────────
+let _chatActionMsgId=null, _chatActionEl=null, _pressTimeout=null;
+
+function chatMsgPointerDown(el, msgId, e){
+  _pressTimeout=setTimeout(()=>showChatActionMenu(el, msgId, e), 500);
+}
+function chatMsgPointerUp(){ clearTimeout(_pressTimeout); }
+
+function showChatActionMenu(el, msgId, e){
+  _chatActionMsgId=msgId;
+  _chatActionEl=el;
+  const menu=document.getElementById('chat-action-menu');
+  menu.style.display='block';
+  // Position near tap/click
+  const x=Math.min((e.touches?e.touches[0].clientX:e.clientX)||200, window.innerWidth-160);
+  const y=Math.min((e.touches?e.touches[0].clientY:e.clientY)||200, window.innerHeight-100);
+  menu.style.left=x+'px';
+  menu.style.top=y+'px';
+}
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#chat-action-menu')) closeChatActionMenu();
+});
+
+function closeChatActionMenu(){
+  document.getElementById('chat-action-menu').style.display='none';
+  _chatActionMsgId=null; _chatActionEl=null;
+}
+
+
+async function chatDeleteMessage(){
+  if(!_chatActionMsgId||!_chatActionEl) return;
+  if(!confirm('Delete this message?')){closeChatActionMenu();return;}
+  try{
+    await fetch(SUPABASE_URL+'/rest/v1/chat_messages?id=eq.'+encodeURIComponent(_chatActionMsgId),{
+      method:'DELETE',
+      headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}
+    });
+    _chatActionEl.style.transition='opacity .3s';
+    _chatActionEl.style.opacity='0';
+    setTimeout(()=>_chatActionEl?.remove(),300);
+  }catch(e){alert('Could not delete: '+e.message);}
+  closeChatActionMenu();
+}
 let _pressTimer = null;
 
 function startPress(i, direction){
@@ -1660,7 +1752,7 @@ async function showPrecision(){
 }
 
 // ── CHAT ──────────────────────────────────────────────────────────────────────
-let chatOpen=false, chatSub=null, chatUnread=0, lastChatTs=null, currentUserChatEnabled=true;
+let chatOpen=false, chatSub=null, chatUnread=0, lastChatTs=null, currentUserChatEnabled=true, currentUserIsHost=false;
 let chatOldestTs=null, chatHasMore=false;
 const CHAT_PAGE=500;
 
@@ -1730,6 +1822,7 @@ function msgHtml(m, showName){
   const time=new Date(m.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
   const name=m.display_name||m.username;
   const safeId=m.id?m.id.replace(/-/g,''):'';
+  const hostBadge=m.is_host?'<span class="host-badge">Host</span>':'';
   const reactions=m.reactions||{};
   const reactHtml=Object.entries(reactions).filter(([,users])=>users.length>0).map(([emoji,users])=>{
     const iMine=users.includes(currentUser);
@@ -1743,7 +1836,7 @@ function msgHtml(m, showName){
       +'</div>'
     :'';
   return '<div class="chat-msg '+(mine?'mine':'theirs')+'" data-user="'+escapeHtml(m.username)+'" data-ts="'+m.created_at+'" data-id="'+safeId+'" data-fullid="'+(m.id||'')+'">'
-    +(showName?'<div class="chat-name">'+escapeHtml(name)+'</div>':'')+''
+    +(showName?'<div class="chat-name">'+escapeHtml(name)+hostBadge+'</div>':'')+''
     +'<div style="position:relative">'
     +'<div class="chat-bubble" data-msgid="'+safeId+'"'+(m.id ? ' oncontextmenu="chatContextMenu(event,this)" ontouchstart="bubbleTouchStart(event)" ontouchend="bubbleTouchEnd()" ontouchmove="bubbleTouchEnd()" ondblclick="bubbleDblClick(event)"' : '')+'>'+escapeHtml(m.message)+'</div>'
     +'<button class="msg-action-btn" data-mid="'+safeId+'" style="position:absolute;'+(mine?'left:-28px':'right:-28px')+';top:2px;opacity:.5;font-size:1rem;padding:2px 4px;border-radius:6px" onclick="openReactPicker(this)" title="Add reaction">😊</button>'
@@ -1943,10 +2036,6 @@ async function deleteMsg(msgId){
 
 
 
-function chatContextMenu(e, msgId){
-  e.preventDefault();
-  toggleReactionPicker(msgId, e.target);
-}
 
 // ── CHAT LONG PRESS (mobile reaction) ────────────────────────────────────────
 let _chatLongTimer = null;
@@ -2048,7 +2137,7 @@ async function sendMessage(){
   if(!msg||!currentUser) return;
   inp.value=''; inp.blur(); inp.focus();
   const sentAt=new Date().toISOString();
-  appendMessage({username:currentUser,display_name:currentUser,message:msg,created_at:sentAt});
+  appendMessage({username:currentUser,display_name:currentUser,message:msg,created_at:sentAt,is_host:currentUserIsHost});
   lastChatTs=sentAt;
   try{
     await fetch(SUPABASE_URL+'/rest/v1/chat_messages',{
@@ -2059,7 +2148,7 @@ async function sendMessage(){
         'Content-Type':'application/json',
         'Prefer':'return=minimal'
       },
-      body:JSON.stringify({username:currentUser,display_name:currentUser,message:msg})
+      body:JSON.stringify({username:currentUser,display_name:currentUser,message:msg,is_host:currentUserIsHost})
     });
   }catch(e){
     console.warn('Chat send:',e.message);
