@@ -1033,16 +1033,9 @@ function renderSongs(){
 function snapAndSet(i, inp){
   const raw = parseFloat(inp.value);
   if(isNaN(raw)) return;
-  // Snap to nearest 0.5
   const snapped = Math.max(0, Math.min(12, Math.round(raw * 2) / 2));
-  // Only update the input value on change (not while typing every digit)
-  if(inp === document.activeElement && inp.value.length < 4) {
-    // Still typing — just validate range, don't snap yet
-    setScore(i, raw);
-  } else {
-    inp.value = snapped;
-    setScore(i, snapped);
-  }
+  inp.value = snapped;
+  setScore(i, snapped);
 }
 
 function adjustScore(i,direction){
