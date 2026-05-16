@@ -87,11 +87,11 @@ header p{display:none;}
 .score-pills{display:flex;flex-wrap:wrap;gap:4px;}
 .score-pill{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:2px 7px;font-size:.74rem;color:#7b72a8;cursor:default;position:relative;}
 .score-pill.used{background:rgba(232,200,74,.12);border-color:rgba(232,200,74,.4);color:var(--gold);cursor:pointer;}
-/* SCORE PILL TOOLTIP */
-.pill-tooltip{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#1e1a35;border:1px solid var(--border);border-radius:8px;padding:7px 10px;white-space:nowrap;font-size:.72rem;color:var(--text);z-index:200;pointer-events:none;opacity:0;transition:opacity .15s;box-shadow:0 4px 16px rgba(0,0,0,.4);}
+/* SCORE PILL TOOLTIP — shown via JS on both hover and tap */
+.pill-tooltip{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#1e1a35;border:1px solid rgba(232,200,74,.3);border-radius:10px;padding:8px 12px;white-space:nowrap;font-size:.75rem;color:var(--text);z-index:500;pointer-events:none;opacity:0;transition:opacity .15s;box-shadow:0 4px 20px rgba(0,0,0,.5);}
 .pill-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1e1a35;}
 .score-pill.used:hover .pill-tooltip{opacity:1;}
-.pill-tooltip .pt-flag{margin-right:4px;}
+.score-pill.used.tapped .pill-tooltip{opacity:1;}
 .pill-tooltip .pt-song{font-weight:600;color:var(--gold);display:block;margin-bottom:2px;}
 .pill-tooltip .pt-country{color:var(--muted);font-size:.68rem;}
 .progress-label{font-size:.8rem;color:#9991c4;margin-bottom:6px;}
@@ -360,7 +360,7 @@ header p{display:none;}
       onerror="this.style.display='none'"/>
     <div style="flex:1">
       <div class="prize-title">&#127942; Tonight's Prize</div>
-      <div class="prize-sub">The voter whose taste matches the official results most closely wins a <strong>20,000mAh Wireless Fast Charger Power Bank</strong> — with built-in iPhone &amp; USB-C cables!</div>
+      <div class="prize-sub">The voter whose prediction for the <strong>final order</strong> is closest to the official results wins a <strong>20,000mAh Wireless Fast Charger Power Bank</strong> with built-in iPhone &amp; USB-C cables. <strong>Free to play. Voting opens now!</strong></div>
     </div>
   </div>
 
@@ -656,6 +656,11 @@ async function boot(){
       currentUser=local.username;
       document.getElementById('session-name').textContent=currentUser;
       initNotifications();
+      // Fetch chat_enabled for this user and init chat FAB
+      try{
+        const urows=await sbGet('users','username=ilike.'+encodeURIComponent(local.username)+'&select=chat_enabled');
+        initChat(urows.length?urows[0].chat_enabled!==false:true);
+      }catch(e){ initChat(true); }
       if(local.contestId){
         try{
           const contests=await sbGet('contests','id=eq.'+encodeURIComponent(local.contestId)+'&active=eq.true&select=*');
@@ -789,6 +794,7 @@ async function enterContest(contest){
   activeVoter=allVoters.indexOf(currentUser);
   if(activeVoter<0) activeVoter=0;
   hideAll(); show('results-screen');
+  showChatFab();
   document.getElementById('results-contest-name').textContent=contest.name;
   document.getElementById('precision-contest-name').textContent=contest.name;
   // Start on vote tab
@@ -952,18 +958,13 @@ function renderScorePills(){
   const voter=allVoters[activeVoter];
   const vs=allScores[voter]||[];
   const used=vs.filter(x=>x!==null);
-  // 0–12 in 0.5 steps = exactly 25 unique values
   const possible=[];
   for(let s=0;s<=12;s+=0.5) possible.push(Math.round(s*100)/100);
-  // Build a map: score → song index (for tooltip)
   const scoreToSong={};
   vs.forEach((score,idx)=>{
-    if(score!==null){
-      const key=Math.round(score*100);
-      scoreToSong[key]=idx;
-    }
+    if(score!==null){ const key=Math.round(score*100); scoreToSong[key]=idx; }
   });
-  document.getElementById('score-pills-r').innerHTML=possible.map(s=>{
+  const pillHtml=possible.map(s=>{
     const key=Math.round(s*100);
     const isUsed=used.some(u=>Math.round(u*100)===key);
     if(!isUsed) return '<div class="score-pill">'+s+'</div>';
@@ -972,14 +973,27 @@ function renderScorePills(){
     const songName=song?(song.song&&song.song!=='TBA'?song.song:song.country):'';
     const country=song?song.country:'';
     const tooltip=song
-      ? '<div class="pill-tooltip">'
+      ?'<div class="pill-tooltip">'
         +'<span class="pt-song">'+escapeHtml(songName)+'</span>'
         +'<span class="pt-country">'+flagImg(country,14)+' '+escapeHtml(country)+'</span>'
         +'</div>'
-      : '';
-    return '<div class="score-pill used">'+s+tooltip+'</div>';
+      :'';
+    return '<div class="score-pill used" onclick="tapPill(this)">'+s+tooltip+'</div>';
   }).join('');
+  ['score-pills','score-pills-r'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.innerHTML=pillHtml;
+  });
 }
+
+function tapPill(el){
+  document.querySelectorAll('.score-pill.tapped').forEach(p=>{ if(p!==el) p.classList.remove('tapped'); });
+  el.classList.toggle('tapped');
+}
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.score-pill'))
+    document.querySelectorAll('.score-pill.tapped').forEach(p=>p.classList.remove('tapped'));
+});
 
 // ── ARTIST PHOTO ─────────────────────────────────────────────────────────────
 function artistPhoto(s,idx){
@@ -1424,6 +1438,12 @@ function initChat(enabled){
   const fab=document.getElementById('chat-fab');
   if(fab) fab.style.display=enabled?'flex':'none';
   if(enabled) subscribeChat();
+}
+
+// Show FAB immediately when entering voting area
+function showChatFab(){
+  const fab=document.getElementById('chat-fab');
+  if(fab&&currentUserChatEnabled) fab.style.display='flex';
 }
 
 function toggleChat(){
