@@ -1514,7 +1514,7 @@ async function showPrecision(){
 }
 
 // ── CHAT ──────────────────────────────────────────────────────────────────────
-let chatOpen=false, chatSub=null, chatUnread=0, lastChatTs=null, currentUserChatEnabled=false;
+let chatOpen=false, chatSub=null, chatUnread=0, lastChatTs=null, currentUserChatEnabled=true;
 let chatOldestTs=null, chatHasMore=false;
 const CHAT_PAGE=50;
 
@@ -1527,7 +1527,6 @@ function initChat(enabled){
 
 
 function toggleChat(){
-  if(!currentUserChatEnabled) return;
   chatOpen=!chatOpen;
   document.getElementById('chat-panel').classList.toggle('open',chatOpen);
   if(chatOpen){chatUnread=0;updateUnreadBadge();loadMessages();setTimeout(()=>document.getElementById('chat-inp').focus(),100);}
