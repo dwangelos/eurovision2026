@@ -1838,12 +1838,7 @@ async function showPrecision(){
       const pct=Math.round(((rho+1)/2)*100);
       const label=pct>=80?'🎯 Excellent taste':pct>=60?'👂 Good ear':pct>=40?'🎲 Average picker':'🤪 Bold choices';
       return {voter,pct,rated:ratedIdxs.length,label};
-    }).filter(r=>r.rated>=10).sort((a,b)=>{
-      // Primary: most songs voted (completeness)
-      if(b.rated!==a.rated) return b.rated-a.rated;
-      // Secondary: precision % (accuracy)
-      return b.pct-a.pct;
-    });
+    }).filter(r=>r.rated>=10).sort((a,b)=>b.pct-a.pct);
 
     let html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">'
       +'<div style="font-size:.82rem;color:var(--muted)">'
