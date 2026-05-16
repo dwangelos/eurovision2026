@@ -1262,7 +1262,7 @@ function startPress(i, direction){
   // Fire immediately on first press
   adjustScore(i, direction);
   // Then repeat every 500ms while held
-  _pressTimer = setInterval(()=> adjustScore(i, direction), 500);
+  _pressTimer = setInterval(()=> adjustScore(i, direction), 250);
 }
 
 function stopPress(){
@@ -1742,13 +1742,13 @@ function msgHtml(m, showName){
       +'<button class="msg-action-btn" onclick="deleteMsg(\'"+m.id+"\')">🗑️ Delete</button>'
       +'</div>'
     :'';
-  return '<div class="chat-msg '+(mine?'mine':'theirs')+'" data-user="'+escapeHtml(m.username)+'" data-ts="'+m.created_at+'" data-id="'+safeId+'">'
+  return '<div class="chat-msg '+(mine?'mine':'theirs')+'" data-user="'+escapeHtml(m.username)+'" data-ts="'+m.created_at+'" data-id="'+safeId+'" data-fullid="'+(m.id||'')+'">'
     +(showName?'<div class="chat-name">'+escapeHtml(name)+'</div>':'')+''
     +'<div style="position:relative">'
     +'<div class="chat-bubble" data-msgid="'+safeId+'"'+(m.id ? ' oncontextmenu="chatContextMenu(event,this)" ontouchstart="bubbleTouchStart(event)" ontouchend="bubbleTouchEnd()" ontouchmove="bubbleTouchEnd()" ondblclick="bubbleDblClick(event)"' : '')+'>'+escapeHtml(m.message)+'</div>'
-    +'<button class="msg-action-btn" style="position:absolute;'+(mine?'left:-28px':'right:-28px')+';top:2px;opacity:.4;font-size:.9rem;padding:2px" onclick="toggleReactionPicker(\'"+m.id+"\',this)" title="React">😊</button>'
+    +'<button class="msg-action-btn" data-mid="'+safeId+'" style="position:absolute;'+(mine?'left:-28px':'right:-28px')+';top:2px;opacity:.5;font-size:1rem;padding:2px 4px;border-radius:6px" onclick="openReactPicker(this)" title="Add reaction">😊</button>'
     +'<div class="reaction-picker" id="rp-'+safeId+'">'
-      +REACT_EMOJIS.map(e=>'<button onclick="toggleReaction(\'"+m.id+"\',\'"+e+"\')">'+e+'</button>').join('')
+      +REACT_EMOJIS.map(e=>'<button data-mid="'+safeId+'" data-emoji="'+e+'" onclick="reactFromPicker(this)">'+e+'</button>').join('')
     +'</div>'
     +'</div>'
     +(reactHtml?'<div class="chat-reactions">'+reactHtml+'</div>':'')+''
@@ -1829,6 +1829,29 @@ function appendMessage(m){
   tmp.innerHTML=msgHtml(m,showName);
   el.appendChild(tmp.content.firstChild);
   el.scrollTop=el.scrollHeight;
+}
+
+
+function reactFromPicker(btn){
+  const safeId = btn.dataset.mid;
+  const emoji = btn.dataset.emoji;
+  if(!safeId||!emoji) return;
+  // Find full UUID from parent chat-msg
+  const msgDiv = btn.closest('.chat-msg') || document.querySelector('.chat-msg[data-id="'+safeId+'"]');
+  const fullId = msgDiv ? msgDiv.dataset.fullid : null;
+  if(!fullId){ console.warn('No fullId for',safeId); return; }
+  document.querySelectorAll('.reaction-picker.open').forEach(p=>p.classList.remove('open'));
+  toggleReaction(fullId, emoji);
+}
+
+function openReactPicker(btn){
+  const safeId = btn.dataset.mid;
+  if(!safeId) return;
+  document.querySelectorAll('.reaction-picker.open').forEach(p=>{
+    if(p.id !== 'rp-'+safeId) p.classList.remove('open');
+  });
+  const picker = document.getElementById('rp-'+safeId);
+  if(picker) picker.classList.toggle('open');
 }
 
 function toggleReactionPicker(msgId,btn){
