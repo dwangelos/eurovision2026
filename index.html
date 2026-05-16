@@ -101,7 +101,7 @@ header p{display:none;}
 .voting-banner{background:rgba(74,232,160,.08);border:1px solid rgba(74,232,160,.2);border-radius:10px;padding:10px 16px;font-size:.82rem;color:var(--green);margin-bottom:12px;display:none;}
 .voting-banner.show{display:block;}
 .voting-banner.warn{background:rgba(232,200,74,.08);border-color:rgba(232,200,74,.2);color:var(--gold);}
-.conflict-msg{color:var(--red);font-size:.8rem;min-height:18px;margin-bottom:8px;text-align:center;}
+.conflict-msg{font-size:.82rem;min-height:0;margin-bottom:10px;text-align:left;}
 /* SONG CARDS */
 .song-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:13px 16px;display:grid;grid-template-columns:30px 52px 1fr auto;align-items:center;gap:12px;transition:border-color .2s,box-shadow .2s;margin-bottom:9px;}
 .song-card:hover{border-color:rgba(232,200,74,.28);}
@@ -597,7 +597,7 @@ header p{display:none;}
 </div>
 
 <!-- EMOJI POPUP — floating, always fully visible -->
-<div id="emoji-popup" style="display:none;position:fixed;background:#1e1a35;border:1px solid var(--border);border-radius:14px;padding:10px;flex-wrap:wrap;gap:4px;z-index:700;box-shadow:0 8px 32px rgba(0,0,0,.6);max-width:280px;max-height:200px;overflow-y:auto;right:24px;bottom:160px">
+<div id="emoji-popup" style="display:none;position:fixed;background:#1e1a35;border:1px solid var(--border);border-radius:14px;padding:10px;flex-wrap:wrap;gap:4px;z-index:700;box-shadow:0 8px 32px rgba(0,0,0,.6);max-height:200px;overflow-y:auto">
 
 <!-- CHAT MESSAGE ACTION MENU -->
 <div id="chat-action-menu" style="display:none;position:fixed;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:6px;z-index:600;box-shadow:0 8px 30px rgba(0,0,0,.5);min-width:140px">
@@ -1288,19 +1288,17 @@ function toggleEmojiPicker(){
     popup.style.display='none';
     return;
   }
-  // Build emojis lazily
   if(!popup.children.length){
     popup.innerHTML=EMOJIS.map(e=>'<button onclick="insertEmoji(\''+e+'\')" ontouchend="event.preventDefault();insertEmoji(\''+e+'\')" style="background:transparent;border:none;font-size:1.3rem;cursor:pointer;padding:4px;border-radius:6px;line-height:1">'+e+'</button>').join('');
   }
-  // Position: above the chat input, anchored to right edge of screen
-  const fab=document.getElementById('chat-fab');
-  const panel=document.getElementById('chat-panel');
-  const panelBottom=parseInt(panel.style.bottom||'90')+panel.offsetHeight+10;
   popup.style.display='flex';
-  // On mobile: right:8px to match panel; on desktop: right:24px
-  const isMobile=window.innerWidth<=640;
-  popup.style.right=isMobile?'8px':'24px';
-  popup.style.bottom=(panel.offsetHeight+100)+'px';
+  // Position: right-align to the chat panel's right edge
+  const panel=document.getElementById('chat-panel');
+  const panelRect=panel.getBoundingClientRect();
+  popup.style.right=(window.innerWidth - panelRect.right)+'px';
+  popup.style.left='auto';
+  popup.style.bottom=(window.innerHeight - panelRect.top + 8)+'px';
+  popup.style.maxWidth=(panelRect.width - 8)+'px';
   setTimeout(()=>document.getElementById('chat-inp').focus(),100);
 }
 
@@ -1410,37 +1408,64 @@ function validateAll(){
     const card=document.getElementById('card-'+i);
     if(!inp) return;
     const hasVal=vs[i]!==null;
-    inp.classList.toggle('conflict',conflicts.has(i));
-    inp.classList.toggle('ok',hasVal&&!conflicts.has(i));
-    if(card) card.classList.toggle('rated',hasVal&&!conflicts.has(i));
+    const isConflict=conflicts.has(i);
+    inp.classList.toggle('conflict',isConflict);
+    inp.classList.toggle('ok',hasVal&&!isConflict);
+    if(card) card.classList.toggle('rated',hasVal&&!isConflict);
+    // Show/hide inline conflict hint on the card
+    let hint=document.getElementById('conflict-hint-'+i);
+    if(isConflict){
+      if(!hint){
+        hint=document.createElement('div');
+        hint.id='conflict-hint-'+i;
+        hint.style.cssText='font-size:.72rem;color:var(--red);margin-top:4px;grid-column:1/-1;';
+        card&&card.appendChild(hint);
+      }
+      // Find what other song has the same score
+      const score=vs[i];
+      const dupeIdx=idxs.find(j=>j!==i&&allScores[voter][j]===score);
+      if(dupeIdx!==undefined){
+        const dupeSong=contestSongs[dupeIdx];
+        const dupeName=dupeSong?(dupeSong.song&&dupeSong.song!=='TBA'?dupeSong.song:dupeSong.country):'?';
+        hint.innerHTML='&#9888; Also used for <b>'+escapeHtml(dupeName)+'</b>'
+          +' &nbsp;<button onclick="clearScoreFor('+dupeIdx+')" style="background:rgba(232,200,74,.15);border:1px solid rgba(232,200,74,.4);color:var(--gold);border-radius:6px;padding:1px 7px;font-size:.7rem;cursor:pointer;font-family:\'DM Sans\',sans-serif">Clear it</button>';
+      }
+    } else if(hint){
+      hint.remove();
+    }
+  });
+
+  // Build conflict messages
+  const msgHtmlParts=[];
+  const seenPairs=new Set();
+  Object.entries(valMap).forEach(([score,idxs])=>{
+    if(idxs.length<2) return;
+    // For each conflicting pair show once
+    for(let a=0;a<idxs.length;a++){
+      for(let b=a+1;b<idxs.length;b++){
+        const ia=idxs[a], ib=idxs[b];
+        const pairKey=Math.min(ia,ib)+'-'+Math.max(ia,ib);
+        if(seenPairs.has(pairKey)) continue;
+        seenPairs.add(pairKey);
+        const songA=contestSongs[ia], songB=contestSongs[ib];
+        const nameA=songA?(songA.song&&songA.song!=='TBA'?songA.song:songA.country):'?';
+        const nameB=songB?(songB.song&&songB.song!=='TBA'?songB.song:songB.country):'?';
+        msgHtmlParts.push(
+          '<div style="background:rgba(232,74,106,.1);border:1px solid rgba(232,74,106,.3);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">'
+          +'<span style="color:var(--red);font-size:.8rem">&#9888; Score <b>'+score+'</b>: <b>'+escapeHtml(nameA)+'</b> &amp; <b>'+escapeHtml(nameB)+'</b> both have this score</span>'
+          +'<div style="display:flex;gap:6px;flex-shrink:0">'
+          +'<button onclick="clearScoreFor('+ia+')" style="background:rgba(232,200,74,.15);border:1px solid rgba(232,200,74,.4);color:var(--gold);border-radius:6px;padding:3px 10px;font-size:.75rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">Clear '+escapeHtml(nameA)+'</button>'
+          +'<button onclick="clearScoreFor('+ib+')" style="background:rgba(232,200,74,.15);border:1px solid rgba(232,200,74,.4);color:var(--gold);border-radius:6px;padding:3px 10px;font-size:.75rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">Clear '+escapeHtml(nameB)+'</button>'
+          +'</div></div>'
+        );
+      }
+    }
   });
 
   ['conflict-msg','conflict-msg-r'].forEach(id=>{
     const msg=document.getElementById(id);
     if(!msg) return;
-    if(conflicts.size>0){
-      let html='';
-      const seen=new Set();
-      Object.entries(valMap).forEach(([score,idxs])=>{
-        if(idxs.length<2) return;
-        idxs.forEach((i)=>{
-          const others=idxs.filter(j=>j!==i);
-          others.forEach(other=>{
-            const key=i+'-'+other;
-            if(seen.has(key)) return; seen.add(key); seen.add(other+'-'+i);
-            const otherSong=contestSongs[other];
-            const thisSong=contestSongs[i];
-            const otherName=otherSong?(otherSong.song&&otherSong.song!=='TBA'?otherSong.song:otherSong.country):'?';
-            const thisName=thisSong?(thisSong.song&&thisSong.song!=='TBA'?thisSong.song:thisSong.country):'?';
-            html+='<div style="margin-bottom:5px">&#9888; Score <b>'+score+'</b> already used for <b>'+escapeHtml(otherName)+'</b>'
-              +' &mdash; <button onclick="clearScoreFor('+other+')" style="background:rgba(232,200,74,.15);border:1px solid rgba(232,200,74,.4);color:var(--gold);border-radius:6px;padding:2px 8px;font-size:.75rem;cursor:pointer;font-family:\'DM Sans\',sans-serif">Clear '+escapeHtml(otherName)+'</button></div>';
-          });
-        });
-      });
-      msg.innerHTML=html||'Duplicate scores — each score must be unique.';
-    }else{
-      msg.innerHTML='';
-    }
+    msg.innerHTML=msgHtmlParts.join('');
   });
 }
 
