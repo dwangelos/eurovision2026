@@ -1373,25 +1373,35 @@ let _pressTimer = null;
 let _pressRepeat = null;
 let _touchStartY = 0;
 let _touchMoved = false;
+let _pressCount = 0;
 
 function startPress(i, direction, e){
   _touchMoved = false;
+  _pressCount = 0;
   if(e && e.touches) _touchStartY = e.touches[0].clientY;
-  // 150ms delay — filters accidental scroll touches
   _pressTimer = setTimeout(()=>{
     if(_touchMoved) return;
     adjustScore(i, direction);
-    // Repeat every 600ms while held
-    _pressRepeat = setInterval(()=>{
-      if(_touchMoved){ stopPress(); return; }
-      adjustScore(i, direction);
-    }, 600);
+    _pressCount++;
+    // Start fast — 150ms, accelerate to 80ms after 5 steps
+    const scheduleNext = () => {
+      if(_touchMoved) return;
+      const delay = _pressCount < 5 ? 150 : 80;
+      _pressRepeat = setTimeout(()=>{
+        if(_touchMoved){ stopPress(); return; }
+        adjustScore(i, direction);
+        _pressCount++;
+        scheduleNext();
+      }, delay);
+    };
+    scheduleNext();
   }, 150);
 }
 
 function stopPress(){
   clearTimeout(_pressTimer); _pressTimer = null;
-  clearInterval(_pressRepeat); _pressRepeat = null;
+  clearTimeout(_pressRepeat); _pressRepeat = null;
+  _pressCount = 0;
 }
 
 function onPressMove(e){
