@@ -71,7 +71,8 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
 .vmr-me{background:rgba(232,200,74,.12);color:var(--gold);}
 .vmr-done{background:rgba(74,232,160,.1);color:var(--green);}
 .vmr-pending{background:rgba(123,114,168,.1);color:var(--muted);}
-.voter-tab{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:.73rem;cursor:pointer;transition:all .15s;color:var(--muted);white-space:nowrap;}
+.voter-tabs{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:5px;margin-bottom:10px;}
+.voter-tab{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:.73rem;cursor:pointer;transition:all .15s;color:var(--muted);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .voter-tab.active{background:var(--gold);color:#0d0b18;border-color:var(--gold);font-weight:600;}
 .voter-tab:hover:not(.active){border-color:var(--gold);color:var(--gold);}
 .used-scores{margin-bottom:12px;}
@@ -155,8 +156,13 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
 .voter-row .v-name{font-size:.9rem;font-weight:500;}
 .voter-row .v-score{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--gold);}
 .voter-row .v-score.no-vote{color:var(--muted);font-size:.85rem;font-family:'DM Sans',sans-serif;font-weight:400;}
-/* CHAT */
-#chat-panel{position:fixed;bottom:0;right:20px;width:320px;max-height:480px;background:var(--card);border:1px solid var(--border);border-bottom:none;border-radius:16px 16px 0 0;display:flex;flex-direction:column;z-index:300;box-shadow:0 -4px 40px rgba(0,0,0,.4);}
+/* CHAT FAB */
+#chat-fab{position:fixed;bottom:24px;right:24px;width:54px;height:54px;border-radius:50%;background:var(--gold);color:#0d0b18;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.35rem;box-shadow:0 4px 20px rgba(232,200,74,.45);z-index:400;transition:transform .2s,box-shadow .2s;}
+#chat-fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(232,200,74,.6);}
+#chat-fab-unread{position:absolute;top:-3px;right:-3px;background:var(--red);color:#fff;border-radius:99px;padding:2px 6px;font-size:.65rem;font-weight:700;display:none;font-family:'DM Sans',sans-serif;min-width:18px;text-align:center;}
+/* CHAT PANEL — floating bubble */
+#chat-panel{position:fixed;bottom:90px;right:24px;width:330px;max-height:500px;background:var(--card);border:1px solid var(--border);border-radius:16px;display:flex;flex-direction:column;z-index:399;box-shadow:0 8px 40px rgba(0,0,0,.5);transform:scale(0.95) translateY(12px);opacity:0;pointer-events:none;transition:transform .22s cubic-bezier(.34,1.56,.64,1),opacity .18s;}
+#chat-panel.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all;}
 .chat-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:.9rem;color:var(--gold);flex-shrink:0;}
 .chat-close{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;line-height:1;padding:2px 6px;border-radius:6px;}
 .chat-close:hover{color:var(--text);}
@@ -177,16 +183,26 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
 /* NAV */
 .nav-row{display:flex;gap:12px;justify-content:center;margin-top:30px;flex-wrap:wrap;}
 /* RESPONSIVE */
-@media(max-width:600px){
+@media(max-width:480px){
+  .voter-tabs{grid-template-columns:1fr;}
   .song-card{grid-template-columns:24px 40px 1fr auto;gap:8px;padding:10px 12px;}
   .song-photo{width:36px;height:36px;}
   .score-input{width:48px;}
   header h1{font-size:1.9rem;}
   #db-badge{display:none;}
   .join-card{padding:28px 20px;}
-  .name-input-wrap{flex-direction:column;}
   .precision-card{grid-template-columns:36px 1fr auto;gap:10px;padding:14px;}
-  #chat-panel{right:0;left:0;width:100%;border-radius:16px 16px 0 0;max-height:60vh;}
+  #chat-panel{right:8px;left:8px;width:auto;bottom:88px;}
+  #chat-fab{bottom:16px;right:16px;}
+}
+@media(min-width:481px) and (max-width:767px){
+  .voter-tabs{grid-template-columns:repeat(2,1fr);}
+}
+@media(min-width:768px) and (max-width:1099px){
+  .voter-tabs{grid-template-columns:repeat(3,1fr);}
+}
+@media(min-width:1100px){
+  .voter-tabs{grid-template-columns:repeat(4,1fr);}
 }
 </style>
 </head>
@@ -233,9 +249,8 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
 <!-- VOTING -->
 <div class="wrap" id="voting-screen" style="display:none">
   <div class="session-bar">
-    <div class="who">Voting as <strong id="session-name"></strong></div>
+    <div class="who">Voting as <strong id="session-name"></strong> <button onclick="showEditName()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.75rem;padding:2px 6px;border-radius:4px;font-family:'DM Sans',sans-serif" title="Edit name">&#9998;</button></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <button class="btn btn-ghost btn-sm" id="chat-btn" style="display:none" onclick="toggleChat()">&#128172; Chat <span id="chat-unread" style="display:none;background:var(--red);color:#fff;border-radius:99px;padding:1px 6px;font-size:.7rem;margin-left:2px"></span></button>
       <button class="btn btn-ghost btn-sm" onclick="showResults()">&#127942; Results</button>
       <button class="btn btn-ghost btn-sm" onclick="showContestPicker()">&#8592; Contests</button>
       <button class="btn btn-ghost btn-sm" onclick="showJoinScreen()">Sign Out</button>
@@ -288,8 +303,14 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
   </div>
 </div>
 
+<!-- CHAT FAB -->
+<button id="chat-fab" onclick="toggleChat()" title="Group Chat">
+  &#128172;
+  <span id="chat-fab-unread"></span>
+</button>
+
 <!-- CHAT PANEL -->
-<div id="chat-panel" style="display:none">
+<div id="chat-panel">
   <div class="chat-header">
     <span>&#128172; Group Chat</span>
     <button class="chat-close" onclick="toggleChat()">&times;</button>
@@ -299,6 +320,32 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
     <input type="text" id="chat-inp" placeholder="Say something&hellip;" maxlength="500"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"/>
     <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<!-- EDIT NAME MODAL -->
+<div class="modal-overlay" id="edit-name-modal" onclick="closeEditName(event)">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div><h3>&#9998; Edit Your Name</h3><div class="modal-song">Your votes and chat history will be kept.</div></div>
+      <button class="modal-close" onclick="document.getElementById('edit-name-modal').classList.remove('open');document.body.style.overflow=''">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px">
+        <input type="text" id="edit-firstname" placeholder="First name" maxlength="24"
+          autocorrect="off" spellcheck="false"
+          style="background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px 14px;font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s"
+          onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'"
+          onkeydown="if(event.key==='Enter')document.getElementById('edit-lastname').focus()"/>
+        <input type="text" id="edit-lastname" placeholder="Last name" maxlength="24"
+          autocorrect="off" spellcheck="false"
+          style="background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px 14px;font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s"
+          onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'"
+          onkeydown="if(event.key==='Enter')saveEditName()"/>
+      </div>
+      <div id="edit-name-msg" style="font-size:.8rem;min-height:18px;margin-bottom:14px;color:var(--muted)"></div>
+      <button class="btn" style="width:100%" onclick="saveEditName()">Save Name</button>
+    </div>
   </div>
 </div>
 
@@ -467,6 +514,7 @@ async function boot(){
     if(local&&local.username){
       currentUser=local.username;
       document.getElementById('session-name').textContent=currentUser;
+      initNotifications();
       if(local.contestId){
         try{
           const contests=await sbGet('contests','id=eq.'+encodeURIComponent(local.contestId)+'&active=eq.true&select=*');
@@ -540,6 +588,7 @@ async function submitJoin(){
     }
     document.getElementById('session-name').textContent=currentUser;
     saveSession(currentUser,null);
+    initNotifications();
     await showContestPicker();
   }catch(e){
     btn.disabled=false; btn.textContent="Let's Vote \u2192";
@@ -753,10 +802,9 @@ function renderScorePills(){
   const voter=allVoters[activeVoter];
   const vs=allScores[voter]||[];
   const used=vs.filter(x=>x!==null);
-  // 0–11 in 0.5 steps, 11.25–12 in 0.25 steps
+  // 0–12 in 0.5 steps = exactly 25 unique values
   const possible=[];
-  for(let s=0;s<=11;s+=0.5) possible.push(Math.round(s*100)/100);
-  for(let s=11.25;s<=12;s+=0.25) possible.push(Math.round(s*100)/100);
+  for(let s=0;s<=12;s+=0.5) possible.push(Math.round(s*100)/100);
   document.getElementById('score-pills').innerHTML=possible.map(s=>{
     const isUsed=used.some(u=>Math.round(u*100)===Math.round(s*100));
     return '<div class="score-pill'+(isUsed?' used':'')+'">'+s+'</div>';
@@ -813,14 +861,8 @@ function renderSongs(){
 function adjustScore(i,direction){
   const inp=document.getElementById('score-inp-'+i);
   const cur=inp.value===''?null:parseFloat(inp.value);
-  let step,base;
-  if(cur===null){
-    base=0; step=0.5;
-  } else {
-    step=(cur>=11||(direction>0&&cur>=10.75))?0.25:0.5;
-    base=cur;
-  }
-  const newVal=Math.max(0,Math.min(12,Math.round((base+(direction*step))*100)/100));
+  const base=cur===null?0:cur;
+  const newVal=Math.max(0,Math.min(12,Math.round((base+(direction*0.5))*100)/100));
   inp.value=newVal;
   setScore(i,newVal);
 }
@@ -994,6 +1036,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     closeModal();
     document.getElementById('voters-modal').classList.remove('open');
+    document.getElementById('edit-name-modal').classList.remove('open');
     document.body.style.overflow='';
   }
 });
@@ -1063,22 +1106,22 @@ const CHAT_PAGE=50;
 
 function initChat(enabled){
   currentUserChatEnabled=!!enabled;
-  const btn=document.getElementById('chat-btn');
-  if(btn) btn.style.display=enabled?'':'none';
+  const fab=document.getElementById('chat-fab');
+  if(fab) fab.style.display=enabled?'flex':'none';
   if(enabled) subscribeChat();
 }
 
 function toggleChat(){
   if(!currentUserChatEnabled) return;
   chatOpen=!chatOpen;
-  const panel=document.getElementById('chat-panel');
-  panel.style.display=chatOpen?'flex':'none';
+  document.getElementById('chat-panel').classList.toggle('open',chatOpen);
   if(chatOpen){chatUnread=0;updateUnreadBadge();loadMessages();setTimeout(()=>document.getElementById('chat-inp').focus(),100);}
 }
 
 function updateUnreadBadge(){
-  const b=document.getElementById('chat-unread');
-  if(chatUnread>0){b.textContent=chatUnread>9?'9+':chatUnread;b.style.display='inline';}
+  const b=document.getElementById('chat-fab-unread');
+  if(!b) return;
+  if(chatUnread>0){b.textContent=chatUnread>9?'9+':chatUnread;b.style.display='block';}
   else{b.style.display='none';}
 }
 
@@ -1222,7 +1265,11 @@ function subscribeChat(){
         if(lastChatTs&&m.created_at<=lastChatTs) return;
         lastChatTs=m.created_at;
         if(chatOpen){appendMessage(m);}
-        else if(m.username!==currentUser){chatUnread++;updateUnreadBadge();}
+        else if(m.username!==currentUser){
+          chatUnread++;
+          updateUnreadBadge();
+          sendChatNotification(m.display_name||m.username, m.message);
+        }
       });
     }catch(e){}
   },4000);
@@ -1241,6 +1288,123 @@ async function sendMessage(){
     });
     if(r.ok){const [m]=await r.json();appendMessage(m);lastChatTs=m.created_at;}
   }catch(e){inp.value=msg;}
+}
+
+// ── EDIT NAME ─────────────────────────────────────────────────────────────────
+function showEditName(){
+  const parts=currentUser.split(' ');
+  const first=parts[0]||'';
+  const last=parts.slice(1).join(' ')||'';
+  document.getElementById('edit-firstname').value=first;
+  document.getElementById('edit-lastname').value=last;
+  document.getElementById('edit-name-msg').textContent='';
+  document.getElementById('edit-name-msg').style.color='var(--muted)';
+  document.getElementById('edit-name-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+  setTimeout(()=>document.getElementById('edit-firstname').focus(),100);
+}
+
+function closeEditName(e){
+  if(e.target===document.getElementById('edit-name-modal')){
+    document.getElementById('edit-name-modal').classList.remove('open');
+    document.body.style.overflow='';
+  }
+}
+
+async function saveEditName(){
+  const first=document.getElementById('edit-firstname').value.trim();
+  const last=document.getElementById('edit-lastname').value.trim();
+  const msg=document.getElementById('edit-name-msg');
+  if(!first||!last||first.length<2||last.length<2){
+    msg.textContent='Both names must be at least 2 characters.';
+    msg.style.color='var(--red)'; return;
+  }
+  const newName=first+' '+last;
+  if(newName===currentUser){
+    document.getElementById('edit-name-modal').classList.remove('open');
+    document.body.style.overflow=''; return;
+  }
+  // Check if name already taken by someone else
+  try{
+    const existing=await sbGet('users','username=ilike.'+encodeURIComponent(newName)+'&select=username');
+    if(existing.length&&existing[0].username.toLowerCase()!==currentUser.toLowerCase()){
+      msg.textContent='That name is already taken. Choose a different one.';
+      msg.style.color='var(--red)'; return;
+    }
+    msg.textContent='Saving…'; msg.style.color='var(--muted)';
+    // Update username — cascade will update votes + chat_messages
+    const r=await fetch(SUPABASE_URL+'/rest/v1/users?username=eq.'+encodeURIComponent(currentUser),{
+      method:'PATCH',
+      headers:{...H,'Prefer':'return=representation'},
+      body:JSON.stringify({username:newName, first_name:first, last_name:last})
+    });
+    if(!r.ok) throw new Error(await r.text());
+    // Update local state
+    const oldName=currentUser;
+    currentUser=newName;
+    document.getElementById('session-name').textContent=currentUser;
+    saveSession(currentUser, currentContest?.id||null);
+    // Update allVoters + allScores in memory
+    const idx=allVoters.indexOf(oldName);
+    if(idx!==-1){
+      allVoters[idx]=newName;
+      allScores[newName]=allScores[oldName];
+      delete allScores[oldName];
+      if(activeVoter===idx) document.getElementById('tab-name-label').textContent=newName;
+      renderTabs();
+    }
+    document.getElementById('edit-name-modal').classList.remove('open');
+    document.body.style.overflow='';
+  }catch(e){
+    msg.textContent='Error: '+e.message; msg.style.color='var(--red)';
+  }
+}
+
+// ── NOTIFICATIONS (Service Worker) ───────────────────────────────────────────
+let swReg = null;
+let notifyEnabled = false;
+
+async function initNotifications(){
+  if(!('serviceWorker' in navigator) || !('Notification' in window)) return;
+  try{
+    swReg = await navigator.serviceWorker.register('/sw.js');
+    // Listen for OPEN_CHAT message from SW notification click
+    navigator.serviceWorker.addEventListener('message', e => {
+      if(e.data?.type === 'OPEN_CHAT') toggleChat();
+    });
+    // Ask permission if not yet granted
+    if(Notification.permission === 'granted'){
+      notifyEnabled = true;
+    } else if(Notification.permission !== 'denied'){
+      // Show a subtle prompt after a short delay
+      setTimeout(askNotifyPermission, 3000);
+    }
+  } catch(e){ console.log('SW:', e); }
+}
+
+async function askNotifyPermission(){
+  // Only ask if user is logged in and chat is enabled
+  if(!currentUser || !currentUserChatEnabled) return;
+  const result = await Notification.requestPermission();
+  notifyEnabled = result === 'granted';
+  if(notifyEnabled){
+    new Notification('Eurovision 2026 🎵', {
+      body: 'You\'ll now get notified when someone chats!',
+      icon: '/icon-192.svg',
+      tag: 'welcome'
+    });
+  }
+}
+
+function sendChatNotification(sender, message){
+  if(!notifyEnabled || !swReg || chatOpen) return;
+  // Don't notify for own messages
+  if(sender === currentUser) return;
+  swReg.active?.postMessage({
+    type: 'CHAT_NOTIFY',
+    sender,
+    message: message.length > 80 ? message.slice(0,80)+'…' : message
+  });
 }
 
 boot();
