@@ -16,8 +16,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
 #loading p{color:var(--muted);font-size:.9rem;}
-#db-badge{position:fixed;bottom:16px;right:16px;display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.73rem;color:var(--muted);z-index:200;}
-#db-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;}
+#db-badge{position:fixed;bottom:16px;left:16px;display:flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:5px 10px;font-size:.65rem;color:var(--muted);z-index:200;opacity:.6;}
+#db-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0;}
 #db-badge.ready .dot{background:var(--green);}
 #db-badge.error .dot{background:var(--red);}
 /* TOP BAR */
@@ -243,11 +243,12 @@ header p{display:none;}
   .song-photo{width:36px;height:36px;}
   .score-input{width:58px;}
   header h1{font-size:1.9rem;}
-  #db-badge{display:none;}
+  #db-badge{font-size:.6rem;padding:4px 8px;}
+  #db-label{display:none;}
   .join-card{padding:28px 20px;}
   .precision-card{grid-template-columns:36px 1fr auto;gap:10px;padding:14px;}
   #chat-panel{right:8px;left:8px;width:auto;bottom:88px;}
-  #chat-fab{bottom:16px;right:16px;}
+  #chat-fab{bottom:16px;right:16px;width:48px;height:48px;font-size:1.2rem;}
 }
 @media(min-width:481px) and (max-width:767px){
   .voter-tabs{grid-template-columns:repeat(2,1fr);}
