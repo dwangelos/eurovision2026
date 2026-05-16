@@ -596,6 +596,9 @@ header p{display:none;}
   </div>
 </div>
 
+<!-- EMOJI POPUP — floating, always fully visible -->
+<div id="emoji-popup" style="display:none;position:fixed;background:#1e1a35;border:1px solid var(--border);border-radius:14px;padding:10px;flex-wrap:wrap;gap:4px;z-index:700;box-shadow:0 8px 32px rgba(0,0,0,.6);max-width:280px;max-height:200px;overflow-y:auto;right:24px;bottom:160px">
+
 <!-- CHAT MESSAGE ACTION MENU -->
 <div id="chat-action-menu" style="display:none;position:fixed;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:6px;z-index:600;box-shadow:0 8px 30px rgba(0,0,0,.5);min-width:140px">
   <div id="cam-edit" onclick="chatEditMessage()" style="padding:10px 14px;font-size:.85rem;cursor:pointer;border-radius:8px;display:flex;align-items:center;gap:8px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background=''">&#9998; Edit</div>
@@ -1280,17 +1283,25 @@ function snapAndSet(i, inp){
 const EMOJIS=['😀','😂','🤣','😍','🥰','😎','🤩','😜','🤔','😮','😭','😡','🥳','🎉','🔥','❤️','💛','💙','👏','🙌','👍','👎','🫶','🎵','🎶','🏆','⭐','🌟','💫','✨','🎤','🎧','🇨🇾','🇬🇷','🇪🇺','🎊','🥂','🍾','😱','🤯','🙈','💯','🫡','🤌','👑'];
 
 function toggleEmojiPicker(){
-  const p=document.getElementById('emoji-picker');
-  if(p.style.display==='none'||!p.style.display){
-    // Build emojis lazily
-    if(!p.children.length){
-      p.innerHTML=EMOJIS.map(e=>'<button onclick="insertEmoji(\''+e+'\')" ontouchend="event.preventDefault();insertEmoji(\''+e+'\')">'+e+'</button>').join('');
-    }
-    p.style.display='flex';
-    document.getElementById('chat-inp').focus();
-  } else {
-    p.style.display='none';
+  const popup=document.getElementById('emoji-popup');
+  if(popup.style.display==='flex'){
+    popup.style.display='none';
+    return;
   }
+  // Build emojis lazily
+  if(!popup.children.length){
+    popup.innerHTML=EMOJIS.map(e=>'<button onclick="insertEmoji(\''+e+'\')" ontouchend="event.preventDefault();insertEmoji(\''+e+'\')" style="background:transparent;border:none;font-size:1.3rem;cursor:pointer;padding:4px;border-radius:6px;line-height:1">'+e+'</button>').join('');
+  }
+  // Position: above the chat input, anchored to right edge of screen
+  const fab=document.getElementById('chat-fab');
+  const panel=document.getElementById('chat-panel');
+  const panelBottom=parseInt(panel.style.bottom||'90')+panel.offsetHeight+10;
+  popup.style.display='flex';
+  // On mobile: right:8px to match panel; on desktop: right:24px
+  const isMobile=window.innerWidth<=640;
+  popup.style.right=isMobile?'8px':'24px';
+  popup.style.bottom=(panel.offsetHeight+100)+'px';
+  setTimeout(()=>document.getElementById('chat-inp').focus(),100);
 }
 
 function insertEmoji(emoji){
@@ -1299,13 +1310,16 @@ function insertEmoji(emoji){
   inp.value=inp.value.slice(0,pos)+emoji+inp.value.slice(pos);
   inp.focus();
   inp.setSelectionRange(pos+emoji.length,pos+emoji.length);
+  // Don't close — let user pick multiple emojis
 }
 
-// Close emoji picker when clicking outside
+// Close emoji popup when clicking outside
 document.addEventListener('click',e=>{
-  const p=document.getElementById('emoji-picker');
-  if(p&&p.style.display!=='none'&&!e.target.closest('#emoji-picker')&&!e.target.closest('.emoji-btn'))
-    p.style.display='none';
+  const popup=document.getElementById('emoji-popup');
+  if(popup&&popup.style.display!=='none'
+     &&!e.target.closest('#emoji-popup')
+     &&!e.target.closest('.emoji-btn'))
+    popup.style.display='none';
 });
 
 // ── CHAT MESSAGE EDIT/DELETE ───────────────────────────────────────────────────
@@ -1401,35 +1415,33 @@ function validateAll(){
     if(card) card.classList.toggle('rated',hasVal&&!conflicts.has(i));
   });
 
-  const msg=document.getElementById('conflict-msg-r');
-  if(conflicts.size>0){
-    // Build helpful per-conflict messages
-    let html='';
-    Object.entries(valMap).forEach(([score,idxs])=>{
-      if(idxs.length<2) return;
-      idxs.forEach((i,pos)=>{
-        const others=idxs.filter((_,j)=>j!==pos);
-        others.forEach(other=>{
-          const otherSong=contestSongs[other];
-          const thisSong=contestSongs[i];
-          const otherName=otherSong?(otherSong.song&&otherSong.song!=='TBA'?otherSong.song:otherSong.country):'?';
-          const thisName=thisSong?(thisSong.song&&thisSong.song!=='TBA'?thisSong.song:thisSong.country):'?';
-          html+='<div style="margin-bottom:4px">&#9888;&#xFE0F; <b>'+escapeHtml(thisName)+'</b>: score '+score+' already used for <b>'+escapeHtml(otherName)+'</b>'
-            +' &mdash; <button onclick="clearScoreFor('+other+')" style="background:rgba(232,200,74,.15);border:1px solid rgba(232,200,74,.4);color:var(--gold);border-radius:6px;padding:2px 8px;font-size:.75rem;cursor:pointer;font-family:\'DM Sans\',sans-serif">Clear '+escapeHtml(otherName)+'</button></div>';
+  ['conflict-msg','conflict-msg-r'].forEach(id=>{
+    const msg=document.getElementById(id);
+    if(!msg) return;
+    if(conflicts.size>0){
+      let html='';
+      const seen=new Set();
+      Object.entries(valMap).forEach(([score,idxs])=>{
+        if(idxs.length<2) return;
+        idxs.forEach((i)=>{
+          const others=idxs.filter(j=>j!==i);
+          others.forEach(other=>{
+            const key=i+'-'+other;
+            if(seen.has(key)) return; seen.add(key); seen.add(other+'-'+i);
+            const otherSong=contestSongs[other];
+            const thisSong=contestSongs[i];
+            const otherName=otherSong?(otherSong.song&&otherSong.song!=='TBA'?otherSong.song:otherSong.country):'?';
+            const thisName=thisSong?(thisSong.song&&thisSong.song!=='TBA'?thisSong.song:thisSong.country):'?';
+            html+='<div style="margin-bottom:5px">&#9888; Score <b>'+score+'</b> already used for <b>'+escapeHtml(otherName)+'</b>'
+              +' &mdash; <button onclick="clearScoreFor('+other+')" style="background:rgba(232,200,74,.15);border:1px solid rgba(232,200,74,.4);color:var(--gold);border-radius:6px;padding:2px 8px;font-size:.75rem;cursor:pointer;font-family:\'DM Sans\',sans-serif">Clear '+escapeHtml(otherName)+'</button></div>';
+          });
         });
       });
-    });
-    // Deduplicate
-    const seen=new Set();
-    const deduped=html.split('</div>').filter(line=>{
-      const key=line.replace(/<[^>]+>/g,'').trim();
-      if(!key||seen.has(key)) return false;
-      seen.add(key); return true;
-    }).join('</div>');
-    msg.innerHTML=deduped+(deduped?'</div>':'');
-  }else{
-    msg.innerHTML='';
-  }
+      msg.innerHTML=html||'Duplicate scores — each score must be unique.';
+    }else{
+      msg.innerHTML='';
+    }
+  });
 }
 
 async function clearScoreFor(i){
@@ -1815,6 +1827,7 @@ function initChat(enabled){
 function toggleChat(){
   chatOpen=!chatOpen;
   document.getElementById('chat-panel').classList.toggle('open',chatOpen);
+  if(!chatOpen) document.getElementById('emoji-popup').style.display='none';
   if(chatOpen){chatUnread=0;updateUnreadBadge();loadMessages();setTimeout(()=>document.getElementById('chat-inp').focus(),100);}
 }
 
