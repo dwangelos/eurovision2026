@@ -332,6 +332,10 @@ async function loadUsers(){
     allUsers=users;
     sortUsers();
     userPage=0;
+    // Restore saved search from cookie
+    const saved=getAdminSearchCookie();
+    const searchEl=document.getElementById('user-search');
+    if(searchEl&&saved) searchEl.value=saved;
     document.getElementById('user-count').textContent=users.length+' voters';
     renderUsers();
   }catch(e){document.getElementById('users-grid').innerHTML='<div style="color:var(--red);grid-column:1/-1;padding:20px">'+e.message+'</div>';}
@@ -371,7 +375,19 @@ function sortUsers(){
   }
 }
 
-function onSearch(){userPage=0;renderUsers();}
+function getAdminSearchCookie(){
+  const m=document.cookie.split(';').find(c=>c.trim().startsWith('admin_search='));
+  return m?decodeURIComponent(m.trim().slice('admin_search='.length)):'';
+}
+function setAdminSearchCookie(val){
+  document.cookie='admin_search='+encodeURIComponent(val)+';path=/;max-age='+60*60*24*7;
+}
+
+function onSearch(){
+  const val=document.getElementById('user-search').value;
+  setAdminSearchCookie(val);
+  userPage=0;renderUsers();
+}
 
 async function refreshUsers(){
   const btn=document.querySelector('[onclick="refreshUsers()"]');
