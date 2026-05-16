@@ -71,8 +71,9 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
 .vmr-me{background:rgba(232,200,74,.12);color:var(--gold);}
 .vmr-done{background:rgba(74,232,160,.1);color:var(--green);}
 .vmr-pending{background:rgba(123,114,168,.1);color:var(--muted);}
-.voter-tab{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:.8rem;cursor:pointer;transition:all .15s;color:var(--muted);}
+.voter-tab{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:.73rem;cursor:pointer;transition:all .15s;color:var(--muted);white-space:nowrap;}
 .voter-tab.active{background:var(--gold);color:#0d0b18;border-color:var(--gold);font-weight:600;}
+.voter-tab:hover:not(.active){border-color:var(--gold);color:var(--gold);}
 .used-scores{margin-bottom:12px;}
 .used-scores h3{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
 .score-pills{display:flex;flex-wrap:wrap;gap:5px;}
@@ -123,7 +124,9 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
 .score-bar{height:4px;background:var(--border);border-radius:99px;margin-top:8px;overflow:hidden;}
 .score-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px;transition:width .6s;}
 .total-score{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--gold);}
-.voters-btn{background:rgba(232,200,74,.1);border:1px solid rgba(232,200,74,.25);border-radius:8px;color:var(--gold);font-size:.75rem;font-family:'DM Sans',sans-serif;cursor:pointer;padding:5px 10px;display:flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap;}
+.odds-strip{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:5px 0 2px;}
+.odds-tag{font-size:.68rem;padding:2px 7px;border-radius:20px;border:1px solid var(--border);color:var(--muted);white-space:nowrap;}
+.odds-tag b{color:var(--text);font-weight:600;}border:1px solid rgba(232,200,74,.25);border-radius:8px;color:var(--gold);font-size:.75rem;font-family:'DM Sans',sans-serif;cursor:pointer;padding:5px 10px;display:flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap;}
 .voters-btn:hover{background:rgba(232,200,74,.2);border-color:var(--gold);}
 .voters-btn svg{width:13px;height:13px;flex-shrink:0;}
 /* PRECISION */
@@ -574,6 +577,13 @@ async function enterContest(contest){
   currentContest=contest;
   saveSession(currentUser,contest.id);
   contestSongs=await sbGet('contest_songs','contest_id=eq.'+encodeURIComponent(contest.id)+'&select=*&order=running_order.asc');
+  // Enrich songs with odds data
+  try{
+    const oddsRows=await sbGet('song_odds','contest_id=eq.'+encodeURIComponent(contest.id)+'&select=country,win_chance,best_odds,odds_rank');
+    const oddsMap={};
+    oddsRows.forEach(o=>{oddsMap[o.country]=o;});
+    contestSongs=contestSongs.map(s=>({...s,odds:oddsMap[s.country]||null}));
+  }catch(e){}
   const userRows=await sbGet('users','select=username&order=username.asc');
   allVoters=userRows.map(r=>r.username);
   allScores={};
@@ -638,9 +648,10 @@ function renderTabs(){
     const i=allVoters.indexOf(v);
     const count=(allScores[v]||[]).filter(x=>x!==null).length;
     const isActive=i===activeVoter;
+    const isMe=v===currentUser;
     return '<div class="voter-tab'+(isActive?' active':'')+'" onclick="switchTab('+i+')">'
-      +escapeHtml(v.split(' ')[0])
-      +(count>0?' <small style="opacity:.6">'+count+'</small>':'')
+      +escapeHtml(v)
+      +(count>0?' <small style="opacity:.55;font-size:.65rem">'+count+'</small>':'')
       +'</div>';
   }).join('');
   // Show "See all" button only if there are more than 10 voters
@@ -741,10 +752,13 @@ function updateProgress(){
 function renderScorePills(){
   const voter=allVoters[activeVoter];
   const vs=allScores[voter]||[];
-  const used=vs.filter(x=>x!==null).map(x=>x);
-  const possible=[0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12];
+  const used=vs.filter(x=>x!==null);
+  // 0–11 in 0.5 steps, 11.25–12 in 0.25 steps
+  const possible=[];
+  for(let s=0;s<=11;s+=0.5) possible.push(Math.round(s*100)/100);
+  for(let s=11.25;s<=12;s+=0.25) possible.push(Math.round(s*100)/100);
   document.getElementById('score-pills').innerHTML=possible.map(s=>{
-    const isUsed=used.includes(s);
+    const isUsed=used.some(u=>Math.round(u*100)===Math.round(s*100));
     return '<div class="score-pill'+(isUsed?' used':'')+'">'+s+'</div>';
   }).join('');
 }
@@ -779,6 +793,10 @@ function renderSongs(){
       +'<div class="song-title">'+flagImg(s.country,20)+' '+escapeHtml(display)+'</div>'
       +'<div class="song-country">'+escapeHtml(s.country)+'</div>'
       +(s.artist&&s.artist!=='TBA'?'<div class="song-artist">'+escapeHtml(s.artist)+'</div>':'')
+      +(s.odds?'<div style="font-size:.67rem;color:'+(s.odds.odds_rank<=3?'var(--green)':s.odds.odds_rank<=8?'var(--gold)':'var(--muted)')
+        +';margin-top:2px">'
+        +(s.odds.odds_rank<=3?'🔥':s.odds.odds_rank<=8?'⭐':'')
+        +' #'+s.odds.odds_rank+' favourite &middot; '+(s.odds.win_chance<0.01?'<1%':Math.round(s.odds.win_chance*100)+'%')+' win &middot; best '+s.odds.best_odds+'</div>':'')
       +'</div>'
       +'<div class="score-control">'
       +'<button class="score-btn" onclick="adjustScore('+i+',-0.5)"'+dis+'>&minus;</button>'
@@ -792,10 +810,17 @@ function renderSongs(){
   validateAll();
 }
 
-function adjustScore(i,delta){
+function adjustScore(i,direction){
   const inp=document.getElementById('score-inp-'+i);
-  const cur=inp.value===''?-delta:parseFloat(inp.value);
-  const newVal=Math.max(0,Math.min(12,Math.round((cur+delta)*100)/100));
+  const cur=inp.value===''?null:parseFloat(inp.value);
+  let step,base;
+  if(cur===null){
+    base=0; step=0.5;
+  } else {
+    step=(cur>=11||(direction>0&&cur>=10.75))?0.25:0.5;
+    base=cur;
+  }
+  const newVal=Math.max(0,Math.min(12,Math.round((base+(direction*step))*100)/100));
   inp.value=newVal;
   setScore(i,newVal);
 }
@@ -852,6 +877,91 @@ async function showResults(){
   clearInterval(countdownTimer);
   hideAll(); show('results-screen');
   document.getElementById('results-contest-name').textContent=currentContest.name;
+  const [votes, userRows, oddsRows] = await Promise.all([
+    sbGet('votes','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&select=username,song_idx,score'),
+    sbGet('users','select=username&order=username.asc'),
+    sbGet('song_odds','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&select=country,win_chance,best_odds,avg_odds,odds_rank'),
+  ]);
+  const voters=userRows.map(r=>r.username);
+  // Build odds map keyed by country
+  const oddsMap={};
+  oddsRows.forEach(o=>{ oddsMap[o.country]=o; });
+
+  const sc={};
+  voters.forEach(v=>{ sc[v]=Array(contestSongs.length).fill(null); });
+  votes.forEach(row=>{ if(sc[row.username]!==undefined) sc[row.username][row.song_idx]=parseFloat(row.score); });
+  const totals=contestSongs.map((s,i)=>{
+    const bd={};
+    let total=0;
+    voters.forEach(v=>{ bd[v]=sc[v][i]; if(sc[v][i]!==null) total+=sc[v][i]; });
+    return {idx:i,total:Math.round(total*100)/100,song:s.song,country:s.country,artist:s.artist,photo_url:s.photo_url,bd,odds:oddsMap[s.country]||null};
+  }).sort((a,b)=>b.total-a.total);
+  const maxTotal=totals[0]?.total||1;
+  window._resultBreakdowns={};
+  totals.forEach(s=>{ window._resultBreakdowns[s.idx]={song:s,voters,sc}; });
+
+  document.getElementById('results-list').innerHTML=totals.map((s,rank)=>{
+    const rc=rank===0?'top1':rank===1?'top2':rank===2?'top3':'';
+    const bc=rank===0?'r1':rank===1?'r2':rank===2?'r3':'';
+    const m=rank===0?'🥇':rank===1?'🥈':rank===2?'🥉':rank+1;
+    const pct=maxTotal>0?(s.total/maxTotal)*100:0;
+    const display=s.song&&s.song!=='TBA'?s.song:s.country;
+    const sortedVoters=[...voters].sort((a,b)=>{
+      const sa=s.bd[a],sb=s.bd[b];
+      if(sa!==null&&sb!==null) return sb-sa;
+      if(sa!==null) return -1; if(sb!==null) return 1; return 0;
+    });
+    const votedCount=sortedVoters.filter(v=>s.bd[v]!==null).length;
+    const TOP_SHOW=3;
+    const topVoters=sortedVoters.filter(v=>s.bd[v]!==null).slice(0,TOP_SHOW);
+    const moreCount=votedCount-topVoters.length;
+    const chips=topVoters.map(v=>{
+      const score=s.bd[v]; const isMe=v===currentUser;
+      return '<span style="display:inline-flex;align-items:center;gap:3px;background:var(--bg);border:1px solid '+(isMe?'var(--gold)':'var(--border)')+';border-radius:6px;padding:2px 7px;font-size:.7rem;white-space:nowrap">'
+        +'<span style="color:var(--muted)">'+escapeHtml(v.split(' ')[0])+'</span> '
+        +'<span style="color:'+(isMe?'var(--gold)':'var(--text)')+';font-weight:600">'+(score%1===0?score:score.toFixed(2))+'</span></span>';
+    }).join('');
+
+    // Odds block
+    let oddsHtml='';
+    if(s.odds){
+      const o=s.odds;
+      const winPct=o.win_chance<0.01?'<1%':Math.round(o.win_chance*100)+'%';
+      // Color: favourite = green, mid = gold, outsider = muted
+      const rankColor=o.odds_rank<=3?'var(--green)':o.odds_rank<=8?'var(--gold)':'var(--muted)';
+      const rankLabel=o.odds_rank<=3?'🔥 Favourite':o.odds_rank<=8?'⭐ Contender':'Outsider';
+      oddsHtml='<div class="odds-strip">'
+        +'<span class="odds-tag" style="color:'+rankColor+';border-color:'+rankColor+'25">'+rankLabel+'</span>'
+        +'<span class="odds-tag">&#127922; '+winPct+' win</span>'
+        +'<span class="odds-tag">Best <b>'+o.best_odds+'</b></span>'
+        +'<span class="odds-tag">Avg <b>'+o.avg_odds+'</b></span>'
+        +'</div>';
+    }
+
+    return '<div class="result-card '+rc+'">'
+      +'<div class="rank-badge '+bc+'">'+m+'</div>'
+      +'<div class="result-info">'
+      +'<div class="result-title">'+flagImg(s.country,20)+' '+escapeHtml(display)+'</div>'
+      +'<div class="result-country">'+escapeHtml(s.country)+(s.artist&&s.artist!=='TBA'?' &middot; '+escapeHtml(s.artist):'')+'</div>'
+      +oddsHtml
+      +'<div class="score-bar"><div class="score-bar-fill" style="width:'+pct+'%"></div></div>'
+      +'<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:7px">'
+      +chips
+      +(moreCount>0?'<button onclick="openVoterModal('+s.idx+')" style="background:transparent;border:1px dashed var(--border);color:var(--muted);border-radius:6px;padding:2px 8px;font-size:.7rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">+'+moreCount+' more</button>':'')
+      +(votedCount===0?'<span style="font-size:.72rem;color:var(--muted)">No votes yet</span>':'')
+      +'</div>'
+      +'</div>'
+      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">'
+      +'<div class="total-score">'+(s.total%1===0?s.total:s.total.toFixed(2))+'</div>'
+      +'<button class="voters-btn" onclick="openVoterModal('+s.idx+')">'
+      +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>'
+      +votedCount+'/'+voters.length
+      +'</button></div></div>';
+  }).join('');
+}
+  clearInterval(countdownTimer);
+  hideAll(); show('results-screen');
+  document.getElementById('results-contest-name').textContent=currentContest.name;
   const votes=await sbGet('votes','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&select=username,song_idx,score');
   const userRows=await sbGet('users','select=username&order=username.asc');
   const voters=userRows.map(r=>r.username);
@@ -873,13 +983,35 @@ async function showResults(){
     const m=rank===0?'🥇':rank===1?'🥈':rank===2?'🥉':rank+1;
     const pct=maxTotal>0?(s.total/maxTotal)*100:0;
     const display=s.song&&s.song!=='TBA'?s.song:s.country;
-    const votedCount=voters.filter(v=>s.bd[v]!==null).length;
+    // Sort voters: voted first (highest score first), then no-vote
+    const sortedVoters=[...voters].sort((a,b)=>{
+      const sa=s.bd[a],sb=s.bd[b];
+      if(sa!==null&&sb!==null) return sb-sa;
+      if(sa!==null) return -1; if(sb!==null) return 1;
+      return 0;
+    });
+    const votedCount=sortedVoters.filter(v=>s.bd[v]!==null).length;
+    const TOP_SHOW=3;
+    const topVoters=sortedVoters.filter(v=>s.bd[v]!==null).slice(0,TOP_SHOW);
+    const moreCount=votedCount-topVoters.length;
+    // Build inline top voter chips
+    const chips=topVoters.map(v=>{
+      const score=s.bd[v];
+      const isMe=v===currentUser;
+      return '<span style="display:inline-flex;align-items:center;gap:3px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px 7px;font-size:.7rem;white-space:nowrap;'+(isMe?'border-color:var(--gold);':'')+'"><span style="color:var(--muted)">'
+        +escapeHtml(v.split(' ')[0])+'</span> <span style="color:'+(isMe?'var(--gold)':'var(--text)');font-weight:600">'+(score%1===0?score:score.toFixed(2))+'</span></span>';
+    }).join('');
     return '<div class="result-card '+rc+'">'
       +'<div class="rank-badge '+bc+'">'+m+'</div>'
       +'<div class="result-info">'
       +'<div class="result-title">'+flagImg(s.country,20)+' '+escapeHtml(display)+'</div>'
       +'<div class="result-country">'+escapeHtml(s.country)+(s.artist&&s.artist!=='TBA'?' &middot; '+escapeHtml(s.artist):'')+'</div>'
       +'<div class="score-bar"><div class="score-bar-fill" style="width:'+pct+'%"></div></div>'
+      +'<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:7px">'
+      +chips
+      +(moreCount>0?'<button onclick="openVoterModal('+s.idx+')" style="background:transparent;border:1px dashed var(--border);color:var(--muted);border-radius:6px;padding:2px 8px;font-size:.7rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">+'+moreCount+' more</button>':'')
+      +(votedCount===0?'<span style="font-size:.72rem;color:var(--muted)">No votes yet</span>':'')
+      +'</div>'
       +'</div>'
       +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">'
       +'<div class="total-score">'+(s.total%1===0?s.total:s.total.toFixed(2))+'</div>'
