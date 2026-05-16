@@ -404,7 +404,7 @@ header p{display:none;}
     <div id="results-panel-member" style="display:none">
       <div class="member-pick-row">
         <label style="font-size:.82rem;color:var(--muted)">Viewing rankings by:</label>
-        <select id="member-select" onchange="renderMemberRankings()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 12px;font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer"></select>
+        <select id="member-select" style="background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 12px;font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer"></select>
       </div>
       <div id="member-rankings-list"></div>
     </div>
@@ -1245,9 +1245,21 @@ function switchResultsTab(tab){
 }
 
 // ── MEMBER RANKINGS ───────────────────────────────────────────────────────────
+function getMemberCookie(){
+  const m=document.cookie.split(';').find(c=>c.trim().startsWith('esc_member='));
+  return m?decodeURIComponent(m.trim().slice('esc_member='.length)):null;
+}
+function setMemberCookie(val){
+  document.cookie='esc_member='+encodeURIComponent(val)+';path=/;max-age='+60*60*24*30;
+}
+
 function renderMemberSelect(voters){
-  const sel = document.getElementById('member-select');
-  sel.innerHTML = voters.map(v=>`<option value="${escapeHtml(v)}"${v===currentUser?' selected':''}>${escapeHtml(v)}</option>`).join('');
+  const sel=document.getElementById('member-select');
+  const saved=getMemberCookie();
+  // Priority: saved cookie → currentUser
+  const preferred=saved&&voters.includes(saved)?saved:currentUser;
+  sel.innerHTML=voters.map(v=>'<option value="'+escapeHtml(v)+'"'+(v===preferred?' selected':'')+'>'+escapeHtml(v)+'</option>').join('');
+  sel.onchange=function(){setMemberCookie(this.value);renderMemberRankings();};
   renderMemberRankings();
 }
 
