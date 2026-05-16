@@ -376,6 +376,7 @@ function renderUsers(){
       +'<button class="del-btn" onclick="deleteUser(\''+safeUser+'\')">&#128465; Delete</button>'
       +'<button class="chat-toggle-btn'+(chatOn?' on':'')+'" id="chattog-'+encodeURIComponent(u.username)+'" onclick="toggleChat(\''+safeUser+'\','+chatOn+')">'
       +(chatOn?'&#128172; Chat ON':'&#128172; Chat OFF')+'</button>'
+      +'<button class="chat-toggle-btn" onclick="openEditUser(\''+safeUser+'\')">&#9998; Rename</button>'
       +'</div>'
       +'</div>';
   }).join('');
@@ -400,6 +401,27 @@ function renderPagination(total){
 }
 
 function gotoPage(p){userPage=p;renderUsers();document.getElementById('page-users').scrollIntoView({behavior:'smooth'});}
+
+async function openEditUser(username){
+  const newName=prompt('Rename "'+username+'" to:\n(First and last name)', username);
+  if(!newName||newName.trim()===username) return;
+  const parts=newName.trim().split(' ');
+  if(parts.length<2||parts[0].length<2||parts[1].length<2){
+    alert('Please enter a valid first and last name (at least 2 chars each).'); return;
+  }
+  const first=parts[0], last=parts.slice(1).join(' ');
+  const msg=document.getElementById('users-msg');
+  msg.className='msg'; msg.textContent='Renaming\u2026';
+  try{
+    await patch('users','username=eq.'+encodeURIComponent(username),
+      {username:newName.trim(), first_name:first, last_name:last});
+    msg.className='msg ok'; msg.textContent='&#10003; Renamed to "'+newName.trim()+'"';
+    // Update in memory
+    const u=allUsers.find(u=>u.username===username);
+    if(u){u.username=newName.trim();u.first_name=first;u.last_name=last;}
+    renderUsers();
+  }catch(e){msg.className='msg err';msg.textContent='Error: '+e.message;}
+}
 
 async function deleteUser(username){
   if(!confirm('Delete "'+username+'" and ALL their votes? This cannot be undone.')) return;
