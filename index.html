@@ -20,11 +20,18 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 #db-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;}
 #db-badge.ready .dot{background:var(--green);}
 #db-badge.error .dot{background:var(--red);}
-header{text-align:center;padding:44px 20px 24px;}
-.flag-strip{display:flex;justify-content:center;flex-wrap:wrap;gap:4px;margin-bottom:16px;align-items:center;}
+/* TOP BAR */
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px 12px;max-width:880px;margin:0 auto;width:100%;}
+.alleu-logo{display:flex;align-items:center;text-decoration:none;transition:opacity .2s;}
+.alleu-logo:hover{opacity:.8;}
+.top-bar-right{text-align:right;}
+.top-bar-title{display:block;font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--gold);line-height:1.1;}
+.top-bar-sub{display:block;font-size:.75rem;color:var(--muted);margin-top:2px;}
+header{background:var(--card);border-bottom:1px solid var(--border);margin-bottom:0;}
+header h1{display:none;}
+header p{display:none;}
+.flag-strip{display:flex;justify-content:center;flex-wrap:wrap;gap:3px;padding:8px 16px;align-items:center;border-top:1px solid var(--border);}
 .flag-strip img{border-radius:2px;object-fit:cover;}
-header h1{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,6vw,3.6rem);font-weight:900;background:linear-gradient(135deg,var(--gold) 0%,#fff 50%,var(--gold2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
 /* JOIN */
 .join-card{max-width:420px;margin:24px auto 0;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:44px 36px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4);}
 .join-card h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--gold);margin-bottom:10px;line-height:1.2;}
@@ -115,10 +122,9 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
 .score-input.ok{border-color:rgba(74,232,160,.5);color:var(--green);}
 .score-input.conflict{border-color:var(--red);color:var(--red);}
 /* PRIZE BANNER */
-.prize-banner{display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,rgba(232,200,74,.12),rgba(232,200,74,.04));border:1px solid rgba(232,200,74,.3);border-radius:14px;padding:14px 18px;margin-bottom:18px;}
-.prize-icon{font-size:2rem;flex-shrink:0;}
-.prize-title{font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold);font-weight:700;margin-bottom:3px;}
-.prize-sub{font-size:.78rem;color:#b8b2d8;line-height:1.5;}
+.prize-banner{display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,rgba(232,200,74,.12),rgba(232,200,74,.04));border:1px solid rgba(232,200,74,.35);border-radius:14px;padding:14px 20px;margin-bottom:18px;overflow:hidden;}
+.prize-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold);font-weight:700;margin-bottom:5px;}
+.prize-sub{font-size:.8rem;color:#b8b2d8;line-height:1.6;}
 .prize-sub strong{color:var(--text);}
 /* AVG INDICATOR */
 .avg-indicator{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;font-weight:600;padding:1px 5px;border-radius:4px;margin-left:6px;}
@@ -260,9 +266,21 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
 <div id="db-badge"><div class="dot"></div><span id="db-label">Connecting&hellip;</span></div>
 
 <header>
+  <div class="top-bar">
+    <a href="https://alleu.com" target="_blank" rel="noopener" class="alleu-logo">
+      <img src="/logo.png" id="alleu-logo-img"
+        onerror="this.style.display='none';document.getElementById('alleu-logo-text').style.display='flex'"
+        style="height:36px;width:auto" alt="alleu.com"/>
+      <span id="alleu-logo-text" style="display:none;align-items:center;gap:4px">
+        <span style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--text);letter-spacing:-.5px">alleu</span><span style="font-size:.9rem;color:var(--muted)">.com</span>
+      </span>
+    </a>
+    <div class="top-bar-right">
+      <span class="top-bar-title">&#127926; Vienna 2026</span>
+      <span class="top-bar-sub">Eurovision Grand Final</span>
+    </div>
+  </div>
   <div class="flag-strip" id="flag-strip-header"></div>
-  <h1>&#127926; Vienna 2026</h1>
-  <p>Rate every song &middot; Find out who knows Eurovision best</p>
 </header>
 
 <!-- JOIN -->
@@ -331,26 +349,19 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
 <!-- RESULTS (now includes scoreboard + precision inline) -->
 <div class="wrap" id="results-screen" style="display:none">
 
-  <!-- HEADER + LOGO -->
+  <!-- HEADER -->
   <div class="results-header">
-    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px">
-      <a href="https://alleu.com" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;opacity:.75;transition:opacity .2s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.75'">
-        <img src="/logo.png" id="alleu-logo-img" onerror="this.style.display='none';document.getElementById('alleu-logo-svg').style.display='inline-flex'" style="height:24px;width:auto" alt="alleu.com"/>
-        <span id="alleu-logo-svg" style="display:none;align-items:center;gap:6px">
-          <svg viewBox="0 0 80 20" style="height:18px;width:auto" xmlns="http://www.w3.org/2000/svg"><text x="0" y="16" font-family="'Playfair Display',serif" font-size="16" fill="#7b72a8" letter-spacing="1">alleu</text></svg>
-          <span style="font-size:.72rem;color:var(--muted);font-family:'DM Sans',sans-serif">.com</span>
-        </span>
-      </a>
-    </div>
-    <h2>&#127942; Eurovision 2026</h2>
+    <h2>&#127942; Eurovision 2026 Grand Final</h2>
     <p id="results-contest-name"></p>
   </div>
 
   <!-- PRIZE BANNER -->
   <div class="prize-banner">
-    <div class="prize-icon">&#127942;</div>
-    <div>
-      <div class="prize-title">Winner's Prize</div>
+    <img src="/powerbank.gif" alt="Power Bank Prize"
+      style="height:90px;width:auto;flex-shrink:0;filter:drop-shadow(0 4px 12px rgba(232,200,74,.3))"
+      onerror="this.style.display='none'"/>
+    <div style="flex:1">
+      <div class="prize-title">&#127942; Tonight's Prize</div>
       <div class="prize-sub">The voter whose taste matches the official results most closely wins a <strong>20,000mAh Wireless Fast Charger Power Bank</strong> — with built-in iPhone &amp; USB-C cables!</div>
     </div>
   </div>
