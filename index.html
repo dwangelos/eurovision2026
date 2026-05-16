@@ -72,15 +72,22 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
 .vmr-done{background:rgba(74,232,160,.1);color:var(--green);}
 .vmr-pending{background:rgba(123,114,168,.1);color:var(--muted);}
 .voter-tabs{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:5px;margin-bottom:10px;}
-.voter-tab{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:.73rem;cursor:pointer;transition:all .15s;color:var(--muted);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.voter-tab{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:.73rem;cursor:pointer;transition:all .15s;color:#b8b2d8;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .voter-tab.active{background:var(--gold);color:#0d0b18;border-color:var(--gold);font-weight:600;}
 .voter-tab:hover:not(.active){border-color:var(--gold);color:var(--gold);}
-.used-scores{margin-bottom:12px;}
-.used-scores h3{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
-.score-pills{display:flex;flex-wrap:wrap;gap:5px;}
-.score-pill{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:.76rem;color:var(--muted);}
-.score-pill.used{background:rgba(232,200,74,.12);border-color:rgba(232,200,74,.4);color:var(--gold);}
-.progress-label{font-size:.8rem;color:var(--muted);margin-bottom:6px;}
+.used-scores{margin-bottom:8px;}
+.used-scores h3{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
+.score-pills{display:flex;flex-wrap:wrap;gap:4px;}
+.score-pill{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:2px 7px;font-size:.74rem;color:#7b72a8;cursor:default;position:relative;}
+.score-pill.used{background:rgba(232,200,74,.12);border-color:rgba(232,200,74,.4);color:var(--gold);cursor:pointer;}
+/* SCORE PILL TOOLTIP */
+.pill-tooltip{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#1e1a35;border:1px solid var(--border);border-radius:8px;padding:7px 10px;white-space:nowrap;font-size:.72rem;color:var(--text);z-index:200;pointer-events:none;opacity:0;transition:opacity .15s;box-shadow:0 4px 16px rgba(0,0,0,.4);}
+.pill-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1e1a35;}
+.score-pill.used:hover .pill-tooltip{opacity:1;}
+.pill-tooltip .pt-flag{margin-right:4px;}
+.pill-tooltip .pt-song{font-weight:600;color:var(--gold);display:block;margin-bottom:2px;}
+.pill-tooltip .pt-country{color:var(--muted);font-size:.68rem;}
+.progress-label{font-size:.8rem;color:#9991c4;margin-bottom:6px;}
 .progress-bar-wrap{height:4px;background:var(--border);border-radius:99px;margin-bottom:16px;overflow:hidden;}
 .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px;transition:width .4s;}
 .voting-banner{background:rgba(74,232,160,.08);border:1px solid rgba(74,232,160,.2);border-radius:10px;padding:10px 16px;font-size:.82rem;color:var(--green);margin-bottom:12px;display:none;}
@@ -773,7 +780,7 @@ function renderTabs(){
   // Show "See all" button only if there are more than 10 voters
   const btn=document.getElementById('voters-all-btn');
   if(btn) btn.style.display=allVoters.length>TOP?'inline-flex':'none';
-  if(btn&&rest.length>0) btn.textContent='&#128101; +'+rest.length+' more voters';
+  if(btn&&rest.length>0) btn.innerHTML='&#128101; +'+rest.length+' more voters';
   document.getElementById('tab-name-label').textContent=allVoters[activeVoter]||'';
 }
 function switchTab(i){activeVoter=i;renderTabs();renderSongs();}
@@ -872,9 +879,29 @@ function renderScorePills(){
   // 0–12 in 0.5 steps = exactly 25 unique values
   const possible=[];
   for(let s=0;s<=12;s+=0.5) possible.push(Math.round(s*100)/100);
+  // Build a map: score → song index (for tooltip)
+  const scoreToSong={};
+  vs.forEach((score,idx)=>{
+    if(score!==null){
+      const key=Math.round(score*100);
+      scoreToSong[key]=idx;
+    }
+  });
   document.getElementById('score-pills').innerHTML=possible.map(s=>{
-    const isUsed=used.some(u=>Math.round(u*100)===Math.round(s*100));
-    return '<div class="score-pill'+(isUsed?' used':'')+'">'+s+'</div>';
+    const key=Math.round(s*100);
+    const isUsed=used.some(u=>Math.round(u*100)===key);
+    if(!isUsed) return '<div class="score-pill">'+s+'</div>';
+    const songIdx=scoreToSong[key];
+    const song=contestSongs[songIdx];
+    const songName=song?(song.song&&song.song!=='TBA'?song.song:song.country):'';
+    const country=song?song.country:'';
+    const tooltip=song
+      ? '<div class="pill-tooltip">'
+        +'<span class="pt-song">'+escapeHtml(songName)+'</span>'
+        +'<span class="pt-country">'+flagImg(country,14)+' '+escapeHtml(country)+'</span>'
+        +'</div>'
+      : '';
+    return '<div class="score-pill used">'+s+tooltip+'</div>';
   }).join('');
 }
 
