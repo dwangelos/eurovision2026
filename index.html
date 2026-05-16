@@ -1039,12 +1039,16 @@ function snapAndSet(i, inp){
   setScore(i, snapped);
 }
 
+const SCORES=[0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12];
+
 function adjustScore(i,direction){
   const inp=document.getElementById('score-inp-'+i);
-  const raw=inp.value===''?null:parseFloat(inp.value);
-  // Snap current value to nearest 0.5 first, then add step
-  const base=raw===null?0:Math.round(raw*2)/2;
-  const newVal=Math.max(0,Math.min(12,Math.round((base+(direction*0.5))*10)/10));
+  const cur=parseFloat(inp.value);
+  // Find closest allowed index
+  let idx=SCORES.findIndex(s=>s===cur);
+  if(idx===-1) idx=direction>0?0:SCORES.length-1;
+  idx=Math.max(0,Math.min(SCORES.length-1,idx+direction));
+  const newVal=SCORES[idx];
   inp.value=newVal;
   setScore(i,newVal);
 }
