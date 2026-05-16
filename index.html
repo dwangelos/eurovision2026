@@ -82,6 +82,7 @@ header p{display:none;}
 .voter-tab{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:.73rem;cursor:pointer;transition:all .15s;color:#b8b2d8;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .voter-tab.active{background:var(--gold);color:#0d0b18;border-color:var(--gold);font-weight:600;}
 .voter-tab:hover:not(.active){border-color:var(--gold);color:var(--gold);}
+.voter-tab .tab-detail-btn:hover{opacity:1!important;background:rgba(0,0,0,.15);}
 .used-scores{margin-bottom:8px;}
 .used-scores h3{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
 .score-pills{display:flex;flex-wrap:wrap;gap:4px;}
@@ -856,7 +857,9 @@ async function enterContest(contest){
   activeVoter=allVoters.indexOf(currentUser);
   if(activeVoter<0) activeVoter=0;
   hideAll(); show('results-screen');
-  showChatFab();
+  // Always show FAB once in contest
+  const fab=document.getElementById('chat-fab');
+  if(fab) fab.style.display='flex';
   document.getElementById('results-contest-name').textContent=contest.name;
   document.getElementById('precision-contest-name').textContent=contest.name;
   // Start on vote tab
@@ -912,8 +915,10 @@ function renderTabs(){
     const count=(allScores[v]||[]).filter(x=>x!==null).length;
     const isActive=i===activeVoter;
     const safeV=v.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    return '<div class="voter-tab'+(isActive?' active':'')+'" onclick="switchTab('+i+')" ondblclick="openVoterPanel(\''+safeV+'\')" title="Click to view scores · Double-click for detail">'
-      +escapeHtml(v)+(count>0?' <small style="opacity:.55;font-size:.65rem">'+count+'</small>':'')+'</div>';
+    return '<div class="voter-tab'+(isActive?' active':'')+'" style="display:flex;align-items:center;justify-content:center;gap:4px;padding:4px 8px">'
+      +'<span onclick="switchTab('+i+')" style="flex:1;overflow:hidden;text-overflow:ellipsis;cursor:pointer">'+escapeHtml(v)+(count>0?' <small style="opacity:.55;font-size:.65rem">'+count+'</small>':'')+'</span>'
+      +'<span onclick="openVoterPanel(\''+safeV+'\')" title="View detail" style="font-size:.65rem;opacity:.5;cursor:pointer;flex-shrink:0;padding:1px 3px;border-radius:3px;line-height:1" class="tab-detail-btn">&#8599;</span>'
+      +'</div>';
   }).join('');
   ['voter-tabs','voter-tabs-r'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.innerHTML=tabHtml;
@@ -1520,11 +1525,6 @@ function initChat(enabled){
   if(enabled) subscribeChat();
 }
 
-// Show FAB immediately when entering voting area
-function showChatFab(){
-  const fab=document.getElementById('chat-fab');
-  if(fab&&currentUserChatEnabled) fab.style.display='flex';
-}
 
 function toggleChat(){
   if(!currentUserChatEnabled) return;
