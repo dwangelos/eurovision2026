@@ -245,6 +245,10 @@ header p{display:none;}
 .reaction-picker.open{opacity:1;pointer-events:all;}
 .reaction-picker button{background:none;border:none;font-size:1.2rem;cursor:pointer;padding:2px;border-radius:6px;transition:transform .1s;}
 .reaction-picker button:hover{transform:scale(1.3);}
+.chat-msg:hover .react-btn{opacity:1!important;}
+.chat-msg:active .react-btn{opacity:1!important;}
+/* Always show on mobile since no hover */
+@media(max-width:640px){.react-btn{opacity:.6!important;}}
 .msg-actions{display:flex;gap:4px;margin-top:3px;opacity:0;transition:opacity .15s;}
 .chat-msg:hover .msg-actions{opacity:1;}
 .chat-msg.mine:hover .msg-actions{opacity:1;}
@@ -1839,7 +1843,7 @@ function msgHtml(m, showName){
     +(showName?'<div class="chat-name">'+escapeHtml(name)+hostBadge+'</div>':'')+''
     +'<div style="position:relative">'
     +'<div class="chat-bubble" data-msgid="'+safeId+'"'+(m.id ? ' oncontextmenu="chatContextMenu(event,this)" ontouchstart="bubbleTouchStart(event)" ontouchend="bubbleTouchEnd()" ontouchmove="bubbleTouchEnd()" ondblclick="bubbleDblClick(event)"' : '')+'>'+escapeHtml(m.message)+'</div>'
-    +'<button class="msg-action-btn" data-mid="'+safeId+'" style="position:absolute;'+(mine?'left:-28px':'right:-28px')+';top:2px;opacity:.5;font-size:1rem;padding:2px 4px;border-radius:6px" onclick="openReactPicker(this)" title="Add reaction">😊</button>'
+    +'<button class="msg-action-btn react-btn" data-mid="'+safeId+'" style="position:absolute;'+(mine?'left:-32px':'right:-32px')+';top:0;width:26px;height:26px;opacity:0;font-size:1rem;padding:2px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;transition:opacity .2s" onclick="openReactPicker(this);event.stopPropagation()" ontouchend="event.preventDefault();event.stopPropagation();openReactPicker(this)" title="React">😊</button>'
     +'<div class="reaction-picker" id="rp-'+safeId+'">'
       +REACT_EMOJIS.map(e=>'<button data-mid="'+safeId+'" data-emoji="'+e+'" onclick="reactFromPicker(this)">'+e+'</button>').join('')
     +'</div>'
@@ -1958,7 +1962,7 @@ function toggleReactionPicker(msgId,btn){
 
 // Close reaction pickers on outside click
 document.addEventListener('click',e=>{
-  if(!e.target.closest('.reaction-picker')&&!e.target.closest('.msg-action-btn[onclick*="toggleReactionPicker"]'))
+  if(!e.target.closest('.reaction-picker')&&!e.target.closest('[onclick*="openReactPicker"]')&&!e.target.closest('[data-mid]'))
     document.querySelectorAll('.reaction-picker.open').forEach(p=>p.classList.remove('open'));
   if(!e.target.closest('.score-pill'))
     document.querySelectorAll('.score-pill.tapped').forEach(p=>p.classList.remove('tapped'));
