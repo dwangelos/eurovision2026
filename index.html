@@ -369,6 +369,7 @@ header p{display:none;}
     <button class="main-tab active" id="mtab-vote" onclick="switchMainTab('vote')">&#9997; Vote</button>
     <button class="main-tab" id="mtab-scores" onclick="switchMainTab('scores')">&#127942; Scoreboard</button>
     <button class="main-tab" id="mtab-precision" onclick="switchMainTab('precision')">&#127919; Precision</button>
+    <button class="main-tab" id="mtab-voter" onclick="switchMainTab('voter')" style="display:none;flex:0;padding:10px 14px;font-size:.8rem">&#127915; <span id="mtab-voter-name"></span></button>
   </div>
 
   <!-- VOTE PANEL (song list) -->
@@ -415,6 +416,18 @@ header p{display:none;}
   <div id="main-panel-precision" style="display:none">
     <p id="precision-contest-name" style="color:var(--muted);font-size:.85rem;margin-bottom:16px"></p>
     <div id="precision-list"></div>
+  </div>
+
+  <!-- VOTER DETAIL PANEL -->
+  <div id="main-panel-voter" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--gold);font-weight:700" id="voter-panel-name"></div>
+        <div style="font-size:.82rem;color:var(--muted);margin-top:3px" id="voter-panel-sub"></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="switchMainTab('scores')">&#8592; Back to Scoreboard</button>
+    </div>
+    <div id="voter-panel-list"></div>
   </div>
 
   <div class="nav-row" style="margin-top:20px">
@@ -540,18 +553,67 @@ function hideAll(){['join-screen','contest-screen','results-screen','precision-s
 let _activeMainTab='vote';
 function switchMainTab(tab){
   _activeMainTab=tab;
-  ['vote','scores','precision'].forEach(t=>{
-    document.getElementById('main-tab-'+t) && document.getElementById('main-tab-'+t); // handled below
+  ['vote','scores','precision','voter'].forEach(t=>{
     document.getElementById('mtab-'+t)?.classList.toggle('active',t===tab);
-    document.getElementById('main-panel-'+t).style.display=t===tab?'':'none';
+    const panel=document.getElementById('main-panel-'+t);
+    if(panel) panel.style.display=t===tab?'':'none';
   });
-  if(tab==='scores'){
-    showResults();
-  } else if(tab==='precision'){
-    showPrecision();
-  } else {
-    // Re-render vote tab with current voter
-    renderTabsAndSongs();
+  if(tab==='scores') showResults();
+  else if(tab==='precision') showPrecision();
+  else if(tab==='vote') renderTabsAndSongs();
+}
+
+async function openVoterPanel(username){
+  // Show voter tab button
+  const btn=document.getElementById('mtab-voter');
+  const nameEl=document.getElementById('mtab-voter-name');
+  if(btn){ btn.style.display=''; nameEl.textContent=username.split(' ')[0]; }
+  switchMainTab('voter');
+  document.getElementById('voter-panel-name').textContent=username;
+  document.getElementById('voter-panel-sub').textContent='Loading…';
+  const list=document.getElementById('voter-panel-list');
+  list.innerHTML='<div style="color:var(--muted);font-size:.85rem;padding:20px;text-align:center"><div class="spinner" style="display:inline-block;margin-right:8px"></div>Loading…</div>';
+  try{
+    const sc=window._resultSc||{};
+    const totals=window._resultTotals||[];
+    // If data not loaded yet, fetch it
+    let songs=contestSongs;
+    let voterScores=sc[username]||null;
+    if(!voterScores||!totals.length){
+      const votes=await sbGet('votes','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&username=eq.'+encodeURIComponent(username)+'&select=song_idx,score');
+      voterScores=Array(songs.length).fill(null);
+      votes.forEach(v=>{ voterScores[v.song_idx]=parseFloat(v.score); });
+    }
+    // Sort songs by voter score desc
+    const sorted=[...songs].map((s,i)=>({...s,idx:i,score:voterScores?voterScores[i]:null}))
+      .sort((a,b)=>{
+        if(a.score!==null&&b.score!==null) return b.score-a.score;
+        if(a.score!==null) return -1;
+        if(b.score!==null) return 1;
+        return a.idx-b.idx;
+      });
+    const votedCount=sorted.filter(s=>s.score!==null).length;
+    const isMe=username===currentUser;
+    document.getElementById('voter-panel-sub').textContent=
+      (isMe?'Your votes — ':'')
+      +votedCount+' of '+songs.length+' songs voted · ranked highest to lowest';
+    list.innerHTML=sorted.map((s,rank)=>{
+      const display=s.song&&s.song!=='TBA'?s.song:s.country;
+      const rated=s.score!==null;
+      const isTop=rated&&rank<3;
+      return '<div class="result-card'+(isTop?' top'+(rank+1):'')+'" style="grid-template-columns:44px 1fr auto;margin-bottom:8px">'
+        +'<div class="rank-badge'+(isTop?' r'+(rank+1):'')+'" style="'+(rated?'':'background:var(--border);color:var(--muted)')+'">'+( rated?rank+1:'—' )+'</div>'
+        +'<div class="result-info">'
+        +'<div class="result-title">'+flagImg(s.country,18)+' '+escapeHtml(display)+'</div>'
+        +'<div class="result-country">'+escapeHtml(s.country)+(s.artist&&s.artist!=='TBA'?' · '+escapeHtml(s.artist):'')+'</div>'
+        +'</div>'
+        +(rated
+          ?'<div class="total-score" style="font-size:1.6rem">'+(s.score%1===0?s.score:s.score.toFixed(1))+'</div>'
+          :'<div style="font-size:.78rem;color:var(--muted);font-style:italic;align-self:center">not voted</div>')
+        +'</div>';
+    }).join('');
+  }catch(e){
+    list.innerHTML='<div style="color:var(--red);padding:20px">'+e.message+'</div>';
   }
 }
 function hideLoading(){const l=document.getElementById('loading');l.classList.add('gone');setTimeout(()=>l.style.display='none',600);}
@@ -849,7 +911,8 @@ function renderTabs(){
     const i=allVoters.indexOf(v);
     const count=(allScores[v]||[]).filter(x=>x!==null).length;
     const isActive=i===activeVoter;
-    return '<div class="voter-tab'+(isActive?' active':'')+'" onclick="switchTab('+i+')">'
+    const safeV=v.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<div class="voter-tab'+(isActive?' active':'')+'" onclick="switchTab('+i+')" ondblclick="openVoterPanel(\''+safeV+'\')" title="Click to view scores · Double-click for detail">'
       +escapeHtml(v)+(count>0?' <small style="opacity:.55;font-size:.65rem">'+count+'</small>':'')+'</div>';
   }).join('');
   ['voter-tabs','voter-tabs-r'].forEach(id=>{
@@ -913,12 +976,16 @@ function renderVotersModal(page){
     const isActive=i===activeVoter;
     const badgeCls=isMe?'vmr-me':done?'vmr-done':'vmr-pending';
     const badgeTxt=isMe?'You':done?'Done':''+count+'/'+total2;
-    return '<div class="voters-modal-row'+(isActive?' active':'')+'" onclick="selectVoterFromModal('+i+')" style="'+(isActive?'background:rgba(232,200,74,.05)':'')+'">'
-      +'<div>'
+    const safeV2=v.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<div class="voters-modal-row'+(isActive?' active':'')+'" style="'+(isActive?'background:rgba(232,200,74,.05)':'')+'">'
+      +'<div style="flex:1;min-width:0" onclick="selectVoterFromModal('+i+')">'
       +'<div class="vmr-name">'+escapeHtml(v)+'</div>'
       +'<div class="vmr-meta">'+count+' of '+total2+' songs rated</div>'
       +'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px">'
       +'<span class="vmr-badge '+badgeCls+'">'+badgeTxt+'</span>'
+      +'<button onclick="document.getElementById(\'voters-modal\').classList.remove(\'open\');document.body.style.overflow=\'\';openVoterPanel(\''+safeV2+'\')" style="background:rgba(232,200,74,.1);border:1px solid rgba(232,200,74,.25);color:var(--gold);border-radius:6px;padding:3px 9px;font-size:.72rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">&#127915; Detail</button>'
+      +'</div>'
       +'</div>';
   }).join('');
 
@@ -1347,8 +1414,9 @@ function openVoterModal(songIdx){
   document.getElementById('modal-body').innerHTML=sorted.map(v=>{
     const score=sc[v][s.idx];
     const isMe=v===currentUser;
-    return '<div class="voter-row">'
-      +'<div class="v-name">'+escapeHtml(v)+(isMe?' <small style="color:var(--gold);font-size:.72rem">(you)</small>':'')+'</div>'
+    const safeV=v.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<div class="voter-row" style="cursor:pointer" onclick="closeModal();openVoterPanel(\''+safeV+'\')">'
+      +'<div class="v-name">'+escapeHtml(v)+(isMe?' <small style="color:var(--gold);font-size:.72rem">(you)</small>':'')+' <small style="color:var(--muted);font-size:.68rem">&#8599;</small></div>'
       +(score!==null?'<div class="v-score">'+(score%1===0?score:score.toFixed(2))+'</div>'
         :'<div class="v-score no-vote">not voted</div>')
       +'</div>';
