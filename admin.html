@@ -481,7 +481,7 @@ async function openEditUser(username){
   try{
     await patch('users','username=eq.'+encodeURIComponent(username),
       {username:newName.trim(), first_name:first, last_name:last});
-    msg.className='msg ok'; msg.textContent='&#10003; Renamed to "'+newName.trim()+'"';
+    msg.className='msg ok'; msg.innerHTML='&#10003; Renamed to "'+newName.trim()+'"';
     // Update in memory
     const u=allUsers.find(u=>u.username===username);
     if(u){u.username=newName.trim();u.first_name=first;u.last_name=last;}
@@ -502,7 +502,7 @@ async function deleteUser(username){
     allUsers=allUsers.filter(u=>u.username!==username);
     delete allVoteStats[username];
     document.getElementById('user-count').textContent=allUsers.length+' voters';
-    msg.className='msg ok'; msg.textContent='&#10003; Deleted.';
+    msg.className='msg ok'; msg.innerHTML='&#10003; Deleted.';
   }catch(e){msg.className='msg err'; msg.textContent='Error: '+e.message;}
 }
 
@@ -548,7 +548,7 @@ async function toggleContest(id,active){
     currentContest=c[0]||null;
     document.getElementById('header-sub').textContent=currentContest?'Active: '+currentContest.name:'No active contest';
     const msg=document.getElementById('contests-msg');
-    msg.className='msg ok'; msg.textContent='&#10003; Updated.';
+    msg.className='msg ok'; msg.innerHTML='&#10003; Updated.';
   }catch(e){document.getElementById('contests-msg').className='msg err';document.getElementById('contests-msg').textContent='Error: '+e.message;}
 }
 
@@ -591,7 +591,7 @@ async function saveResults(){
   if(err){msg.className='msg err';msg.textContent='Invalid or duplicate positions.';return;}
   try{
     await upsert('official_results',rows);
-    msg.className='msg ok'; msg.textContent='&#10003; '+rows.length+' saved.';
+    msg.className='msg ok'; msg.innerHTML='&#10003; '+rows.length+' saved.';
   }catch(e){msg.className='msg err';msg.textContent='Error: '+e.message;}
 }
 </script>
