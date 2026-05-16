@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Eurovision 2026 &middot; Vienna &middot; Friends Vote</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzBkMGIxOCIvPgogIDxwb2x5Z29uIHBvaW50cz0iMTYsNCAxOC45LDEyLjIgMjcuNiwxMi4yIDIwLjksMTcuNCAyMy40LDI1LjggMTYsMjAuOCA4LjYsMjUuOCAxMS4xLDE3LjQgNC40LDEyLjIgMTMuMSwxMi4yIiBmaWxsPSIjZThjODRhIi8+Cjwvc3ZnPg==">
@@ -1412,77 +1415,79 @@ function adjustScore(i,direction){
   setScore(i,newVal);
 }
 
+let _conflictTimer = null;
+
 function validateAll(){
   const voter=allVoters[activeVoter];
   if(voter!==currentUser) return;
   const vs=allScores[voter]||[];
-
-  // score value -> [song indices]
   const valMap={};
-  vs.forEach((v,i)=>{
-    if(v===null) return;
-    const key=Math.round(v*100)/100;
-    if(!valMap[key]) valMap[key]=[];
-    valMap[key].push(i);
-  });
-
-  // which indices are in conflict
+  vs.forEach((v,i)=>{ if(v===null) return; const k=Math.round(v*100)/100; if(!valMap[k]) valMap[k]=[]; valMap[k].push(i); });
   const conflicts=new Set();
   Object.values(valMap).forEach(idxs=>{ if(idxs.length>1) idxs.forEach(i=>conflicts.add(i)); });
 
-  // update each card
+  // Update input colours immediately — no delay
   contestSongs.forEach((_,i)=>{
     const inp=document.getElementById('score-inp-'+i);
     const card=document.getElementById('card-'+i);
-    const hint=document.getElementById('conflict-hint-'+i);
     if(!inp) return;
     const hasVal=vs[i]!==null;
     const isConflict=conflicts.has(i);
     inp.classList.toggle('conflict',isConflict);
     inp.classList.toggle('ok',hasVal&&!isConflict);
     if(card) card.classList.toggle('rated',hasVal&&!isConflict);
-    if(!hint) return;
-    if(isConflict){
-      const score=Math.round(vs[i]*100)/100;
-      const others=(valMap[score]||[]).filter(j=>j!==i);
+  });
+
+  // Clear timer and messages immediately if no conflicts
+  clearTimeout(_conflictTimer);
+  if(conflicts.size===0){
+    contestSongs.forEach((_,i)=>{ const h=document.getElementById('conflict-hint-'+i); if(h){h.innerHTML='';h.classList.remove('active');} });
+    ['conflict-msg','conflict-msg-r'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=''; });
+    return;
+  }
+
+  // Wait 2 seconds before showing the conflict details
+  _conflictTimer=setTimeout(()=>{
+    const vs2=allScores[allVoters[activeVoter]]||[];
+    const vm2={};
+    vs2.forEach((v,i)=>{ if(v===null) return; const k=Math.round(v*100)/100; if(!vm2[k]) vm2[k]=[]; vm2[k].push(i); });
+
+    contestSongs.forEach((_,i)=>{
+      const hint=document.getElementById('conflict-hint-'+i);
+      if(!hint) return;
+      const score=vs2[i];
+      if(score===null){hint.innerHTML='';hint.classList.remove('active');return;}
+      const key=Math.round(score*100)/100;
+      const others=(vm2[key]||[]).filter(j=>j!==i);
       if(others.length){
         const other=others[0];
         const os=contestSongs[other];
         const oName=os?(os.song&&os.song!=='TBA'?os.song:os.country):'?';
-        hint.innerHTML='&#9888; Score '+score+' also used for <b>'+escapeHtml(oName)+'</b>'
+        hint.innerHTML='&#9888; Score '+key+' also used for <b>'+escapeHtml(oName)+'</b>'
           +' &mdash; <button onclick="clearScoreFor('+other+')" style="background:rgba(232,200,74,.15);border:1px solid rgba(232,200,74,.4);color:var(--gold);border-radius:6px;padding:1px 8px;font-size:.7rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">Clear '+escapeHtml(oName)+'</button>';
         hint.classList.add('active');
+      } else { hint.innerHTML=''; hint.classList.remove('active'); }
+    });
+
+    const parts=[], seen=new Set();
+    Object.entries(vm2).forEach(([score,idxs])=>{
+      if(idxs.length<2) return;
+      for(let a=0;a<idxs.length;a++) for(let b=a+1;b<idxs.length;b++){
+        const ia=idxs[a],ib=idxs[b],pk=Math.min(ia,ib)+'-'+Math.max(ia,ib);
+        if(seen.has(pk)) continue; seen.add(pk);
+        const nA=contestSongs[ia]?(contestSongs[ia].song&&contestSongs[ia].song!=='TBA'?contestSongs[ia].song:contestSongs[ia].country):'?';
+        const nB=contestSongs[ib]?(contestSongs[ib].song&&contestSongs[ib].song!=='TBA'?contestSongs[ib].song:contestSongs[ib].country):'?';
+        parts.push('<div style="background:rgba(232,74,106,.1);border:1px solid rgba(232,74,106,.3);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">'
+          +'<span style="color:var(--red);font-size:.8rem">&#9888; Score <b>'+score+'</b>: <b>'+escapeHtml(nA)+'</b> &amp; <b>'+escapeHtml(nB)+'</b></span>'
+          +'<div style="display:flex;gap:5px;flex-shrink:0">'
+          +'<button onclick="clearScoreFor('+ia+')" style="background:rgba(232,200,74,.15);border:1px solid rgba(232,200,74,.4);color:var(--gold);border-radius:6px;padding:3px 9px;font-size:.73rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">Clear '+escapeHtml(nA)+'</button>'
+          +'<button onclick="clearScoreFor('+ib+')" style="background:rgba(232,200,74,.15);border:1px solid rgba(232,200,74,.4);color:var(--gold);border-radius:6px;padding:3px 9px;font-size:.73rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">Clear '+escapeHtml(nB)+'</button>'
+          +'</div></div>');
       }
-    } else {
-      hint.innerHTML='';
-      hint.classList.remove('active');
-    }
-  });
-
-  // top banner
-  const parts=[];
-  const seen=new Set();
-  Object.entries(valMap).forEach(([score,idxs])=>{
-    if(idxs.length<2) return;
-    for(let a=0;a<idxs.length;a++) for(let b=a+1;b<idxs.length;b++){
-      const ia=idxs[a],ib=idxs[b],pk=Math.min(ia,ib)+'-'+Math.max(ia,ib);
-      if(seen.has(pk)) continue; seen.add(pk);
-      const nA=contestSongs[ia]?(contestSongs[ia].song&&contestSongs[ia].song!=='TBA'?contestSongs[ia].song:contestSongs[ia].country):'?';
-      const nB=contestSongs[ib]?(contestSongs[ib].song&&contestSongs[ib].song!=='TBA'?contestSongs[ib].song:contestSongs[ib].country):'?';
-      parts.push('<div style="background:rgba(232,74,106,.1);border:1px solid rgba(232,74,106,.3);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">'
-        +'<span style="color:var(--red);font-size:.8rem">&#9888; Score <b>'+score+'</b>: <b>'+escapeHtml(nA)+'</b> &amp; <b>'+escapeHtml(nB)+'</b></span>'
-        +'<div style="display:flex;gap:5px;flex-shrink:0">'
-        +'<button onclick="clearScoreFor('+ia+')" style="background:rgba(232,200,74,.15);border:1px solid rgba(232,200,74,.4);color:var(--gold);border-radius:6px;padding:3px 9px;font-size:.73rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">Clear '+escapeHtml(nA)+'</button>'
-        +'<button onclick="clearScoreFor('+ib+')" style="background:rgba(232,200,74,.15);border:1px solid rgba(232,200,74,.4);color:var(--gold);border-radius:6px;padding:3px 9px;font-size:.73rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">Clear '+escapeHtml(nB)+'</button>'
-        +'</div></div>');
-    }
-  });
-  ['conflict-msg','conflict-msg-r'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.innerHTML=parts.join('');
-  });
+    });
+    ['conflict-msg','conflict-msg-r'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=parts.join(''); });
+  }, 2000);
 }
-
 
 async function clearScoreFor(i){
   const voter=allVoters[activeVoter];
