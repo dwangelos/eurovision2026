@@ -130,6 +130,11 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
 /* CONFETTI */
 .confetti-piece{position:fixed;width:8px;height:8px;top:-10px;z-index:9999;pointer-events:none;border-radius:2px;animation:confetti-fall linear forwards;}
 @keyframes confetti-fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+/* MAIN PAGE TABS */
+.main-tabs{display:flex;gap:0;margin-bottom:20px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:4px;}
+.main-tab{flex:1;background:transparent;border:none;border-radius:8px;padding:10px 12px;font-size:.88rem;font-family:'DM Sans',sans-serif;color:var(--muted);cursor:pointer;transition:all .2s;font-weight:500;}
+.main-tab.active{background:var(--gold);color:#0d0b18;font-weight:700;}
+.main-tab:hover:not(.active){color:var(--text);background:rgba(255,255,255,.04);}
 /* RESULTS TABS */
 .results-tabs{display:flex;gap:6px;margin-bottom:20px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:5px;}
 .results-tab{flex:1;background:transparent;border:none;border-radius:8px;padding:9px 12px;font-size:.82rem;font-family:'DM Sans',sans-serif;color:var(--muted);cursor:pointer;transition:all .2s;font-weight:500;white-space:nowrap;}
@@ -317,96 +322,95 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
   <div class="voting-banner" id="voting-banner"></div>
   <div class="conflict-msg" id="conflict-msg"></div>
   <div id="songs-list"></div>
-  <div class="nav-row">
-    <button class="btn btn-sm" onclick="showResults()">&#127942; View Scoreboard</button>
-    <button class="btn btn-ghost btn-sm contest-nav-btn" onclick="showContestPicker()" style="display:none">&#8592; Contests</button>
+  <div class="nav-row" style="margin-top:20px">
     <button class="btn btn-del btn-sm" onclick="showJoinScreen()">Sign Out</button>
+    <button class="btn btn-ghost btn-sm contest-nav-btn" onclick="showContestPicker()" style="display:none">&#8592; Contests</button>
   </div>
 </div>
 
-<!-- RESULTS -->
+<!-- RESULTS (now includes scoreboard + precision inline) -->
 <div class="wrap" id="results-screen" style="display:none">
+
+  <!-- HEADER + LOGO -->
   <div class="results-header">
     <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px">
       <a href="https://alleu.com" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;opacity:.75;transition:opacity .2s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.75'">
-        <img src="/logo.png" id="alleu-logo-img"
-          onerror="this.style.display='none';document.getElementById('alleu-logo-svg').style.display='inline-flex'"
-          style="height:24px;width:auto" alt="alleu.com"/>
+        <img src="/logo.png" id="alleu-logo-img" onerror="this.style.display='none';document.getElementById('alleu-logo-svg').style.display='inline-flex'" style="height:24px;width:auto" alt="alleu.com"/>
         <span id="alleu-logo-svg" style="display:none;align-items:center;gap:6px">
-          <svg viewBox="0 0 80 20" style="height:18px;width:auto" xmlns="http://www.w3.org/2000/svg">
-            <text x="0" y="16" font-family="'Playfair Display',serif" font-size="16" fill="#7b72a8" letter-spacing="1">alleu</text>
-          </svg>
+          <svg viewBox="0 0 80 20" style="height:18px;width:auto" xmlns="http://www.w3.org/2000/svg"><text x="0" y="16" font-family="'Playfair Display',serif" font-size="16" fill="#7b72a8" letter-spacing="1">alleu</text></svg>
           <span style="font-size:.72rem;color:var(--muted);font-family:'DM Sans',sans-serif">.com</span>
         </span>
       </a>
     </div>
-    <h2>&#127942; Scoreboard</h2>
+    <h2>&#127942; Eurovision 2026</h2>
     <p id="results-contest-name"></p>
   </div>
 
   <!-- PRIZE BANNER -->
   <div class="prize-banner">
-    <div class="prize-icon">🏆</div>
+    <div class="prize-icon">&#127942;</div>
     <div>
       <div class="prize-title">Winner's Prize</div>
       <div class="prize-sub">The voter whose taste matches the official results most closely wins a <strong>20,000mAh Wireless Fast Charger Power Bank</strong> — with built-in iPhone &amp; USB-C cables!</div>
     </div>
   </div>
 
-  <!-- TAB SWITCHER -->
-  <div class="results-tabs">
-    <button class="results-tab active" id="rtab-group" onclick="switchResultsTab('group')">&#127942; Group Votes</button>
-    <button class="results-tab" id="rtab-member" onclick="switchResultsTab('member')">&#128101; Member Rankings</button>
-    <button class="results-tab" id="rtab-odds" onclick="switchResultsTab('odds')">&#127922; Bookmaker Odds</button>
+  <!-- MAIN PAGE TABS: Vote / Scoreboard / Precision -->
+  <div class="main-tabs">
+    <button class="main-tab active" id="mtab-vote" onclick="switchMainTab('vote')">&#9997; Vote</button>
+    <button class="main-tab" id="mtab-scores" onclick="switchMainTab('scores')">&#127942; Scoreboard</button>
+    <button class="main-tab" id="mtab-precision" onclick="switchMainTab('precision')">&#127919; Precision</button>
   </div>
 
-  <!-- LIVE TOGGLE -->
-  <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:12px">
-    <span id="live-dot" style="width:8px;height:8px;border-radius:50%;background:var(--green);display:none;animation:pulse 1.5s infinite"></span>
-    <span id="live-label" style="font-size:.75rem;color:var(--muted);display:none">Live</span>
-    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;color:var(--muted)">
-      <input type="checkbox" id="live-toggle" onchange="toggleLiveResults(this.checked)"
-        style="width:14px;height:14px;accent-color:var(--green);cursor:pointer"/>
-      Auto-refresh
-    </label>
-  </div>
-
-  <!-- GROUP VOTES -->
-  <div id="results-panel-group">
-    <div id="results-list"></div>
-  </div>
-
-  <!-- MEMBER RANKINGS -->
-  <div id="results-panel-member" style="display:none">
-    <div class="member-pick-row">
-      <label style="font-size:.82rem;color:var(--muted)">Viewing rankings by:</label>
-      <select id="member-select" onchange="renderMemberRankings()"
-        style="background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 12px;font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer">
-      </select>
+  <!-- VOTE PANEL (song list) -->
+  <div id="main-panel-vote">
+    <div class="voter-tabs" id="voter-tabs-r"></div>
+    <div style="margin-bottom:8px"><button class="voters-all-btn" id="voters-all-btn-r" onclick="openVotersModal()" style="display:none">&#128101; See all voters</button></div>
+    <div class="used-scores" style="margin-bottom:8px">
+      <h3>Scores Used by <span id="tab-name-label-r">&mdash;</span></h3>
+      <div class="score-pills" id="score-pills-r"></div>
     </div>
-    <div id="member-rankings-list"></div>
+    <div class="progress-label" id="progress-label-r"></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar-r" style="width:0%"></div></div>
+    <div class="voting-banner" id="voting-banner-r"></div>
+    <div class="conflict-msg" id="conflict-msg-r"></div>
+    <div id="songs-list-r"></div>
   </div>
 
-  <!-- BOOKMAKER ODDS -->
-  <div id="results-panel-odds" style="display:none">
-    <div id="odds-rankings-list"></div>
+  <!-- SCOREBOARD PANEL -->
+  <div id="main-panel-scores" style="display:none">
+    <div class="results-tabs" style="margin-top:0">
+      <button class="results-tab active" id="rtab-group" onclick="switchResultsTab('group')">&#127942; Group Votes</button>
+      <button class="results-tab" id="rtab-member" onclick="switchResultsTab('member')">&#128101; Member Rankings</button>
+      <button class="results-tab" id="rtab-odds" onclick="switchResultsTab('odds')">&#127922; Bookmaker Odds</button>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:12px">
+      <span id="live-dot" style="width:8px;height:8px;border-radius:50%;background:var(--green);display:none;animation:pulse 1.5s infinite"></span>
+      <span id="live-label" style="font-size:.75rem;color:var(--muted);display:none">Live</span>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;color:var(--muted)">
+        <input type="checkbox" id="live-toggle" onchange="toggleLiveResults(this.checked)" style="width:14px;height:14px;accent-color:var(--green);cursor:pointer"/> Auto-refresh
+      </label>
+    </div>
+    <div id="results-panel-group"><div id="results-list"></div></div>
+    <div id="results-panel-member" style="display:none">
+      <div class="member-pick-row">
+        <label style="font-size:.82rem;color:var(--muted)">Viewing rankings by:</label>
+        <select id="member-select" onchange="renderMemberRankings()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 12px;font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer"></select>
+      </div>
+      <div id="member-rankings-list"></div>
+    </div>
+    <div id="results-panel-odds" style="display:none"><div id="odds-rankings-list"></div></div>
   </div>
 
-  <div class="nav-row">
-    <button class="btn btn-sm" onclick="showPrecision()">&#127919; Voter Precision</button>
-    <button class="btn btn-ghost btn-sm" onclick="goVoting()">&#8592; Back to Voting</button>
+  <!-- PRECISION PANEL -->
+  <div id="main-panel-precision" style="display:none">
+    <p id="precision-contest-name" style="color:var(--muted);font-size:.85rem;margin-bottom:16px"></p>
+    <div id="precision-list"></div>
+  </div>
+
+  <div class="nav-row" style="margin-top:20px">
     <button class="btn btn-del btn-sm" onclick="showJoinScreen()">Sign Out</button>
-  </div>
-</div>
-
-<!-- PRECISION -->
-<div class="wrap" id="precision-screen" style="display:none">
-  <div class="precision-header"><h2>&#127919; Voter Precision</h2><p id="precision-contest-name"></p></div>
-  <div id="precision-list"></div>
-  <div class="nav-row">
-    <button class="btn btn-ghost btn-sm" onclick="showResults()">&#127942; Scoreboard</button>
     <button class="btn btn-ghost btn-sm contest-nav-btn" onclick="showContestPicker()" style="display:none">&#8592; Contests</button>
-    <button class="btn btn-del btn-sm" onclick="showJoinScreen()">Sign Out</button>
   </div>
 </div>
 
@@ -521,7 +525,26 @@ function clearSession(){localStorage.removeItem(SESSION_KEY);}
 // ── UTILS ─────────────────────────────────────────────────────────────────────
 function show(id){const e=document.getElementById(id);if(e)e.style.display='block';}
 function hide(id){const e=document.getElementById(id);if(e)e.style.display='none';}
-function hideAll(){['join-screen','contest-screen','voting-screen','results-screen','precision-screen'].forEach(hide);}
+function hideAll(){['join-screen','contest-screen','results-screen','precision-screen'].forEach(hide);}
+
+// ── MAIN TAB SWITCHER ─────────────────────────────────────────────────────────
+let _activeMainTab='vote';
+function switchMainTab(tab){
+  _activeMainTab=tab;
+  ['vote','scores','precision'].forEach(t=>{
+    document.getElementById('main-tab-'+t) && document.getElementById('main-tab-'+t); // handled below
+    document.getElementById('mtab-'+t)?.classList.toggle('active',t===tab);
+    document.getElementById('main-panel-'+t).style.display=t===tab?'':'none';
+  });
+  if(tab==='scores'){
+    showResults();
+  } else if(tab==='precision'){
+    showPrecision();
+  } else {
+    // Re-render vote tab with current voter
+    renderTabsAndSongs();
+  }
+}
 function hideLoading(){const l=document.getElementById('loading');l.classList.add('gone');setTimeout(()=>l.style.display='none',600);}
 function setDB(state,label){
   const b=document.getElementById('db-badge');
@@ -754,17 +777,20 @@ async function enterContest(contest){
   });
   activeVoter=allVoters.indexOf(currentUser);
   if(activeVoter<0) activeVoter=0;
-  hideAll(); show('voting-screen');
-  document.getElementById('contest-bar-name').textContent=contest.name;
-  renderTabs(); renderSongs(); updateVotingBanner();
+  hideAll(); show('results-screen');
+  document.getElementById('results-contest-name').textContent=contest.name;
+  document.getElementById('precision-contest-name').textContent=contest.name;
+  // Start on vote tab
+  switchMainTab('vote');
+  updateVotingBanner();
   clearInterval(countdownTimer);
   countdownTimer=setInterval(updateVotingBanner,1000);
 }
 
 // ── VOTING BANNER ─────────────────────────────────────────────────────────────
 function updateVotingBanner(){
-  const banner=document.getElementById('voting-banner');
-  const info=document.getElementById('contest-bar-info');
+  const banner=document.getElementById('voting-banner-r');
+  const info=document.getElementById('precision-contest-name');
   const status=votingStatus(currentContest);
   if(status==='open'){
     const closes=new Date(currentContest.voting_closes_at);
@@ -786,11 +812,13 @@ function updateVotingBanner(){
 }
 
 // ── TABS ──────────────────────────────────────────────────────────────────────
+function renderTabsAndSongs(){ renderTabs(); renderSongs(); }
+
+function goVoting(){ switchMainTab('vote'); }
+
 function renderTabs(){
-  // Sort voters: current user first, then by votes cast desc (most active top)
   const sorted=[...allVoters].sort((a,b)=>{
-    if(a===currentUser) return -1;
-    if(b===currentUser) return 1;
+    if(a===currentUser) return -1; if(b===currentUser) return 1;
     const ca=(allScores[a]||[]).filter(x=>x!==null).length;
     const cb=(allScores[b]||[]).filter(x=>x!==null).length;
     return cb-ca;
@@ -798,28 +826,29 @@ function renderTabs(){
   const TOP=10;
   const top=sorted.slice(0,TOP);
   const rest=sorted.slice(TOP);
-  // Ensure activeVoter tab is in top list — if not, swap in
   const activeUser=allVoters[activeVoter];
-  if(activeUser&&!top.includes(activeUser)){
-    top[TOP-1]=activeUser;
-  }
-  document.getElementById('voter-tabs').innerHTML=top.map(v=>{
+  if(activeUser&&!top.includes(activeUser)) top[TOP-1]=activeUser;
+  const tabHtml=top.map(v=>{
     const i=allVoters.indexOf(v);
     const count=(allScores[v]||[]).filter(x=>x!==null).length;
     const isActive=i===activeVoter;
-    const isMe=v===currentUser;
     return '<div class="voter-tab'+(isActive?' active':'')+'" onclick="switchTab('+i+')">'
-      +escapeHtml(v)
-      +(count>0?' <small style="opacity:.55;font-size:.65rem">'+count+'</small>':'')
-      +'</div>';
+      +escapeHtml(v)+(count>0?' <small style="opacity:.55;font-size:.65rem">'+count+'</small>':'')+'</div>';
   }).join('');
-  // Show "See all" button only if there are more than 10 voters
+  ['voter-tabs','voter-tabs-r'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.innerHTML=tabHtml;
+  });
   const btn=document.getElementById('voters-all-btn');
-  if(btn) btn.style.display=allVoters.length>TOP?'inline-flex':'none';
-  if(btn&&rest.length>0) btn.innerHTML='&#128101; +'+rest.length+' more voters';
-  document.getElementById('tab-name-label').textContent=allVoters[activeVoter]||'';
+  const btnR=document.getElementById('voters-all-btn-r');
+  const show=allVoters.length>TOP;
+  const txt=show?'&#128101; +'+rest.length+' more voters':'';
+  [btn,btnR].forEach(b=>{ if(b){b.style.display=show?'':'none'; if(show) b.innerHTML=txt;} });
+  ['tab-name-label','tab-name-label-r'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.textContent=allVoters[activeVoter]||'';
+  });
 }
-function switchTab(i){activeVoter=i;renderTabs();renderSongs();}
+
+function switchTab(i){ activeVoter=i; renderTabs(); renderSongs(); }
 
 // ── VOTERS MODAL ──────────────────────────────────────────────────────────────
 const VOTERS_PAGE_SIZE=12;
@@ -895,7 +924,7 @@ function selectVoterFromModal(i){
   document.getElementById('voters-modal').classList.remove('open');
   document.body.style.overflow='';
   // Scroll to top of song list
-  document.getElementById('songs-list').scrollIntoView({behavior:'smooth'});
+  document.getElementById('songs-list-r').scrollIntoView({behavior:'smooth'});
 }
 
 // ── PROGRESS ──────────────────────────────────────────────────────────────────
@@ -904,8 +933,8 @@ function updateProgress(){
   const vs=allScores[voter]||[];
   const rated=vs.filter(x=>x!==null).length;
   const total=contestSongs.length;
-  document.getElementById('progress-label').textContent=rated+' of '+total+' songs rated';
-  document.getElementById('progress-bar').style.width=total>0?Math.round((rated/total)*100)+'%':'0%';
+  document.getElementById('progress-label-r').textContent=rated+' of '+total+' songs rated';
+  document.getElementById('progress-bar-r').style.width=total>0?Math.round((rated/total)*100)+'%':'0%';
 }
 
 function renderScorePills(){
@@ -923,7 +952,7 @@ function renderScorePills(){
       scoreToSong[key]=idx;
     }
   });
-  document.getElementById('score-pills').innerHTML=possible.map(s=>{
+  document.getElementById('score-pills-r').innerHTML=possible.map(s=>{
     const key=Math.round(s*100);
     const isUsed=used.some(u=>Math.round(u*100)===key);
     if(!isUsed) return '<div class="score-pill">'+s+'</div>';
@@ -960,7 +989,7 @@ function renderSongs(){
   const isMe=voter===currentUser;
   const canVote=isMe&&votingStatus(currentContest)==='open';
   renderScorePills(); updateProgress();
-  document.getElementById('songs-list').innerHTML=contestSongs.map((s,i)=>{
+  document.getElementById('songs-list-r').innerHTML=contestSongs.map((s,i)=>{
     const val=vs[i]; const rated=val!==null;
     const display=s.song&&s.song!=='TBA'?s.song:s.country;
     const dis=canVote?'':' disabled';
@@ -1034,7 +1063,7 @@ function validateAll(){
     inp.classList.toggle('ok',hasVal&&!conflicts.has(i));
     if(card) card.classList.toggle('rated',hasVal&&!conflicts.has(i));
   });
-  const msg=document.getElementById('conflict-msg');
+  const msg=document.getElementById('conflict-msg-r');
   if(conflicts.size>0){
     msg.textContent='Duplicate scores detected \u2014 each score must be unique.';
   }else{
@@ -1054,26 +1083,35 @@ async function setScore(i,raw){
   if(hasConflict) return;
   setDB('saving','Saving\u2026');
   try{
-    // Use explicit upsert with on-conflict columns for votes
-    const r = await fetch(SUPABASE_URL+'/rest/v1/votes',{
-      method:'POST',
-      headers:{...H,
-        'Prefer':'resolution=merge-duplicates,return=representation',
-        'on-conflict':'username,contest_id,song_idx'
-      },
-      body:JSON.stringify({username:voter,contest_id:currentContest.id,song_idx:i,score:rounded})
-    });
-    if(!r.ok) throw new Error(await r.text());
+    // Try update first, insert if not exists
+    const enc=encodeURIComponent;
+    const existing = await sbGet('votes',
+      `username=eq.${enc(voter)}&contest_id=eq.${enc(currentContest.id)}&song_idx=eq.${i}&select=id`
+    );
+    if(existing.length){
+      const upd = await fetch(SUPABASE_URL+'/rest/v1/votes'
+        +'?username=eq.'+enc(voter)
+        +'&contest_id=eq.'+enc(currentContest.id)
+        +'&song_idx=eq.'+i,{
+        method:'PATCH',
+        headers:{...H,'Prefer':'return=minimal'},
+        body:JSON.stringify({score:rounded})
+      });
+      if(!upd.ok) throw new Error(await upd.text());
+    } else {
+      const ins = await fetch(SUPABASE_URL+'/rest/v1/votes',{
+        method:'POST',
+        headers:{...H,'Prefer':'return=minimal'},
+        body:JSON.stringify({username:voter,contest_id:currentContest.id,song_idx:i,score:rounded})
+      });
+      if(!ins.ok) throw new Error(await ins.text());
+    }
     setDB('ready','Saved');
   }catch(e){ setDB('error','Save failed'); }
 }
 
 // ── RESULTS ───────────────────────────────────────────────────────────────────
 async function showResults(){
-  clearInterval(countdownTimer);
-  hideAll(); show('results-screen');
-  // Reset to group tab on each open
-  switchResultsTab('group');
   document.getElementById('results-contest-name').textContent=currentContest.name;
   const [votes, userRows, oddsRows] = await Promise.all([
     sbGet('votes','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&select=username,song_idx,score'),
@@ -1167,7 +1205,7 @@ async function showResults(){
   }).join('');
 }
 
-function goVoting(){hideAll();show('voting-screen');renderTabs();renderSongs();}
+function goVoting(){ switchMainTab('vote'); }
 
 // ── RESULTS TABS ──────────────────────────────────────────────────────────────
 let _activeResultsTab = 'group';
@@ -1296,8 +1334,6 @@ document.addEventListener('keydown',e=>{
 
 // ── PRECISION ─────────────────────────────────────────────────────────────────
 async function showPrecision(){
-  clearInterval(countdownTimer);
-  hideAll(); show('precision-screen');
   document.getElementById('precision-contest-name').textContent=currentContest.name;
   const list=document.getElementById('precision-list');
   try{
