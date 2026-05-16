@@ -77,8 +77,17 @@ header h1{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold
 .pg-btn:disabled{opacity:.3;cursor:not-allowed;}
 .pg-info{font-size:.78rem;color:var(--muted);padding:0 8px;}
 
-/* CONTESTS */
-.contest-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:12px;}
+.voter-song-row{display:grid;grid-template-columns:36px 44px 44px 1fr auto;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);transition:background .1s;}
+.voter-song-row:last-child{border-bottom:none;}
+.voter-song-row:hover{background:rgba(255,255,255,.02);}
+.voter-song-row .vsr-rank{font-family:'Playfair Display',serif;font-size:1rem;color:var(--muted);text-align:center;font-weight:700;}
+.voter-song-row .vsr-rank.top{color:var(--gold);}
+.voter-song-row .vsr-photo{width:40px;height:40px;border-radius:50%;object-fit:cover;background:var(--border);}
+.voter-song-row .vsr-info{}
+.voter-song-row .vsr-title{font-weight:600;font-size:.88rem;display:flex;align-items:center;gap:6px;}
+.voter-song-row .vsr-artist{font-size:.72rem;color:var(--muted);margin-top:2px;}
+.voter-song-row .vsr-score{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--gold);text-align:right;white-space:nowrap;}
+.voter-song-row .vsr-score.no-vote{font-family:'DM Sans',sans-serif;font-size:.8rem;color:var(--muted);font-weight:400;}display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:12px;}
 .contest-row:last-child{border-bottom:none;}
 .c-name{font-weight:600;font-size:.92rem;}
 .c-meta{font-size:.75rem;color:var(--muted);margin-top:3px;}
@@ -144,6 +153,7 @@ header h1{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold
       <div class="nav-item" onclick="showPage('users')" id="nav-users">&#128101; Voters</div>
       <div class="nav-item" onclick="showPage('contests')" id="nav-contests">&#128197; Contests</div>
       <div class="nav-item" onclick="showPage('results')" id="nav-results">&#127942; Official Results</div>
+      <div class="nav-item" id="nav-voter" style="display:none" onclick="showPage('voter')">&#127915; Voter Detail</div>
     </nav>
     <div class="content">
 
@@ -224,6 +234,17 @@ header h1{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold
         </div>
       </div>
 
+      <div class="page" id="page-voter">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;flex-wrap:wrap;gap:10px">
+          <div>
+            <div class="page-title" id="voter-detail-title">Voter Detail</div>
+            <div class="page-sub" id="voter-detail-sub" style="margin-bottom:0"></div>
+          </div>
+          <button class="btn" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-size:.82rem;padding:7px 14px" onclick="showPage('users')">&#8592; Back to Voters</button>
+        </div>
+        <div id="voter-detail-list" style="margin-top:20px"></div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -256,10 +277,79 @@ function showPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
-  document.getElementById('nav-'+name).classList.add('active');
+  document.getElementById('nav-'+name)?.classList.add('active');
   if(name==='users') loadUsers();
   if(name==='contests') loadContests();
   if(name==='results') loadResults();
+}
+
+async function openVoterDetail(username){
+  // Show and activate voter tab
+  const navBtn = document.getElementById('nav-voter');
+  navBtn.style.display = '';
+  navBtn.innerHTML = '&#127915; ' + esc(username.split(' ')[0]);
+  showPage('voter');
+
+  document.getElementById('voter-detail-title').textContent = username;
+  document.getElementById('voter-detail-sub').textContent = 'Songs ranked by score — highest to lowest';
+  const list = document.getElementById('voter-detail-list');
+  list.innerHTML = '<div class="loading"><span class="spinner"></span>Loading&#8230;</div>';
+
+  try{
+    const [votes, songsData] = await Promise.all([
+      currentContest ? get('votes','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&username=eq.'+encodeURIComponent(username)+'&select=song_idx,score') : Promise.resolve([]),
+      songs.length ? Promise.resolve(songs) : get('contest_songs','contest_id=eq.'+encodeURIComponent(currentContest?.id||'')+'&select=*&order=running_order.asc'),
+    ]);
+    if(!songs.length && songsData.length) songs = songsData;
+
+    // Build score map
+    const scoreMap = {};
+    votes.forEach(v=>{ scoreMap[v.song_idx] = parseFloat(v.score); });
+
+    // Sort songs: voted first by score desc, then unvoted
+    const sorted = [...songs].map((s,i)=>({...s, idx:i, score:scoreMap[i]??null}))
+      .sort((a,b)=>{
+        if(a.score!==null && b.score!==null) return b.score-a.score;
+        if(a.score!==null) return -1;
+        if(b.score!==null) return 1;
+        return a.idx-b.idx;
+      });
+
+    const votedCount = sorted.filter(s=>s.score!==null).length;
+    document.getElementById('voter-detail-sub').textContent =
+      votedCount+' of '+songs.length+' songs voted · sorted by score';
+
+    list.innerHTML = '<div class="card" style="padding:0">'
+      + sorted.map((s,rank)=>{
+          const display = s.song&&s.song!=='TBA'?s.song:s.country;
+          const isTop = s.score!==null && rank < 3;
+          return '<div class="voter-song-row">'
+            +'<div class="vsr-rank'+(isTop?' top':'')+'">'+( s.score!==null ? rank+1 : '—' )+'</div>'
+            +(s.photo_url
+              ?'<img class="vsr-photo" src="'+s.photo_url+'" onerror="this.style.display=\'none\'">'
+              :'<div class="vsr-photo" style="display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--muted)">'+s.country.slice(0,2).toUpperCase()+'</div>')
+            +'<div style="display:flex;align-items:center;flex-shrink:0">'+flagImgAdmin(s.country)+'</div>'
+            +'<div class="vsr-info">'
+            +'<div class="vsr-title">'+esc(display)+'</div>'
+            +'<div class="vsr-artist">'+esc(s.country)+(s.artist&&s.artist!=='TBA'?' · '+esc(s.artist):'')+'</div>'
+            +'</div>'
+            +(s.score!==null
+              ?'<div class="vsr-score">'+(s.score%1===0?s.score:s.score.toFixed(1))+'</div>'
+              :'<div class="vsr-score no-vote">not voted</div>')
+            +'</div>';
+        }).join('')
+      +'</div>';
+  }catch(e){
+    list.innerHTML='<div style="color:var(--red);padding:20px">'+e.message+'</div>';
+  }
+}
+
+// Simple flag for admin (no CDN needed, just emoji-style country code)
+function flagImgAdmin(country){
+  const ISO={'Albania':'al','Australia':'au','Austria':'at','Belgium':'be','Bulgaria':'bg','Croatia':'hr','Cyprus':'cy','Czechia':'cz','Denmark':'dk','Finland':'fi','France':'fr','Germany':'de','Greece':'gr','Israel':'il','Italy':'it','Lithuania':'lt','Malta':'mt','Moldova':'md','Norway':'no','Poland':'pl','Romania':'ro','Serbia':'rs','Sweden':'se','Ukraine':'ua','United Kingdom':'gb'};
+  const code=ISO[country];
+  if(!code) return '';
+  return '<img src="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/'+code+'.svg" width="28" height="18" style="border-radius:2px;object-fit:cover" alt="'+country+'">';
 }
 async function get(t,p){const r=await fetch(SB+'/rest/v1/'+t+'?'+(p||''),{headers:H});if(!r.ok)throw new Error(await r.text());return r.json();}
 async function patch(t,p,b){const r=await fetch(SB+'/rest/v1/'+t+'?'+p,{method:'PATCH',headers:H,body:JSON.stringify(b)});if(!r.ok)throw new Error(await r.text());}
@@ -304,7 +394,7 @@ async function loadDashboard(){
     const count=vv[u.username]||0;
     const pct=songs.length>0?Math.round((count/songs.length)*100):0;
     return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">'
-      +'<div style="flex:1;font-size:.85rem;font-weight:500">'+esc(u.username)+'</div>'
+      +'<div style="flex:1;font-size:.85rem;font-weight:500;cursor:pointer;color:var(--text);text-decoration:underline dotted" onclick="openVoterDetail(this.dataset.u)" data-u="'+esc(u.username)+'" title="View voter detail">'+esc(u.username)+'</div>'
       +'<div style="width:120px;height:5px;background:var(--border);border-radius:99px;overflow:hidden">'
       +'<div style="width:'+pct+'%;height:100%;background:'+(pct===100?'var(--green)':'var(--gold)')+';border-radius:99px"></div></div>'
       +'<div style="font-size:.75rem;color:var(--muted);width:44px;text-align:right">'+count+'/'+songs.length+'</div>'
@@ -442,7 +532,7 @@ function renderUsers(){
       const chatOn=u.chat_enabled!==false;
       const safeUser=u.username.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
       return '<tr style="border-bottom:1px solid var(--border)" onmouseover="this.style.background=\'rgba(255,255,255,.02)\'" onmouseout="this.style.background=\'\'">'+
-        '<td style="padding:10px 12px;font-weight:500;font-size:.88rem">'+esc(fullName)+'</td>'+
+        '<td style="padding:10px 12px;font-weight:500;font-size:.88rem;cursor:pointer;text-decoration:underline dotted" onclick="openVoterDetail(this.dataset.u)" data-u="'+esc(u.username)+'" title="View votes">'+esc(fullName)+' <span style="color:var(--muted);font-size:.7rem">&#8599;</span></td>'+
         '<td style="padding:10px 12px;font-size:.78rem;color:var(--muted)">'+joined+'</td>'+
         '<td style="padding:10px 12px;font-size:.82rem">'+
           '<div style="display:flex;align-items:center;gap:8px">'+
@@ -482,7 +572,7 @@ function renderUsers(){
     const safeUser=u.username.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     return '<div class="user-card" id="ucard-'+encodeURIComponent(u.username)+'">'
       +'<span class="uc-badge '+badgeCls+'">'+badgeTxt+'</span>'
-      +'<div class="uc-name">'+esc(fullName)+'</div>'
+      +'<div class="uc-name" style="cursor:pointer;text-decoration:underline dotted" onclick="openVoterDetail(this.dataset.u)" data-u="'+esc(u.username)+'" title="View votes">'+esc(fullName)+' <span style="color:var(--muted);font-size:.7rem">&#8599;</span></div>'
       +(joined?'<div class="uc-joined">&#128197; '+joined+'</div>':'')
       +'<div class="uc-progress"><div class="uc-progress-fill" style="width:'+pct+'%;background:'+(done?'var(--green)':'var(--gold)')+'"></div></div>'
       +'<div class="uc-stats">'
