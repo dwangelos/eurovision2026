@@ -213,8 +213,8 @@ header p{display:none;}
 .voter-row .v-score{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--gold);}
 .voter-row .v-score.no-vote{color:var(--muted);font-size:.85rem;font-family:'DM Sans',sans-serif;font-weight:400;}
 /* CHAT FAB */
-#chat-fab{position:fixed;bottom:24px;right:24px;width:54px;height:54px;border-radius:50%;background:var(--gold);color:#0d0b18;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.35rem;box-shadow:0 4px 20px rgba(232,200,74,.45);z-index:400;transition:transform .2s,box-shadow .2s;}
-#chat-fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(232,200,74,.6);}
+#chat-fab{position:fixed;bottom:24px;right:24px;width:54px;height:54px;border-radius:50%;background:var(--green);color:#0d0b18;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:1.35rem;box-shadow:0 4px 20px rgba(74,232,160,.45);z-index:400;transition:transform .2s,box-shadow .2s;}
+#chat-fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(74,232,160,.6);}
 #chat-fab-unread{position:absolute;top:-3px;right:-3px;background:var(--red);color:#fff;border-radius:99px;padding:2px 6px;font-size:.65rem;font-weight:700;display:none;font-family:'DM Sans',sans-serif;min-width:18px;text-align:center;}
 /* CHAT PANEL — floating bubble */
 #chat-panel{position:fixed;bottom:90px;right:24px;width:min(330px,calc(100vw - 48px));max-height:min(500px,calc(100vh - 140px));background:var(--card);border:1px solid var(--border);border-radius:16px;display:flex;flex-direction:column;z-index:399;box-shadow:0 8px 40px rgba(0,0,0,.5);transform:scale(0.95) translateY(12px);opacity:0;pointer-events:none;transition:transform .22s cubic-bezier(.34,1.56,.64,1),opacity .18s;}
@@ -231,10 +231,25 @@ header p{display:none;}
 .chat-msg.theirs .chat-bubble{background:var(--bg);border:1px solid var(--border);border-radius:12px 12px 12px 2px;}
 .chat-meta{font-size:.68rem;color:var(--muted);padding:0 4px;}
 .chat-name{font-size:.72rem;font-weight:600;color:var(--text);padding:0 4px;margin-bottom:1px;}
-.chat-input-row{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;}
-.chat-input-row input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 12px;font-size:.84rem;font-family:'DM Sans',sans-serif;outline:none;}
+.chat-input-row{padding:8px 10px;border-top:1px solid var(--border);display:flex;gap:6px;flex-shrink:0;}
+.chat-input-row input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 10px;font-size:16px;font-family:'DM Sans',sans-serif;outline:none;}
 .chat-input-row input:focus{border-color:var(--gold);}
-.chat-input-row button{background:var(--gold);color:#0d0b18;border:none;border-radius:8px;padding:8px 14px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.chat-input-row button{background:var(--gold);color:#0d0b18;border:none;border-radius:8px;padding:7px 18px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0;}
+.chat-reactions{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;}
+.reaction-btn{background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:2px 7px;font-size:.78rem;cursor:pointer;display:flex;align-items:center;gap:3px;transition:all .15s;color:var(--text);}
+.reaction-btn.mine{background:rgba(232,200,74,.12);border-color:rgba(232,200,74,.4);}
+.reaction-btn:hover{border-color:var(--gold);}
+.reaction-btn .rcount{font-size:.7rem;color:var(--muted);}
+.reaction-picker{position:absolute;bottom:calc(100% + 6px);right:0;background:#1e1a35;border:1px solid var(--border);border-radius:12px;padding:6px 8px;display:flex;gap:4px;z-index:600;box-shadow:0 4px 20px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .15s;}
+.reaction-picker.open{opacity:1;pointer-events:all;}
+.reaction-picker button{background:none;border:none;font-size:1.2rem;cursor:pointer;padding:2px;border-radius:6px;transition:transform .1s;}
+.reaction-picker button:hover{transform:scale(1.3);}
+.msg-actions{display:flex;gap:4px;margin-top:3px;opacity:0;transition:opacity .15s;}
+.chat-msg:hover .msg-actions{opacity:1;}
+.chat-msg.mine:hover .msg-actions{opacity:1;}
+.msg-action-btn{background:none;border:none;font-size:.68rem;color:var(--muted);cursor:pointer;padding:1px 5px;border-radius:4px;font-family:'DM Sans',sans-serif;}
+.msg-action-btn:hover{color:var(--text);background:rgba(255,255,255,.08);}
+.msg-editing{width:100%;background:var(--bg);border:1px solid var(--gold);border-radius:8px;color:var(--text);padding:6px 10px;font-size:.84rem;font-family:'DM Sans',sans-serif;outline:none;resize:none;}
 .chat-empty{color:var(--muted);font-size:.82rem;text-align:center;padding:20px 0;}
 /* NAV */
 .nav-row{display:flex;gap:12px;justify-content:center;margin-top:30px;flex-wrap:wrap;}
@@ -335,7 +350,7 @@ header p{display:none;}
   #chat-panel{right:8px;left:8px;width:auto;bottom:84px;max-height:55vh;border-radius:16px;}
   #chat-fab{bottom:14px;right:14px;width:48px;height:48px;font-size:1.2rem;}
   .chat-bubble{font-size:.8rem;padding:7px 10px;}
-  .chat-input-row input{font-size:.82rem;}
+  .chat-input-row input{font-size:16px;}
 
   /* DB badge */
   #db-badge{font-size:.6rem;padding:3px 8px;}
@@ -1647,7 +1662,7 @@ async function showPrecision(){
 // ── CHAT ──────────────────────────────────────────────────────────────────────
 let chatOpen=false, chatSub=null, chatUnread=0, lastChatTs=null, currentUserChatEnabled=true;
 let chatOldestTs=null, chatHasMore=false;
-const CHAT_PAGE=50;
+const CHAT_PAGE=500;
 
 function initChat(enabled){
   currentUserChatEnabled=!!enabled;
@@ -1707,26 +1722,55 @@ function dateSep(dateStr){
   return '<div style="text-align:center;margin:8px 0;"><span style="background:var(--border);color:var(--muted);font-size:.68rem;padding:3px 10px;border-radius:20px">'+label+'</span></div>';
 }
 
+
+const REACT_EMOJIS=['👍','❤️','😂','😮','🔥','🎵','🏆','👏'];
+
+function msgHtml(m, showName){
+  const mine=m.username===currentUser;
+  const time=new Date(m.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  const name=m.display_name||m.username;
+  const safeId=m.id?m.id.replace(/-/g,''):'';
+  const reactions=m.reactions||{};
+  const reactHtml=Object.entries(reactions).filter(([,users])=>users.length>0).map(([emoji,users])=>{
+    const iMine=users.includes(currentUser);
+    return '<button class="reaction-btn'+(iMine?' mine':'')+'" onclick="toggleReaction(\'"+m.id+"\',\'"+emoji+"\')">'
+      +emoji+' <span class="rcount">'+users.length+'</span></button>';
+  }).join('');
+  const actionsHtml=mine
+    ?'<div class="msg-actions">'
+      +'<button class="msg-action-btn" onclick="editMsg(\'"+m.id+"\',this)">✏️ Edit</button>'
+      +'<button class="msg-action-btn" onclick="deleteMsg(\'"+m.id+"\')">🗑️ Delete</button>'
+      +'</div>'
+    :'';
+  return '<div class="chat-msg '+(mine?'mine':'theirs')+'" data-user="'+escapeHtml(m.username)+'" data-ts="'+m.created_at+'" data-id="'+safeId+'">'
+    +(showName?'<div class="chat-name">'+escapeHtml(name)+'</div>':'')+''
+    +'<div style="position:relative">'
+    +'<div class="chat-bubble" data-msgid="'+safeId+'"'+(m.id ? ' oncontextmenu="chatContextMenu(event,this)" ontouchstart="bubbleTouchStart(event)" ontouchend="bubbleTouchEnd()" ontouchmove="bubbleTouchEnd()" ondblclick="bubbleDblClick(event)"' : '')+'>'+escapeHtml(m.message)+'</div>'
+    +'<button class="msg-action-btn" style="position:absolute;'+(mine?'left:-28px':'right:-28px')+';top:2px;opacity:.4;font-size:.9rem;padding:2px" onclick="toggleReactionPicker(\'"+m.id+"\',this)" title="React">😊</button>'
+    +'<div class="reaction-picker" id="rp-'+safeId+'">'
+      +REACT_EMOJIS.map(e=>'<button onclick="toggleReaction(\'"+m.id+"\',\'"+e+"\')">'+e+'</button>').join('')
+    +'</div>'
+    +'</div>'
+    +(reactHtml?'<div class="chat-reactions">'+reactHtml+'</div>':'')+''
+    +actionsHtml
+    +'<div class="chat-meta">'+time+'</div>'
+    +'</div>';
+}
+
 function renderMessages(msgs, scrollToBottom){
   const el=document.getElementById('chat-messages');
   if(!msgs.length){
-    el.innerHTML=(chatHasMore?'':'')+'<div class="chat-empty">No messages yet. Say hello!</div>';
-    updateLoadMore(el);
-    return;
+    el.innerHTML='<div class="chat-empty">No messages yet. Say hello!</div>';
+    updateLoadMore(el); return;
   }
   let html='', prevUser=null, prevDate=null;
   msgs.forEach(m=>{
     const mine=m.username===currentUser;
-    const time=new Date(m.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     const msgDate=new Date(m.created_at).toDateString();
     if(msgDate!==prevDate){html+=dateSep(m.created_at);prevUser=null;}
     prevDate=msgDate;
     const showName=!mine&&m.username!==prevUser;
-    const name=m.display_name||m.username;
-    html+='<div class="chat-msg '+(mine?'mine':'theirs')+'" data-user="'+escapeHtml(m.username)+'" data-ts="'+m.created_at+'">'
-      +(showName?'<div class="chat-name">'+escapeHtml(name)+'</div>':'')
-      +'<div class="chat-bubble">'+escapeHtml(m.message)+'</div>'
-      +'<div class="chat-meta">'+time+'</div></div>';
+    html+=msgHtml(m,showName);
     prevUser=m.username;
   });
   el.innerHTML=html;
@@ -1740,24 +1784,17 @@ function prependMessages(msgs){
   let html='', prevUser=null, prevDate=null;
   msgs.forEach(m=>{
     const mine=m.username===currentUser;
-    const time=new Date(m.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     const msgDate=new Date(m.created_at).toDateString();
     if(msgDate!==prevDate){html+=dateSep(m.created_at);prevUser=null;}
     prevDate=msgDate;
     const showName=!mine&&m.username!==prevUser;
-    const name=m.display_name||m.username;
-    html+='<div class="chat-msg '+(mine?'mine':'theirs')+'" data-user="'+escapeHtml(m.username)+'" data-ts="'+m.created_at+'">'
-      +(showName?'<div class="chat-name">'+escapeHtml(name)+'</div>':'')
-      +'<div class="chat-bubble">'+escapeHtml(m.message)+'</div>'
-      +'<div class="chat-meta">'+time+'</div></div>';
+    html+=msgHtml(m,showName);
     prevUser=m.username;
   });
-  // Remove old load-more btn, prepend new messages, re-add btn
   const oldBtn=document.getElementById('load-more-btn');
   if(oldBtn) oldBtn.remove();
   el.insertAdjacentHTML('afterbegin',html);
   updateLoadMore(el);
-  // Keep scroll position
   el.scrollTop=el.scrollHeight-oldHeight;
 }
 
@@ -1768,7 +1805,7 @@ function updateLoadMore(el){
     const btn=document.createElement('button');
     btn.id='load-more-btn';
     btn.textContent='Load older messages';
-    btn.style.cssText='display:block;margin:8px auto 12px;background:var(--bg);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:6px 14px;font-size:.75rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;';
+    btn.style.cssText="display:block;margin:8px auto 12px;background:var(--bg);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:6px 14px;font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif";
     btn.onclick=loadOlderMessages;
     el.insertBefore(btn,el.firstChild);
   }
@@ -1779,8 +1816,6 @@ function appendMessage(m){
   const empty=el.querySelector('.chat-empty');
   if(empty) empty.remove();
   const mine=m.username===currentUser;
-  const time=new Date(m.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-  // Date separator if needed
   const msgDate=new Date(m.created_at).toDateString();
   const lastMsg=el.querySelector('.chat-msg:last-of-type');
   const lastDate=lastMsg?new Date(lastMsg.dataset.ts||0).toDateString():null;
@@ -1788,16 +1823,180 @@ function appendMessage(m){
   const last=el.querySelector('.chat-msg:last-of-type');
   const lastUser=last?last.dataset.user:null;
   const showName=!mine&&m.username!==lastUser;
-  const name=m.display_name||m.username;
   const div=document.createElement('div');
-  div.className='chat-msg '+(mine?'mine':'theirs');
-  div.dataset.user=m.username;
-  div.dataset.ts=m.created_at;
-  div.innerHTML=(showName?'<div class="chat-name">'+escapeHtml(name)+'</div>':'')
-    +'<div class="chat-bubble">'+escapeHtml(m.message)+'</div>'
-    +'<div class="chat-meta">'+time+'</div>';
-  el.appendChild(div);
+  div.outerHTML; // placeholder
+  const tmp=document.createElement('template');
+  tmp.innerHTML=msgHtml(m,showName);
+  el.appendChild(tmp.content.firstChild);
   el.scrollTop=el.scrollHeight;
+}
+
+function toggleReactionPicker(msgId,btn){
+  // Close all others
+  document.querySelectorAll('.reaction-picker.open').forEach(p=>{
+    if(p.id!=='rp-'+msgId.replace(/-/g,'')) p.classList.remove('open');
+  });
+  const picker=document.getElementById('rp-'+msgId.replace(/-/g,''));
+  if(picker) picker.classList.toggle('open');
+}
+
+// Close reaction pickers on outside click
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.reaction-picker')&&!e.target.closest('.msg-action-btn[onclick*="toggleReactionPicker"]'))
+    document.querySelectorAll('.reaction-picker.open').forEach(p=>p.classList.remove('open'));
+  if(!e.target.closest('.score-pill'))
+    document.querySelectorAll('.score-pill.tapped').forEach(p=>p.classList.remove('tapped'));
+});
+
+async function toggleReaction(msgId,emoji){
+  document.querySelectorAll('.reaction-picker.open').forEach(p=>p.classList.remove('open'));
+  try{
+    const rows=await sbGet('chat_messages','id=eq.'+encodeURIComponent(msgId)+'&select=reactions');
+    if(!rows.length) return;
+    const reactions=rows[0].reactions||{};
+    const users=reactions[emoji]||[];
+    if(users.includes(currentUser)){
+      reactions[emoji]=users.filter(u=>u!==currentUser);
+    } else {
+      reactions[emoji]=[...users,currentUser];
+    }
+    if(reactions[emoji].length===0) delete reactions[emoji];
+    await fetch(SUPABASE_URL+'/rest/v1/chat_messages?id=eq.'+encodeURIComponent(msgId),{
+      method:'PATCH',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({reactions})
+    });
+    // Update in DOM
+    if(chatOpen) loadMessages();
+  }catch(e){console.warn('Reaction:',e);}
+}
+
+async function editMsg(msgId,btn){
+  const msgDiv=btn.closest('.chat-msg');
+  const bubble=msgDiv?.querySelector('.chat-bubble');
+  if(!bubble) return;
+  const current=bubble.textContent;
+  const textarea=document.createElement('textarea');
+  textarea.className='msg-editing';
+  textarea.value=current;
+  textarea.rows=2;
+  bubble.replaceWith(textarea);
+  textarea.focus();
+  textarea.setSelectionRange(textarea.value.length,textarea.value.length);
+  textarea.onkeydown=async(e)=>{
+    if(e.key==='Enter'&&!e.shiftKey){
+      e.preventDefault();
+      const newText=textarea.value.trim();
+      if(!newText) return;
+      await fetch(SUPABASE_URL+'/rest/v1/chat_messages?id=eq.'+encodeURIComponent(msgId),{
+        method:'PATCH',
+        headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({message:newText})
+      });
+      const newBubble=document.createElement('div');
+      newBubble.className='chat-bubble';
+      newBubble.textContent=newText;
+      textarea.replaceWith(newBubble);
+    }
+    if(e.key==='Escape'){
+      const orig=document.createElement('div');
+      orig.className='chat-bubble';
+      orig.textContent=current;
+      textarea.replaceWith(orig);
+    }
+  };
+}
+
+async function deleteMsg(msgId){
+  if(!confirm('Delete this message?')) return;
+  await fetch(SUPABASE_URL+'/rest/v1/chat_messages?id=eq.'+encodeURIComponent(msgId),{
+    method:'DELETE',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+  });
+  // Remove from DOM
+  const safeId=msgId.replace(/-/g,'');
+  document.querySelectorAll('.chat-msg[data-id="'+safeId+'"]').forEach(el=>el.remove());
+}
+
+
+
+function chatContextMenu(e, msgId){
+  e.preventDefault();
+  toggleReactionPicker(msgId, e.target);
+}
+
+// ── CHAT LONG PRESS (mobile reaction) ────────────────────────────────────────
+let _chatLongTimer = null;
+
+function chatLongPressStart(msgId, e){
+  e.preventDefault();
+  _chatLongTimer = setTimeout(()=>{
+    _chatLongTimer = null;
+    toggleReactionPicker(msgId, e.target);
+    if(navigator.vibrate) navigator.vibrate(40);
+  }, 500);
+}
+
+
+function getMsgIdFromBubble(el){
+  const safeId = el.dataset && el.dataset.msgid;
+  if(!safeId) return null;
+  // Convert safeId back to UUID-like (we stored without dashes)
+  // Actually we stored the full id in data-msgid as safeId (no dashes)
+  // We need to find the actual message id — look at data-id on parent
+  const msgDiv = el.closest('.chat-msg');
+  if(!msgDiv) return null;
+  return msgDiv.dataset.id || null;
+}
+
+function bubbleTouchStart(e){
+  const el = e.currentTarget;
+  _chatLongTimer = setTimeout(()=>{
+    _chatLongTimer = null;
+    const msgDiv = el.closest('.chat-msg');
+    if(!msgDiv) return;
+    const safeId = msgDiv.dataset.id;
+    if(!safeId) return;
+    const picker = document.getElementById('rp-'+safeId);
+    if(picker){ 
+      document.querySelectorAll('.reaction-picker.open').forEach(p=>p.classList.remove('open'));
+      picker.classList.add('open');
+    }
+    if(navigator.vibrate) navigator.vibrate(40);
+  }, 500);
+}
+
+function bubbleTouchEnd(){
+  if(_chatLongTimer){ clearTimeout(_chatLongTimer); _chatLongTimer = null; }
+}
+
+function bubbleDblClick(e){
+  const msgDiv = e.currentTarget.closest('.chat-msg');
+  if(!msgDiv) return;
+  const safeId = msgDiv.dataset.id;
+  if(!safeId) return;
+  const picker = document.getElementById('rp-'+safeId);
+  if(picker){
+    document.querySelectorAll('.reaction-picker.open').forEach(p=>p.classList.remove('open'));
+    picker.classList.toggle('open');
+  }
+}
+
+function chatContextMenu(e, el){
+  e.preventDefault();
+  const msgDiv = (el.closest ? el : e.target).closest('.chat-msg');
+  if(!msgDiv) return;
+  const safeId = msgDiv.dataset.id;
+  if(!safeId) return;
+  const picker = document.getElementById('rp-'+safeId);
+  if(picker){
+    document.querySelectorAll('.reaction-picker.open').forEach(p=>p.classList.remove('open'));
+    picker.classList.toggle('open');
+  }
+}
+
+function chatLongPressEnd(){
+  if(_chatLongTimer){ clearTimeout(_chatLongTimer); _chatLongTimer = null; }
 }
 
 function subscribeChat(){
