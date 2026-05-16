@@ -717,7 +717,7 @@ function switchMainTab(tab){
   });
   if(tab==='scores') showResults();
   else if(tab==='precision') showPrecision();
-  else if(tab==='vote') renderTabsAndSongs();
+  else { clearInterval(_precisionTimer); renderTabsAndSongs(); }
 }
 
 async function openVoterPanel(username){
@@ -1798,17 +1798,24 @@ document.addEventListener('keydown',e=>{
 });
 
 // ── PRECISION ─────────────────────────────────────────────────────────────────
+let _precisionTimer = null;
+
 async function showPrecision(){
   document.getElementById('precision-contest-name').textContent=currentContest.name;
+  clearInterval(_precisionTimer);
+  _precisionTimer=setInterval(()=>{ if(_activeMainTab==='precision') showPrecision(); }, 60000);
   const list=document.getElementById('precision-list');
   try{
     const official=await sbGet('official_results','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&select=song_idx,final_place');
     if(!official.length){
-      list.innerHTML='<div style="text-align:center;color:var(--muted);padding:40px">Official results not yet entered. Check back after the show.</div>';
+      list.innerHTML='<div style="text-align:center;color:var(--muted);padding:40px;font-size:.9rem">⏳ Official results not yet available — check back after the show.</div>';
       return;
     }
     const officialMap={};
     official.forEach(r=>{officialMap[r.song_idx]=r.final_place;});
+    const resultsCount=official.length;
+    const totalSongs=contestSongs.length;
+    const isPartial=resultsCount<totalSongs;
     const votes=await sbGet('votes','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&select=username,song_idx,score');
     const userRows=await sbGet('users','select=username&order=username.asc');
     const voters=userRows.map(r=>r.username);
@@ -1818,7 +1825,7 @@ async function showPrecision(){
     const results=voters.map(voter=>{
       const vs=sc[voter];
       const ratedIdxs=Object.keys(officialMap).map(Number).filter(i=>vs[i]!==null);
-      if(ratedIdxs.length<2) return {voter,pct:0,rated:ratedIdxs.length,label:'Not enough votes'};
+      if(ratedIdxs.length<10) return {voter,pct:0,rated:ratedIdxs.length,label:'Not enough votes'};
       const userRanks=ratedIdxs.map(i=>({idx:i,score:vs[i]})).sort((a,b)=>b.score-a.score);
       const officialRanks=ratedIdxs.map(i=>({idx:i,place:officialMap[i]})).sort((a,b)=>a.place-b.place);
       const n=ratedIdxs.length;
@@ -1829,44 +1836,59 @@ async function showPrecision(){
       ratedIdxs.forEach(i=>{const d=userRankMap[i]-offRankMap[i];d2+=d*d;});
       const rho=1-(6*d2)/(n*(n*n-1));
       const pct=Math.round(((rho+1)/2)*100);
-      const label=pct>=80?'Excellent taste':pct>=60?'Good ear':pct>=40?'Average picker':'Bold choices';
+      const label=pct>=80?'🎯 Excellent taste':pct>=60?'👂 Good ear':pct>=40?'🎲 Average picker':'🤪 Bold choices';
       return {voter,pct,rated:ratedIdxs.length,label};
-    }).filter(r=>r.rated>0).sort((a,b)=>b.pct-a.pct);
-    if(!results.length){list.innerHTML='<div style="text-align:center;color:var(--muted);padding:40px">No votes yet.</div>';return;}
+    }).filter(r=>r.rated>=10).sort((a,b)=>{
+      // Primary: most songs voted (completeness)
+      if(b.rated!==a.rated) return b.rated-a.rated;
+      // Secondary: precision % (accuracy)
+      return b.pct-a.pct;
+    });
 
-    // Who agrees with you most (highest correlation with currentUser, excluding self)
+    let html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">'
+      +'<div style="font-size:.82rem;color:var(--muted)">'
+      +(isPartial
+        ?'<span style="color:var(--gold)">⏳ Partial results: '+resultsCount+' of '+totalSongs+' songs confirmed</span>'
+        :'<span style="color:var(--green)">✓ All '+totalSongs+' official positions loaded</span>')
+      +'</div>'
+      +(isPartial?'<span style="display:flex;align-items:center;gap:5px;font-size:.75rem;color:var(--muted)"><span style="width:7px;height:7px;border-radius:50%;background:var(--gold);animation:pulse 1.5s infinite;display:inline-block"></span> Live · auto-refreshes</span>':'')
+      +'</div>';
+    if(isPartial){
+      const pct=Math.round((resultsCount/totalSongs)*100);
+      html+='<div style="height:4px;background:var(--border);border-radius:99px;margin-bottom:16px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--gold);border-radius:99px"></div></div>';
+    }
+    if(!results.length){list.innerHTML=html+'<div style="text-align:center;color:var(--muted);padding:40px">No voters with more than 10 songs rated.</div>';return;}
     const myResult=results.find(r=>r.voter===currentUser);
     if(myResult&&results.length>1){
-      const others=results.filter(r=>r.voter!==currentUser&&r.pct>0).sort((a,b)=>{
-        // Compare by closeness of pct to mine
-        return Math.abs(a.pct-myResult.pct)-Math.abs(b.pct-myResult.pct);
-      });
+      const others=results.filter(r=>r.voter!==currentUser&&r.pct>0).sort((a,b)=>Math.abs(a.pct-myResult.pct)-Math.abs(b.pct-myResult.pct));
       if(others.length){
         const twin=others[0];
-        list.innerHTML='<div style="background:rgba(74,159,232,.08);border:1px solid rgba(74,159,232,.2);border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:.85rem">'
-          +'<span style="color:var(--blue)">&#128101; Your taste twin: </span>'
+        html+='<div style="background:rgba(74,159,232,.08);border:1px solid rgba(74,159,232,.2);border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:.85rem">'
+          +'<span style="color:#4a9fe8">👥 Your taste twin: </span>'
           +'<strong style="color:var(--text)">'+escapeHtml(twin.voter)+'</strong>'
-          +' — both of you score with similar precision to the official results.'
-          +'</div>';
-      } else { list.innerHTML=''; }
-    } else { list.innerHTML=''; }
-    list.innerHTML=results.map((r,rank)=>{
+          +' — similar precision to you.</div>';
+      }
+    }
+    html+=results.map((r,rank)=>{
       const rc=rank===0?'top1':rank===1?'top2':rank===2?'top3':'';
       const bc=rank===0?'r1':rank===1?'r2':rank===2?'r3':'';
       const m=rank===0?'🥇':rank===1?'🥈':rank===2?'🥉':rank+1;
       const isMe=r.voter===currentUser;
-      return '<div class="precision-card '+rc+'">'
+      return '<div class="precision-card '+rc+'"'+(isMe?' style="border-color:rgba(232,200,74,.5)"':'')+'>'
         +'<div class="rank-badge '+bc+'">'+m+'</div>'
         +'<div>'
         +'<div class="precision-name">'+escapeHtml(r.voter)+(isMe?' <small style="color:var(--gold);font-size:.72rem">(you)</small>':'')+'</div>'
-        +'<div class="precision-sub">'+r.label+' &middot; rated '+r.rated+' of '+contestSongs.length+' songs</div>'
-        +'<div class="precision-bar-wrap">'
-        +'<div class="precision-bar"><div class="precision-bar-fill" style="width:'+r.pct+'%"></div></div>'
+        +'<div class="precision-sub">'+r.label+' &middot; '
+        +(r.rated===totalSongs
+          ?'<span style="color:var(--green)">✓ All '+totalSongs+' songs voted</span>'
+          :'<span style="color:var(--muted)">'+r.rated+' of '+totalSongs+' songs voted</span>')
         +'</div>'
+        +'<div class="precision-bar-wrap"><div class="precision-bar"><div class="precision-bar-fill" style="width:'+r.pct+'%"></div></div></div>'
         +'</div>'
         +'<div class="precision-pct">'+r.pct+'%</div>'
         +'</div>';
     }).join('');
+    list.innerHTML=html;
   }catch(e){list.innerHTML='<div style="color:var(--red)">'+e.message+'</div>';}
 }
 
