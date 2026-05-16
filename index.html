@@ -60,7 +60,17 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
 .contest-bar{background:rgba(232,200,74,.06);border:1px solid rgba(232,200,74,.15);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .c-name{font-weight:600;font-size:.92rem;color:var(--gold);}
 .c-info{font-size:.78rem;color:var(--muted);margin-top:2px;}
-.voter-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.voters-all-btn{background:transparent;border:1px dashed var(--border);color:var(--muted);border-radius:8px;padding:6px 14px;font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.voters-all-btn:hover{border-color:var(--gold);color:var(--gold);}
+.voters-modal-row{display:flex;align-items:center;justify-content:space-between;padding:11px 22px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;}
+.voters-modal-row:hover{background:rgba(255,255,255,.03);}
+.voters-modal-row:last-child{border-bottom:none;}
+.vmr-name{font-weight:500;font-size:.88rem;}
+.vmr-meta{font-size:.73rem;color:var(--muted);margin-top:2px;}
+.vmr-badge{font-size:.7rem;padding:2px 8px;border-radius:20px;font-weight:600;flex-shrink:0;}
+.vmr-me{background:rgba(232,200,74,.12);color:var(--gold);}
+.vmr-done{background:rgba(74,232,160,.1);color:var(--green);}
+.vmr-pending{background:rgba(123,114,168,.1);color:var(--muted);}
 .voter-tab{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:.8rem;cursor:pointer;transition:all .15s;color:var(--muted);}
 .voter-tab.active{background:var(--gold);color:#0d0b18;border-color:var(--gold);font-weight:600;}
 .used-scores{margin-bottom:12px;}
@@ -232,6 +242,11 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
     <div><div class="c-name" id="contest-bar-name"></div><div class="c-info" id="contest-bar-info"></div></div>
   </div>
   <div class="voter-tabs" id="voter-tabs"></div>
+  <div style="margin-bottom:12px">
+    <button class="voters-all-btn" id="voters-all-btn" onclick="openVotersModal()" style="display:none">
+      &#128101; See all voters
+    </button>
+  </div>
   <div class="used-scores">
     <h3>Scores Used by <span id="tab-name-label">&mdash;</span></h3>
     <div class="score-pills" id="score-pills"></div>
@@ -281,6 +296,23 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
     <input type="text" id="chat-inp" placeholder="Say something&hellip;" maxlength="500"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"/>
     <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<!-- ALL VOTERS MODAL -->
+<div class="modal-overlay" id="voters-modal" onclick="closeVotersModal(event)">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <div><h3>&#128101; All Voters</h3><div class="modal-song" id="voters-modal-sub"></div></div>
+      <button class="modal-close" onclick="document.getElementById('voters-modal').classList.remove('open');document.body.style.overflow=''">&times;</button>
+    </div>
+    <div style="padding:12px 22px 0;border-bottom:1px solid var(--border)">
+      <input type="search" id="voters-modal-search" placeholder="&#128269; Search voter&#8230;"
+        oninput="renderVotersModal(0)"
+        style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 14px;font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:12px"/>
+    </div>
+    <div class="modal-body" id="voters-modal-body" style="padding:0;max-height:380px;overflow-y:auto"></div>
+    <div style="padding:10px 22px;border-top:1px solid var(--border);display:flex;justify-content:center;gap:6px;flex-wrap:wrap" id="voters-modal-pagination"></div>
   </div>
 </div>
 
@@ -586,16 +618,115 @@ function updateVotingBanner(){
 
 // ── TABS ──────────────────────────────────────────────────────────────────────
 function renderTabs(){
-  document.getElementById('voter-tabs').innerHTML=allVoters.map((v,i)=>{
-    const count=allScores[v]?allScores[v].filter(x=>x!==null).length:0;
-    return '<div class="voter-tab'+(i===activeVoter?' active':'')+'" onclick="switchTab('+i+')">'
+  // Sort voters: current user first, then by votes cast desc (most active top)
+  const sorted=[...allVoters].sort((a,b)=>{
+    if(a===currentUser) return -1;
+    if(b===currentUser) return 1;
+    const ca=(allScores[a]||[]).filter(x=>x!==null).length;
+    const cb=(allScores[b]||[]).filter(x=>x!==null).length;
+    return cb-ca;
+  });
+  const TOP=10;
+  const top=sorted.slice(0,TOP);
+  const rest=sorted.slice(TOP);
+  // Ensure activeVoter tab is in top list — if not, swap in
+  const activeUser=allVoters[activeVoter];
+  if(activeUser&&!top.includes(activeUser)){
+    top[TOP-1]=activeUser;
+  }
+  document.getElementById('voter-tabs').innerHTML=top.map(v=>{
+    const i=allVoters.indexOf(v);
+    const count=(allScores[v]||[]).filter(x=>x!==null).length;
+    const isActive=i===activeVoter;
+    return '<div class="voter-tab'+(isActive?' active':'')+'" onclick="switchTab('+i+')">'
       +escapeHtml(v.split(' ')[0])
       +(count>0?' <small style="opacity:.6">'+count+'</small>':'')
       +'</div>';
   }).join('');
+  // Show "See all" button only if there are more than 10 voters
+  const btn=document.getElementById('voters-all-btn');
+  if(btn) btn.style.display=allVoters.length>TOP?'inline-flex':'none';
+  if(btn&&rest.length>0) btn.textContent='&#128101; +'+rest.length+' more voters';
   document.getElementById('tab-name-label').textContent=allVoters[activeVoter]||'';
 }
 function switchTab(i){activeVoter=i;renderTabs();renderSongs();}
+
+// ── VOTERS MODAL ──────────────────────────────────────────────────────────────
+const VOTERS_PAGE_SIZE=12;
+let votersModalPage=0;
+
+function openVotersModal(){
+  document.getElementById('voters-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+  document.getElementById('voters-modal-search').value='';
+  votersModalPage=0;
+  renderVotersModal(0);
+  setTimeout(()=>document.getElementById('voters-modal-search').focus(),100);
+}
+
+function closeVotersModal(e){
+  if(e.target===document.getElementById('voters-modal')){
+    document.getElementById('voters-modal').classList.remove('open');
+    document.body.style.overflow='';
+  }
+}
+
+function renderVotersModal(page){
+  if(page!==undefined) votersModalPage=page;
+  const q=(document.getElementById('voters-modal-search')?.value||'').toLowerCase().trim();
+  const filtered=allVoters.filter(v=>!q||v.toLowerCase().includes(q));
+  const total=filtered.length;
+  const pages=Math.ceil(total/VOTERS_PAGE_SIZE);
+  const pageVoters=filtered.slice(votersModalPage*VOTERS_PAGE_SIZE,(votersModalPage+1)*VOTERS_PAGE_SIZE);
+
+  document.getElementById('voters-modal-sub').textContent=
+    total===allVoters.length?total+' voters':total+' of '+allVoters.length+' voters';
+
+  const body=document.getElementById('voters-modal-body');
+  if(!pageVoters.length){
+    body.innerHTML='<div style="text-align:center;color:var(--muted);padding:32px">No voters found.</div>';
+    document.getElementById('voters-modal-pagination').innerHTML=''; return;
+  }
+
+  body.innerHTML=pageVoters.map(v=>{
+    const i=allVoters.indexOf(v);
+    const count=(allScores[v]||[]).filter(x=>x!==null).length;
+    const total2=contestSongs.length;
+    const done=count>=total2&&total2>0;
+    const isMe=v===currentUser;
+    const isActive=i===activeVoter;
+    const badgeCls=isMe?'vmr-me':done?'vmr-done':'vmr-pending';
+    const badgeTxt=isMe?'You':done?'Done':''+count+'/'+total2;
+    return '<div class="voters-modal-row'+(isActive?' active':'')+'" onclick="selectVoterFromModal('+i+')" style="'+(isActive?'background:rgba(232,200,74,.05)':'')+'">'
+      +'<div>'
+      +'<div class="vmr-name">'+escapeHtml(v)+'</div>'
+      +'<div class="vmr-meta">'+count+' of '+total2+' songs rated</div>'
+      +'</div>'
+      +'<span class="vmr-badge '+badgeCls+'">'+badgeTxt+'</span>'
+      +'</div>';
+  }).join('');
+
+  // Pagination
+  const pag=document.getElementById('voters-modal-pagination');
+  if(pages<=1){pag.innerHTML='';return;}
+  let html='';
+  for(let i=0;i<pages;i++){
+    const a=i===votersModalPage;
+    html+='<button onclick="renderVotersModal('+i+')" style="background:'+(a?'var(--gold)':'var(--card)')
+      +';color:'+(a?'#0d0b18':'var(--muted)')+';border:1px solid '+(a?'var(--gold)':'var(--border)')
+      +';border-radius:6px;padding:5px 11px;font-size:.78rem;cursor:pointer;font-family:\'DM Sans\',sans-serif">'+(i+1)+'</button>';
+  }
+  pag.innerHTML=html;
+}
+
+function selectVoterFromModal(i){
+  activeVoter=i;
+  renderTabs(); renderSongs();
+  document.getElementById('voters-modal').classList.remove('open');
+  document.body.style.overflow='';
+  // Scroll to top of song list
+  document.getElementById('songs-list').scrollIntoView({behavior:'smooth'});
+}
 
 // ── PROGRESS ──────────────────────────────────────────────────────────────────
 function updateProgress(){
@@ -789,7 +920,13 @@ function openVoterModal(songIdx){
 }
 function closeModal(){document.getElementById('voter-modal').classList.remove('open');document.body.style.overflow='';}
 function closeVoterModal(e){if(e.target===document.getElementById('voter-modal'))closeModal();}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closeModal();
+    document.getElementById('voters-modal').classList.remove('open');
+    document.body.style.overflow='';
+  }
+});
 
 // ── PRECISION ─────────────────────────────────────────────────────────────────
 async function showPrecision(){
