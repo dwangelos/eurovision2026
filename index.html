@@ -22,7 +22,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 #db-badge.error .dot{background:var(--red);}
 header{text-align:center;padding:44px 20px 24px;}
 .flag-strip{display:flex;justify-content:center;flex-wrap:wrap;gap:4px;margin-bottom:16px;align-items:center;}
-.flag-strip svg{width:28px;height:18px;display:inline-block;vertical-align:middle;}
+.flag-strip img{border-radius:2px;object-fit:cover;}
 header h1{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,6vw,3.6rem);font-weight:900;background:linear-gradient(135deg,var(--gold) 0%,#fff 50%,var(--gold2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
 /* JOIN */
@@ -556,66 +556,68 @@ function escapeHtml(s){
 }
 
 // ── FLAGS (inline SVG) ────────────────────────────────────────────────────────
-const FLAG_DEFS={
-  'Albania':[['#E41E20','0,0,32,21']],
-  'Armenia':[['#D90012','0,0,32,7'],['#0033A0','0,7,32,7'],['#F2A800','0,14,32,7']],
-  'Australia':[['#00008B','0,0,32,21'],['#CC0000','0,0,16,10']],
-  'Austria':[['#ED2939','0,0,32,7'],['#FFFFFF','0,7,32,7'],['#ED2939','0,14,32,7']],
-  'Azerbaijan':[['#0092BC','0,0,32,7'],['#E8112D','0,7,32,7'],['#00B140','0,14,32,7']],
-  'Belgium':[['#000000','0,0,11,21'],['#FFD90C','11,0,10,21'],['#F31830','21,0,11,21']],
-  'Bulgaria':[['#FFFFFF','0,0,32,7'],['#00966E','0,7,32,7'],['#D62612','0,14,32,7']],
-  'Croatia':[['#FF0000','0,0,32,7'],['#FFFFFF','0,7,32,7'],['#0093DD','0,14,32,7']],
-  'Cyprus':[['#FFFFFF','0,0,32,21'],['#D57528','8,2,16,11']],
-  'Czechia':[['#FFFFFF','0,0,32,10'],['#D7141A','0,10,32,11'],['#11457E','0,0,13,21']],
-  'Denmark':[['#C60C30','0,0,32,21'],['#FFFFFF','11,0,4,21'],['#FFFFFF','0,8,32,5']],
-  'Estonia':[['#0072CE','0,0,32,7'],['#000000','0,7,32,7'],['#FFFFFF','0,14,32,7']],
-  'Finland':[['#FFFFFF','0,0,32,21'],['#003580','9,0,5,21'],['#003580','0,8,32,5']],
-  'France':[['#002395','0,0,11,21'],['#FFFFFF','11,0,10,21'],['#ED2939','21,0,11,21']],
-  'Georgia':[['#FFFFFF','0,0,32,21'],['#FF0000','0,8,32,5'],['#FF0000','13,0,6,21']],
-  'Germany':[['#000000','0,0,32,7'],['#DD0000','0,7,32,7'],['#FFCE00','0,14,32,7']],
-  'Greece':[['#0D5EAF','0,0,32,3'],['#FFFFFF','0,3,32,3'],['#0D5EAF','0,6,32,3'],['#FFFFFF','0,9,32,3'],['#0D5EAF','0,12,32,3'],['#FFFFFF','0,15,32,3'],['#0D5EAF','0,18,32,3'],['#0D5EAF','0,0,13,12'],['#FFFFFF','5,0,3,12'],['#FFFFFF','0,4,13,4']],
-  'Israel':[['#FFFFFF','0,0,32,21'],['#0038B8','0,3,32,3'],['#0038B8','0,15,32,3']],
-  'Italy':[['#009246','0,0,11,21'],['#FFFFFF','11,0,10,21'],['#CE2B37','21,0,11,21']],
-  'Latvia':[['#9E3039','0,0,32,7'],['#FFFFFF','0,7,32,7'],['#9E3039','0,14,32,7']],
-  'Lithuania':[['#FDB913','0,0,32,7'],['#006A44','0,7,32,7'],['#C1272D','0,14,32,7']],
-  'Luxembourg':[['#EF3340','0,0,32,7'],['#FFFFFF','0,7,32,7'],['#00A3E0','0,14,32,7']],
-  'Malta':[['#FFFFFF','0,0,16,21'],['#CF142B','16,0,16,21']],
-  'Moldova':[['#003DA5','0,0,11,21'],['#FFD100','11,0,10,21'],['#CC0001','21,0,11,21']],
-  'Montenegro':[['#D4AF37','0,0,32,21'],['#D4202A','2,2,28,17']],
-  'Norway':[['#EF2B2D','0,0,32,21'],['#FFFFFF','9,0,4,21'],['#FFFFFF','0,8,32,5'],['#002868','10,0,2,21'],['#002868','0,9,32,3']],
-  'Poland':[['#FFFFFF','0,0,32,10'],['#DC143C','0,10,32,11']],
-  'Portugal':[['#006600','0,0,12,21'],['#FF0000','12,0,20,21']],
-  'Romania':[['#002B7F','0,0,11,21'],['#FCD116','11,0,10,21'],['#CE1126','21,0,11,21']],
-  'San Marino':[['#5EB6E4','0,0,32,10'],['#FFFFFF','0,10,32,11']],
-  'Serbia':[['#C6363C','0,0,32,7'],['#0C4076','0,7,32,7'],['#FFFFFF','0,14,32,7']],
-  'Sweden':[['#006AA7','0,0,32,21'],['#FECC02','9,0,4,21'],['#FECC02','0,8,32,5']],
-  'Switzerland':[['#FF0000','0,0,32,21'],['#FFFFFF','12,5,8,11'],['#FFFFFF','15,2,2,17']],
-  'Ukraine':[['#005BBB','0,0,32,10'],['#FFD500','0,10,32,11']],
-  'United Kingdom':[['#012169','0,0,32,21'],['#FFFFFF','14,0,4,21'],['#FFFFFF','0,8,32,5'],['#C8102E','15,0,2,21'],['#C8102E','0,9,32,3']]
+const COUNTRY_ISO={  'Albania':'al',
+  'Armenia':'am',
+  'Australia':'au',
+  'Austria':'at',
+  'Azerbaijan':'az',
+  'Belgium':'be',
+  'Bulgaria':'bg',
+  'Croatia':'hr',
+  'Cyprus':'cy',
+  'Czechia':'cz',
+  'Denmark':'dk',
+  'Estonia':'ee',
+  'Finland':'fi',
+  'France':'fr',
+  'Georgia':'ge',
+  'Germany':'de',
+  'Greece':'gr',
+  'Israel':'il',
+  'Italy':'it',
+  'Latvia':'lv',
+  'Lithuania':'lt',
+  'Luxembourg':'lu',
+  'Malta':'mt',
+  'Moldova':'md',
+  'Montenegro':'me',
+  'Norway':'no',
+  'Poland':'pl',
+  'Portugal':'pt',
+  'Romania':'ro',
+  'San Marino':'sm',
+  'Serbia':'rs',
+  'Sweden':'se',
+  'Switzerland':'ch',
+  'Ukraine':'ua',
+  'United Kingdom':'gb',
 };
+const FLAG_CDN='https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3';
 
-function makeFlagSvg(country,w,h){
-  const rects=FLAG_DEFS[country]||[['#888','0,0,32,21']];
-  const sx=w/32,sy=h/21;
-  let p='<rect width="'+w+'" height="'+h+'" rx="2" fill="#EEE"/>';
-  rects.forEach(([c,co])=>{
-    const [x,y,ww,hh]=co.split(',').map(Number);
-    p+='<rect x="'+(x*sx).toFixed(1)+'" y="'+(y*sy).toFixed(1)+'" width="'+(ww*sx).toFixed(1)+'" height="'+(hh*sy).toFixed(1)+'" fill="'+c+'"/>';
-  });
-  p+='<rect width="'+w+'" height="'+h+'" rx="2" fill="none" stroke="rgba(0,0,0,.15)" stroke-width="0.5"/>';
-  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+h+'">'+p+'</svg>';
-}
 function flagImg(country,size){
-  const s=size||32,h=Math.round(s*0.656);
-  return '<span style="display:inline-flex;align-items:center;flex-shrink:0;width:'+s+'px;height:'+h+'px;overflow:hidden;border-radius:2px">'+makeFlagSvg(country,s,h)+'</span>';
+  size=size||28;
+  const h=Math.round(size*0.667);
+  const code=COUNTRY_ISO[country];
+  if(!code) return '<span style="font-size:'+(size*0.5)+'px">&#127987;</span>';
+  return '<img src="'+FLAG_CDN+'/'+code+'.svg"'
+    +' width="'+size+'" height="'+h+'"'
+    +' alt="'+country+'"'
+    +' style="border-radius:2px;object-fit:cover;flex-shrink:0;vertical-align:middle;display:inline-block"'
+    +' loading="lazy"/>';
 }
 
-// Build header flag strip
+// Build header flag strip using real flag images
 (function(){
-  const countries=Object.keys(FLAG_DEFS);
+  const countries=Object.keys(COUNTRY_ISO);
   document.getElementById('flag-strip-header').innerHTML=
-    countries.map(c=>makeFlagSvg(c,28,18)).join('');
+    countries.map(c=>{
+      const code=COUNTRY_ISO[c];
+      return '<img src="'+FLAG_CDN+'/'+code+'.svg" width="28" height="18" alt="'+c+'"'
+        +' style="border-radius:2px;object-fit:cover" loading="lazy"'
+        +' title="'+c+'"/>';
+    }).join('');
 })();
+
 
 // ── VOTING STATUS ─────────────────────────────────────────────────────────────
 function votingStatus(contest){
