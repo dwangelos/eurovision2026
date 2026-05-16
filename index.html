@@ -107,8 +107,28 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
 .score-input:focus{border-color:var(--gold);}
 .score-input.ok{border-color:rgba(74,232,160,.5);color:var(--green);}
 .score-input.conflict{border-color:var(--red);color:var(--red);}
-/* RESULTS */
-.results-header,.precision-header{text-align:center;margin-bottom:28px;}
+/* RESULTS TABS */
+.results-tabs{display:flex;gap:6px;margin-bottom:20px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:5px;}
+.results-tab{flex:1;background:transparent;border:none;border-radius:8px;padding:9px 12px;font-size:.82rem;font-family:'DM Sans',sans-serif;color:var(--muted);cursor:pointer;transition:all .2s;font-weight:500;white-space:nowrap;}
+.results-tab.active{background:var(--gold);color:#0d0b18;font-weight:600;}
+.results-tab:hover:not(.active){color:var(--text);background:rgba(255,255,255,.04);}
+.member-pick-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+/* MEMBER RANK CARD */
+.member-rank-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 14px;display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:12px;margin-bottom:8px;}
+.member-rank-card.top1{border-color:var(--gold);background:rgba(232,200,74,.06);}
+.member-rank-card.top2{border-color:#b8b8b8;}
+.member-rank-card.top3{border-color:#cd7f32;}
+/* ODDS RANK CARD */
+.odds-rank-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;display:grid;grid-template-columns:36px 52px 1fr auto;align-items:center;gap:12px;margin-bottom:8px;}
+.odds-rank-card.fav1{border-color:var(--green);background:rgba(74,232,160,.05);}
+.odds-rank-card.fav2{border-color:rgba(74,232,160,.4);}
+.odds-rank-card.fav3{border-color:rgba(74,232,160,.2);}
+.odds-win-pct{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;text-align:right;white-space:nowrap;}
+@media(max-width:480px){
+  .results-tabs{flex-direction:column;}
+  .results-tab{text-align:left;}
+  .odds-rank-card{grid-template-columns:30px 40px 1fr auto;}
+}
 .results-header h2,.precision-header h2{font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--gold);margin-bottom:5px;}
 .results-header p,.precision-header p{color:var(--muted);font-size:.88rem;}
 .result-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:14px 16px;display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:14px;margin-bottom:10px;transition:all .2s;}
@@ -252,7 +272,7 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
     <div class="who">Voting as <strong id="session-name"></strong> <button onclick="showEditName()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.75rem;padding:2px 6px;border-radius:4px;font-family:'DM Sans',sans-serif" title="Edit name">&#9998;</button></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <button class="btn btn-ghost btn-sm" onclick="showResults()">&#127942; Results</button>
-      <button class="btn btn-ghost btn-sm" onclick="showContestPicker()">&#8592; Contests</button>
+      <button class="btn btn-ghost btn-sm contest-nav-btn" onclick="showContestPicker()" style="display:none">&#8592; Contests</button>
       <button class="btn btn-ghost btn-sm" onclick="showJoinScreen()">Sign Out</button>
     </div>
   </div>
@@ -276,15 +296,59 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
   <div id="songs-list"></div>
   <div class="nav-row">
     <button class="btn btn-sm" onclick="showResults()">&#127942; View Scoreboard</button>
-    <button class="btn btn-ghost btn-sm" onclick="showContestPicker()">&#8592; Contests</button>
+    <button class="btn btn-ghost btn-sm contest-nav-btn" onclick="showContestPicker()" style="display:none">&#8592; Contests</button>
     <button class="btn btn-del btn-sm" onclick="showJoinScreen()">Sign Out</button>
   </div>
 </div>
 
 <!-- RESULTS -->
 <div class="wrap" id="results-screen" style="display:none">
-  <div class="results-header"><h2>&#127942; The Scoreboard</h2><p id="results-contest-name"></p></div>
-  <div id="results-list"></div>
+  <div class="results-header">
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px">
+      <a href="https://alleu.com" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;opacity:.75;transition:opacity .2s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.75'">
+        <img src="/logo.png" id="alleu-logo-img"
+          onerror="this.style.display='none';document.getElementById('alleu-logo-svg').style.display='inline-flex'"
+          style="height:24px;width:auto" alt="alleu.com"/>
+        <span id="alleu-logo-svg" style="display:none;align-items:center;gap:6px">
+          <svg viewBox="0 0 80 20" style="height:18px;width:auto" xmlns="http://www.w3.org/2000/svg">
+            <text x="0" y="16" font-family="'Playfair Display',serif" font-size="16" fill="#7b72a8" letter-spacing="1">alleu</text>
+          </svg>
+          <span style="font-size:.72rem;color:var(--muted);font-family:'DM Sans',sans-serif">.com</span>
+        </span>
+      </a>
+    </div>
+    <h2>&#127942; Scoreboard</h2>
+    <p id="results-contest-name"></p>
+  </div>
+
+  <!-- TAB SWITCHER -->
+  <div class="results-tabs">
+    <button class="results-tab active" id="rtab-group" onclick="switchResultsTab('group')">&#127942; Group Votes</button>
+    <button class="results-tab" id="rtab-member" onclick="switchResultsTab('member')">&#128101; Member Rankings</button>
+    <button class="results-tab" id="rtab-odds" onclick="switchResultsTab('odds')">&#127922; Bookmaker Odds</button>
+  </div>
+
+  <!-- GROUP VOTES -->
+  <div id="results-panel-group">
+    <div id="results-list"></div>
+  </div>
+
+  <!-- MEMBER RANKINGS -->
+  <div id="results-panel-member" style="display:none">
+    <div class="member-pick-row">
+      <label style="font-size:.82rem;color:var(--muted)">Viewing rankings by:</label>
+      <select id="member-select" onchange="renderMemberRankings()"
+        style="background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 12px;font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer">
+      </select>
+    </div>
+    <div id="member-rankings-list"></div>
+  </div>
+
+  <!-- BOOKMAKER ODDS -->
+  <div id="results-panel-odds" style="display:none">
+    <div id="odds-rankings-list"></div>
+  </div>
+
   <div class="nav-row">
     <button class="btn btn-sm" onclick="showPrecision()">&#127919; Voter Precision</button>
     <button class="btn btn-ghost btn-sm" onclick="goVoting()">&#8592; Back to Voting</button>
@@ -298,7 +362,7 @@ header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
   <div id="precision-list"></div>
   <div class="nav-row">
     <button class="btn btn-ghost btn-sm" onclick="showResults()">&#127942; Scoreboard</button>
-    <button class="btn btn-ghost btn-sm" onclick="showContestPicker()">&#8592; Contests</button>
+    <button class="btn btn-ghost btn-sm contest-nav-btn" onclick="showContestPicker()" style="display:none">&#8592; Contests</button>
     <button class="btn btn-del btn-sm" onclick="showJoinScreen()">Sign Out</button>
   </div>
 </div>
@@ -605,7 +669,10 @@ async function showContestPicker(){
   grid.innerHTML='<div style="color:var(--muted);font-size:.85rem;padding:20px">Loading\u2026</div>';
   try{
     const contests=await sbGet('contests','select=*&active=eq.true&order=created_at.asc');
-    if(contests.length===1){await enterContest(contests[0]);return;}
+    // Show/hide contest nav buttons based on count
+    const multiContest = contests.length > 1;
+    document.querySelectorAll('.contest-nav-btn').forEach(b=>b.style.display=multiContest?'':'none');
+    if(contests.length===1){ await enterContest(contests[0]); return; }
     grid.innerHTML=contests.map(c=>'<div class="contest-item" onclick="selectContest(\''+c.id+'\')">'
       +'<div><div class="c-title">'+escapeHtml(c.name)+'</div><div class="c-desc">'+(c.description||'')+'</div></div>'
       +'<div class="c-badge">Open</div></div>').join('');
@@ -918,6 +985,8 @@ async function setScore(i,raw){
 async function showResults(){
   clearInterval(countdownTimer);
   hideAll(); show('results-screen');
+  // Reset to group tab on each open
+  switchResultsTab('group');
   document.getElementById('results-contest-name').textContent=currentContest.name;
   const [votes, userRows, oddsRows] = await Promise.all([
     sbGet('votes','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&select=username,song_idx,score'),
@@ -940,7 +1009,12 @@ async function showResults(){
   }).sort((a,b)=>b.total-a.total);
   const maxTotal=totals[0]?.total||1;
   window._resultBreakdowns={};
+  window._resultTotals=totals;
+  window._resultSc=sc;
+  window._resultOdds=oddsRows.sort((a,b)=>a.odds_rank-b.odds_rank);
   totals.forEach(s=>{ window._resultBreakdowns[s.idx]={song:s,voters,sc}; });
+  // Populate member select
+  renderMemberSelect(voters);
 
   document.getElementById('results-list').innerHTML=totals.map((s,rank)=>{
     const rc=rank===0?'top1':rank===1?'top2':rank===2?'top3':'';
@@ -1003,6 +1077,94 @@ async function showResults(){
 }
 
 function goVoting(){hideAll();show('voting-screen');renderTabs();renderSongs();}
+
+// ── RESULTS TABS ──────────────────────────────────────────────────────────────
+let _activeResultsTab = 'group';
+
+function switchResultsTab(tab){
+  _activeResultsTab = tab;
+  document.querySelectorAll('.results-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('rtab-'+tab).classList.add('active');
+  document.getElementById('results-panel-group').style.display  = tab==='group'  ?'':'none';
+  document.getElementById('results-panel-member').style.display = tab==='member' ?'':'none';
+  document.getElementById('results-panel-odds').style.display   = tab==='odds'   ?'':'none';
+  if(tab==='member') renderMemberRankings();
+  if(tab==='odds')   renderOddsRankings();
+}
+
+// ── MEMBER RANKINGS ───────────────────────────────────────────────────────────
+function renderMemberSelect(voters){
+  const sel = document.getElementById('member-select');
+  sel.innerHTML = voters.map(v=>`<option value="${escapeHtml(v)}"${v===currentUser?' selected':''}>${escapeHtml(v)}</option>`).join('');
+  renderMemberRankings();
+}
+
+function renderMemberRankings(){
+  const voter = document.getElementById('member-select').value;
+  const sc = window._resultSc || {};
+  const totals = window._resultTotals || [];
+  if(!totals.length){ document.getElementById('member-rankings-list').innerHTML='<div style="color:var(--muted);padding:20px;text-align:center">No votes yet.</div>'; return; }
+
+  // Sort songs by this voter's score desc, unvoted songs at bottom
+  const ranked = [...totals].sort((a,b)=>{
+    const sa = sc[voter]?.[a.idx] ?? null;
+    const sb = sc[voter]?.[b.idx] ?? null;
+    if(sa!==null && sb!==null) return sb-sa;
+    if(sa!==null) return -1;
+    if(sb!==null) return 1;
+    return 0;
+  });
+
+  document.getElementById('member-rankings-list').innerHTML = ranked.map((s,rank)=>{
+    const score = sc[voter]?.[s.idx] ?? null;
+    const rc = rank===0?'top1':rank===1?'top2':rank===2?'top3':'';
+    const bc = rank===0?'r1':rank===1?'r2':rank===2?'r3':'';
+    const m  = rank===0?'🥇':rank===1?'🥈':rank===2?'🥉':rank+1;
+    const display = s.song&&s.song!=='TBA'?s.song:s.country;
+    return '<div class="member-rank-card '+rc+'">'
+      +'<div class="rank-badge '+bc+'">'+m+'</div>'
+      +'<div>'
+      +'<div style="display:flex;align-items:center;gap:6px;font-weight:600;font-size:.9rem">'+flagImg(s.country,18)+' '+escapeHtml(display)+'</div>'
+      +'<div style="font-size:.73rem;color:var(--muted);margin-top:2px">'+escapeHtml(s.country)+(s.artist&&s.artist!=='TBA'?' · '+escapeHtml(s.artist):'')+'</div>'
+      +'</div>'
+      +(score!==null
+        ? '<div style="font-family:\'Playfair Display\',serif;font-size:1.5rem;font-weight:700;color:var(--gold)">'+(score%1===0?score:score.toFixed(1))+'</div>'
+        : '<div style="font-size:.75rem;color:var(--muted);font-style:italic">not voted</div>')
+      +'</div>';
+  }).join('');
+}
+
+// ── ODDS RANKINGS ─────────────────────────────────────────────────────────────
+function renderOddsRankings(){
+  const odds = window._resultOdds || [];
+  if(!odds.length){ document.getElementById('odds-rankings-list').innerHTML='<div style="color:var(--muted);padding:20px;text-align:center">No odds data available.</div>'; return; }
+  const totals = window._resultTotals || [];
+  const songMap = {};
+  totals.forEach(s=>{ songMap[s.country]=s; });
+
+  document.getElementById('odds-rankings-list').innerHTML = odds.map((o,rank)=>{
+    const s = songMap[o.country] || {};
+    const display = s.song&&s.song!=='TBA'?s.song:o.country;
+    const rc = rank===0?'fav1':rank===1?'fav2':rank===2?'fav3':'';
+    const rankColor = rank<3?'var(--green)':rank<8?'var(--gold)':'var(--muted)';
+    const winPct = parseFloat(o.win_chance)<0.01?'<1%':Math.round(parseFloat(o.win_chance)*100)+'%';
+    const label = rank===0?'🔥 Top Favourite':rank<3?'🔥 Favourite':rank<8?'⭐ Contender':'Outsider';
+    return '<div class="odds-rank-card '+rc+'">'
+      +'<div style="font-family:\'Playfair Display\',serif;font-size:1rem;font-weight:700;color:'+rankColor+';text-align:center">'+(rank+1)+'</div>'
+      +(s.photo_url?'<img src="'+s.photo_url+'" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.display=\'none\'">':'<div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center">'+flagImg(o.country,32)+'</div>')
+      +'<div>'
+      +'<div style="display:flex;align-items:center;gap:6px;font-weight:600;font-size:.9rem">'+flagImg(o.country,18)+' '+escapeHtml(display)+'</div>'
+      +'<div style="font-size:.73rem;color:var(--muted);margin-top:2px">'+escapeHtml(o.country)+(s.artist&&s.artist!=='TBA'?' · '+escapeHtml(s.artist):'')+'</div>'
+      +'<div style="margin-top:5px;display:flex;gap:5px;flex-wrap:wrap">'
+      +'<span style="font-size:.68rem;color:'+rankColor+';border:1px solid '+rankColor+'40;border-radius:20px;padding:2px 7px">'+label+'</span>'
+      +'<span class="odds-tag">Best <b>'+o.best_odds+'</b></span>'
+      +'<span class="odds-tag">Avg <b>'+o.avg_odds+'</b></span>'
+      +'</div>'
+      +'</div>'
+      +'<div class="odds-win-pct" style="color:'+rankColor+'">'+winPct+'</div>'
+      +'</div>';
+  }).join('');
+}
 
 // ── VOTER MODAL ───────────────────────────────────────────────────────────────
 function openVoterModal(songIdx){
