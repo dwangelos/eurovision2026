@@ -959,68 +959,6 @@ async function showResults(){
       +'</button></div></div>';
   }).join('');
 }
-  clearInterval(countdownTimer);
-  hideAll(); show('results-screen');
-  document.getElementById('results-contest-name').textContent=currentContest.name;
-  const votes=await sbGet('votes','contest_id=eq.'+encodeURIComponent(currentContest.id)+'&select=username,song_idx,score');
-  const userRows=await sbGet('users','select=username&order=username.asc');
-  const voters=userRows.map(r=>r.username);
-  const sc={};
-  voters.forEach(v=>{ sc[v]=Array(contestSongs.length).fill(null); });
-  votes.forEach(row=>{ if(sc[row.username]!==undefined) sc[row.username][row.song_idx]=parseFloat(row.score); });
-  const totals=contestSongs.map((s,i)=>{
-    const bd={};
-    let total=0;
-    voters.forEach(v=>{ bd[v]=sc[v][i]; if(sc[v][i]!==null) total+=sc[v][i]; });
-    return {idx:i,total:Math.round(total*100)/100,song:s.song,country:s.country,artist:s.artist,flag:s.flag,photo_url:s.photo_url,bd};
-  }).sort((a,b)=>b.total-a.total);
-  const maxTotal=totals[0]?.total||1;
-  window._resultBreakdowns={};
-  totals.forEach(s=>{ window._resultBreakdowns[s.idx]={song:s,voters,sc}; });
-  document.getElementById('results-list').innerHTML=totals.map((s,rank)=>{
-    const rc=rank===0?'top1':rank===1?'top2':rank===2?'top3':'';
-    const bc=rank===0?'r1':rank===1?'r2':rank===2?'r3':'';
-    const m=rank===0?'🥇':rank===1?'🥈':rank===2?'🥉':rank+1;
-    const pct=maxTotal>0?(s.total/maxTotal)*100:0;
-    const display=s.song&&s.song!=='TBA'?s.song:s.country;
-    // Sort voters: voted first (highest score first), then no-vote
-    const sortedVoters=[...voters].sort((a,b)=>{
-      const sa=s.bd[a],sb=s.bd[b];
-      if(sa!==null&&sb!==null) return sb-sa;
-      if(sa!==null) return -1; if(sb!==null) return 1;
-      return 0;
-    });
-    const votedCount=sortedVoters.filter(v=>s.bd[v]!==null).length;
-    const TOP_SHOW=3;
-    const topVoters=sortedVoters.filter(v=>s.bd[v]!==null).slice(0,TOP_SHOW);
-    const moreCount=votedCount-topVoters.length;
-    // Build inline top voter chips
-    const chips=topVoters.map(v=>{
-      const score=s.bd[v];
-      const isMe=v===currentUser;
-      return '<span style="display:inline-flex;align-items:center;gap:3px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px 7px;font-size:.7rem;white-space:nowrap;'+(isMe?'border-color:var(--gold);':'')+'"><span style="color:var(--muted)">'
-        +escapeHtml(v.split(' ')[0])+'</span> <span style="color:'+(isMe?'var(--gold)':'var(--text)');font-weight:600">'+(score%1===0?score:score.toFixed(2))+'</span></span>';
-    }).join('');
-    return '<div class="result-card '+rc+'">'
-      +'<div class="rank-badge '+bc+'">'+m+'</div>'
-      +'<div class="result-info">'
-      +'<div class="result-title">'+flagImg(s.country,20)+' '+escapeHtml(display)+'</div>'
-      +'<div class="result-country">'+escapeHtml(s.country)+(s.artist&&s.artist!=='TBA'?' &middot; '+escapeHtml(s.artist):'')+'</div>'
-      +'<div class="score-bar"><div class="score-bar-fill" style="width:'+pct+'%"></div></div>'
-      +'<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:7px">'
-      +chips
-      +(moreCount>0?'<button onclick="openVoterModal('+s.idx+')" style="background:transparent;border:1px dashed var(--border);color:var(--muted);border-radius:6px;padding:2px 8px;font-size:.7rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">+'+moreCount+' more</button>':'')
-      +(votedCount===0?'<span style="font-size:.72rem;color:var(--muted)">No votes yet</span>':'')
-      +'</div>'
-      +'</div>'
-      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">'
-      +'<div class="total-score">'+(s.total%1===0?s.total:s.total.toFixed(2))+'</div>'
-      +'<button class="voters-btn" onclick="openVoterModal('+s.idx+')">'
-      +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>'
-      +votedCount+'/'+voters.length
-      +'</button></div></div>';
-  }).join('');
-}
 
 function goVoting(){hideAll();show('voting-screen');renderTabs();renderSongs();}
 
