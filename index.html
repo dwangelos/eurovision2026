@@ -1023,7 +1023,7 @@ function renderSongs(){
       +'<input class="score-input'+(rated?' ok':'')+'" id="score-inp-'+i+'"'
       +' type="number" min="0" max="12" step="0.5"'
       +' value="'+(rated?val:'')+'" placeholder="&mdash;"'
-      +' onchange="snapAndSet('+i+',this)" oninput="snapAndSet('+i+',this)"'+dis+'/>'
+      +' onchange="snapAndSet('+i+',this)" oninput="snapAndSet('+i+',this)" onblur="snapAndSet('+i+',this)"'+dis+'/>'
       +'<button class="score-btn" onclick="adjustScore('+i+',0.5)"'+dis+'>+</button>'
       +'</div></div>';
   }).join('');
@@ -1033,6 +1033,7 @@ function renderSongs(){
 function snapAndSet(i, inp){
   const raw = parseFloat(inp.value);
   if(isNaN(raw)) return;
+  // Force to exact 0.5 step — no .25 or .75 allowed
   const snapped = Math.max(0, Math.min(12, Math.round(raw * 2) / 2));
   inp.value = snapped;
   setScore(i, snapped);
