@@ -27,12 +27,13 @@ self.addEventListener('notificationclick', e => {
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
       for(const c of list){
         if(c.url.includes('eurovision') || c.url.includes('alleu.com')){
-          c.focus();
-          c.postMessage({ type: 'OPEN_CHAT' });
-          return;
+          return c.focus().then(client => {
+            // Only postMessage if client is still alive
+            try { client.postMessage({ type: 'OPEN_CHAT' }); } catch(e) {}
+          });
         }
       }
-      clients.openWindow(e.notification.data?.url || '/');
+      return clients.openWindow(e.notification.data?.url || '/');
     })
   );
 });
