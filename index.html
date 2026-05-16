@@ -221,6 +221,9 @@ header p{display:none;}
 #chat-fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(74,232,160,.6);}
 #chat-fab-unread{position:absolute;top:-3px;right:-3px;background:var(--red);color:#fff;border-radius:99px;padding:2px 6px;font-size:.65rem;font-weight:700;display:none;font-family:'DM Sans',sans-serif;min-width:18px;text-align:center;}
 /* CHAT PANEL — floating bubble */
+/* CHAT BACKDROP */
+#chat-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:398;display:none;backdrop-filter:blur(2px);}
+#chat-backdrop.open{display:block;}
 #chat-panel{position:fixed;bottom:90px;right:24px;width:min(330px,calc(100vw - 32px));max-width:calc(100vw - 32px);max-height:min(500px,calc(100vh - 140px));background:var(--card);border:1px solid var(--border);border-radius:16px;display:flex;flex-direction:column;z-index:399;box-shadow:0 8px 40px rgba(0,0,0,.5);transform:scale(0.95) translateY(12px);opacity:0;pointer-events:none;transition:transform .22s cubic-bezier(.34,1.56,.64,1),opacity .18s;}
 #chat-panel.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all;}
 .chat-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:.9rem;color:var(--gold);flex-shrink:0;}
@@ -360,7 +363,7 @@ header p{display:none;}
   .voter-row .v-score{font-size:1.1rem;}
 
   /* Chat */
-  #chat-panel{right:8px;left:8px;width:auto;bottom:84px;max-height:55vh;border-radius:16px;}
+  #chat-panel{right:8px;left:8px;width:calc(100vw - 16px);max-width:calc(100vw - 16px);bottom:84px;max-height:55vh;border-radius:16px;}
   #chat-fab{bottom:14px;right:14px;width:48px;height:48px;font-size:1.2rem;}
   .chat-bubble{font-size:.8rem;padding:7px 10px;}
   .chat-input-row input{font-size:16px;}
@@ -600,6 +603,7 @@ header p{display:none;}
   </div>
 </div>
 
+<div id="chat-backdrop" onclick="toggleChat()"></div>
 <!-- EMOJI POPUP — floating, always fully visible -->
 <div id="emoji-popup" style="display:none;position:fixed;background:#1e1a35;border:1px solid var(--border);border-radius:14px;padding:10px;flex-wrap:wrap;gap:4px;z-index:700;box-shadow:0 8px 32px rgba(0,0,0,.6);max-height:200px;overflow-y:auto"></div>
 
@@ -1882,6 +1886,8 @@ function initChat(enabled){
 function toggleChat(){
   chatOpen=!chatOpen;
   document.getElementById('chat-panel').classList.toggle('open',chatOpen);
+  const bd=document.getElementById('chat-backdrop');
+  if(bd) bd.classList.toggle('open',chatOpen);
   if(!chatOpen) document.getElementById('emoji-popup').style.display='none';
   if(chatOpen){chatUnread=0;updateUnreadBadge();loadMessages();setTimeout(()=>document.getElementById('chat-inp').focus(),100);}
 }
