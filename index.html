@@ -851,6 +851,8 @@ async function showPrecision(){
 
 // ── CHAT ──────────────────────────────────────────────────────────────────────
 let chatOpen=false, chatSub=null, chatUnread=0, lastChatTs=null, currentUserChatEnabled=false;
+let chatOldestTs=null, chatHasMore=false;
+const CHAT_PAGE=50;
 
 function initChat(enabled){
   currentUserChatEnabled=!!enabled;
@@ -875,30 +877,106 @@ function updateUnreadBadge(){
 
 async function loadMessages(){
   const el=document.getElementById('chat-messages');
+  el.innerHTML='<div class="chat-empty">Loading history&hellip;</div>';
   try{
-    const msgs=await sbGet('chat_messages','select=*&order=created_at.asc&limit=80');
-    renderMessages(msgs);
+    const msgs=await sbGet('chat_messages','select=*&order=created_at.desc&limit='+CHAT_PAGE);
+    msgs.reverse();
+    chatOldestTs=msgs.length?msgs[0].created_at:null;
+    chatHasMore=msgs.length===CHAT_PAGE;
     if(msgs.length) lastChatTs=msgs[msgs.length-1].created_at;
+    renderMessages(msgs, true);
   }catch(e){el.innerHTML='<div class="chat-empty">Could not load messages.</div>';}
 }
 
-function renderMessages(msgs){
+async function loadOlderMessages(){
+  if(!chatOldestTs||!chatHasMore) return;
+  const btn=document.getElementById('load-more-btn');
+  if(btn){btn.textContent='Loading\u2026';btn.disabled=true;}
+  try{
+    const msgs=await sbGet('chat_messages','select=*&order=created_at.desc&limit='+CHAT_PAGE+'&created_at=lt.'+encodeURIComponent(chatOldestTs));
+    msgs.reverse();
+    chatHasMore=msgs.length===CHAT_PAGE;
+    if(msgs.length) chatOldestTs=msgs[0].created_at;
+    prependMessages(msgs);
+  }catch(e){}
+}
+
+function dateSep(dateStr){
+  const d=new Date(dateStr);
+  const today=new Date();
+  const yesterday=new Date(today);yesterday.setDate(today.getDate()-1);
+  let label;
+  if(d.toDateString()===today.toDateString()) label='Today';
+  else if(d.toDateString()===yesterday.toDateString()) label='Yesterday';
+  else label=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  return '<div style="text-align:center;margin:8px 0;"><span style="background:var(--border);color:var(--muted);font-size:.68rem;padding:3px 10px;border-radius:20px">'+label+'</span></div>';
+}
+
+function renderMessages(msgs, scrollToBottom){
   const el=document.getElementById('chat-messages');
-  if(!msgs.length){el.innerHTML='<div class="chat-empty">No messages yet. Say hello!</div>';return;}
-  let html='',prevUser=null;
+  if(!msgs.length){
+    el.innerHTML=(chatHasMore?'':'')+'<div class="chat-empty">No messages yet. Say hello!</div>';
+    updateLoadMore(el);
+    return;
+  }
+  let html='', prevUser=null, prevDate=null;
   msgs.forEach(m=>{
     const mine=m.username===currentUser;
     const time=new Date(m.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    const msgDate=new Date(m.created_at).toDateString();
+    if(msgDate!==prevDate){html+=dateSep(m.created_at);prevUser=null;}
+    prevDate=msgDate;
     const showName=!mine&&m.username!==prevUser;
     const name=m.display_name||m.username;
-    html+='<div class="chat-msg '+(mine?'mine':'theirs')+'" data-user="'+escapeHtml(m.username)+'">'
+    html+='<div class="chat-msg '+(mine?'mine':'theirs')+'" data-user="'+escapeHtml(m.username)+'" data-ts="'+m.created_at+'">'
       +(showName?'<div class="chat-name">'+escapeHtml(name)+'</div>':'')
       +'<div class="chat-bubble">'+escapeHtml(m.message)+'</div>'
       +'<div class="chat-meta">'+time+'</div></div>';
     prevUser=m.username;
   });
   el.innerHTML=html;
-  el.scrollTop=el.scrollHeight;
+  updateLoadMore(el);
+  if(scrollToBottom) el.scrollTop=el.scrollHeight;
+}
+
+function prependMessages(msgs){
+  const el=document.getElementById('chat-messages');
+  const oldHeight=el.scrollHeight;
+  let html='', prevUser=null, prevDate=null;
+  msgs.forEach(m=>{
+    const mine=m.username===currentUser;
+    const time=new Date(m.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    const msgDate=new Date(m.created_at).toDateString();
+    if(msgDate!==prevDate){html+=dateSep(m.created_at);prevUser=null;}
+    prevDate=msgDate;
+    const showName=!mine&&m.username!==prevUser;
+    const name=m.display_name||m.username;
+    html+='<div class="chat-msg '+(mine?'mine':'theirs')+'" data-user="'+escapeHtml(m.username)+'" data-ts="'+m.created_at+'">'
+      +(showName?'<div class="chat-name">'+escapeHtml(name)+'</div>':'')
+      +'<div class="chat-bubble">'+escapeHtml(m.message)+'</div>'
+      +'<div class="chat-meta">'+time+'</div></div>';
+    prevUser=m.username;
+  });
+  // Remove old load-more btn, prepend new messages, re-add btn
+  const oldBtn=document.getElementById('load-more-btn');
+  if(oldBtn) oldBtn.remove();
+  el.insertAdjacentHTML('afterbegin',html);
+  updateLoadMore(el);
+  // Keep scroll position
+  el.scrollTop=el.scrollHeight-oldHeight;
+}
+
+function updateLoadMore(el){
+  const existing=document.getElementById('load-more-btn');
+  if(existing) existing.remove();
+  if(chatHasMore){
+    const btn=document.createElement('button');
+    btn.id='load-more-btn';
+    btn.textContent='Load older messages';
+    btn.style.cssText='display:block;margin:8px auto 12px;background:var(--bg);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:6px 14px;font-size:.75rem;cursor:pointer;font-family:\'DM Sans\',sans-serif;';
+    btn.onclick=loadOlderMessages;
+    el.insertBefore(btn,el.firstChild);
+  }
 }
 
 function appendMessage(m){
@@ -907,13 +985,19 @@ function appendMessage(m){
   if(empty) empty.remove();
   const mine=m.username===currentUser;
   const time=new Date(m.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-  const last=el.lastElementChild;
+  // Date separator if needed
+  const msgDate=new Date(m.created_at).toDateString();
+  const lastMsg=el.querySelector('.chat-msg:last-of-type');
+  const lastDate=lastMsg?new Date(lastMsg.dataset.ts||0).toDateString():null;
+  if(msgDate!==lastDate) el.insertAdjacentHTML('beforeend',dateSep(m.created_at));
+  const last=el.querySelector('.chat-msg:last-of-type');
   const lastUser=last?last.dataset.user:null;
   const showName=!mine&&m.username!==lastUser;
   const name=m.display_name||m.username;
   const div=document.createElement('div');
   div.className='chat-msg '+(mine?'mine':'theirs');
   div.dataset.user=m.username;
+  div.dataset.ts=m.created_at;
   div.innerHTML=(showName?'<div class="chat-name">'+escapeHtml(name)+'</div>':'')
     +'<div class="chat-bubble">'+escapeHtml(m.message)+'</div>'
     +'<div class="chat-meta">'+time+'</div>';
