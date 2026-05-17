@@ -877,8 +877,13 @@ async function boot(){
       initNotifications();
       // Fetch chat_enabled for this user and init chat FAB
       try{
-        const urows=await sbGet('users','username=ilike.'+encodeURIComponent(local.username)+'&select=chat_enabled,is_host');
+        const urows=await sbGet('users','username=ilike.'+encodeURIComponent(local.username)+'&select=chat_enabled,is_host,expires_at');
         currentUserIsHost=urows.length?!!urows[0].is_host:false;
+        if(urows.length && urows[0].expires_at && new Date(urows[0].expires_at) < new Date() && !currentUserIsHost){
+          showJoinScreen();
+          setTimeout(()=>{ document.getElementById('name-msg').textContent='Your access has expired.'; document.getElementById('name-msg').style.color='var(--red)'; },300);
+          return;
+        }
         initChat(urows.length?urows[0].chat_enabled!==false:true);
       }catch(e){ initChat(true); }
       if(local.contestId){
@@ -943,10 +948,17 @@ async function submitJoin(){
   const btn=document.getElementById('join-btn');
   btn.disabled=true; btn.textContent='Joining\u2026';
   try{
-    const existing=await sbGet('users','username=ilike.'+encodeURIComponent(fullName)+'&select=username,chat_enabled,is_host');
+    const existing=await sbGet('users','username=ilike.'+encodeURIComponent(fullName)+'&select=username,chat_enabled,is_host,expires_at');
     if(existing.length){
       currentUser=existing[0].username;
       currentUserIsHost=!!existing[0].is_host;
+      // Check expiry
+      if(existing[0].expires_at && new Date(existing[0].expires_at) < new Date() && !currentUserIsHost){
+        hideLoading();
+        document.getElementById('name-msg').textContent='Your access has expired. Thank you for participating!';
+        document.getElementById('name-msg').style.color='var(--red)';
+        return;
+      }
       initChat(existing[0].chat_enabled!==false);
     }else{
       await sbUpsert('users',{username:fullName,first_name:first,last_name:last,chat_enabled:true});
